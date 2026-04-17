@@ -51,6 +51,35 @@ Use Read/Write/Edit for file operations, Grep for content search, Glob for file 
 
 ---
 
+## Session Context Restoration (MANDATORY)
+
+When the user says anything like:
+- *"where were we?"*
+- *"what am I working on?"*
+- *"what was I doing?"*
+- *"catch me up"*
+- *"resume"*
+- or any equivalent phrasing that signals a session resume
+
+You **MUST** perform the following steps before responding with anything else:
+
+1. **Scan `.tasks/`** in the current directory, parent directory, and any sub-project directories for `.md` files.
+2. **Read each task file** and identify:
+   - Tasks with `**Status**: in-progress` or `**Status**: pending` — these are **active**
+   - Tasks with `**Status**: done` — these are **closed**, skip unless user asks
+3. **Identify the current phase** for each active task using the `**Phase**:` field and the `## Checklist` to see which items remain unchecked.
+4. **Summarise clearly**:
+   - What task(s) are active
+   - What phase each is in
+   - What the next unchecked step is
+   - Any blockers noted in the task file
+
+5. **Ask the user** which task to resume, or confirm the most recent one if only one is active.
+
+> ⚠️ **Never rely on conversation history alone to reconstruct context.** Always read the task files. They are the source of truth for what is in progress.
+
+---
+
 ## The 8-Phase Workflow
 
 When invoked (via `/workflow` or when detecting a non-trivial task), guide the user through these phases. **Present each phase's output and get user acknowledgment before proceeding to the next.**
