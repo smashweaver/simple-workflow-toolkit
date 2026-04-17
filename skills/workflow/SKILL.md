@@ -65,8 +65,9 @@ You **MUST** perform the following steps before responding with anything else:
 
 1. **Scan `.tasks/`** in the current directory, parent directory, and any sub-project directories for `.md` files.
 2. **Read each task file** and identify:
-   - Tasks with `**Status**: in-progress` or `**Status**: pending` — these are **active**
-   - Tasks with `**Status**: done` — these are **closed**, skip unless user asks
+   - Tasks with `**Status**: ideating` — these are **active brainstorms** awaiting a decision
+   - Tasks with `**Status**: in-progress` or `**Status**: pending` — these are **active implementation tasks**
+   - Tasks with `**Status**: done` or `**Status**: abandoned` — these are **closed**, skip unless user asks
 3. **Identify the current phase** for each active task using the `**Phase**:` field and the `## Checklist` to see which items remain unchecked.
 4. **Summarise clearly**:
    - What task(s) are active
@@ -83,6 +84,33 @@ You **MUST** perform the following steps before responding with anything else:
 ## The 8-Phase Workflow
 
 When invoked (via `/workflow` or when detecting a non-trivial task), guide the user through these phases. **Present each phase's output and get user acknowledgment before proceeding to the next.**
+
+### Phase 0: Ideate (Optional)
+
+Triggered by **either**:
+- An existing task file with `**Status**: ideating` and `**Type**: brainstorm`, **or**
+- Natural language intent signals such as:
+  - *"I need to brainstorm..."*
+  - *"Let's flesh out..."*
+  - *"I have an idea about..."*
+  - *"Not sure if this is worth building, but..."*
+  - *"Help me think through..."*
+  - or any equivalent phrasing that signals exploratory thinking rather than a defined task
+
+When triggered by **natural language**, you must **silently create a brainstorm task file** using the Ideation Template (see Task Manager Protocol below) before beginning the conversation. Use `taskmgr` if available, otherwise create `.tasks/YYYYMMDDHHMMSS_topic-name.md` directly. Do not ask for permission — just create it and begin the ideation.
+
+- **Mode: Conversational.** Do not propose files to change, write code, or rush into technical planning.
+- **Ask probing questions** to help the user surface, drill down, and validate the idea.
+- **Play devil's advocate** — identify gaps, edge cases, and alternative approaches constructively.
+- **Update the task file** as the discussion evolves (use Edit to add notes under `## Notes`).
+- **When the user is ready to build**, perform the **graduation ritual**:
+  1. Change `**Status**` from `ideating` → `pending`
+  2. Change `**Type**` from `brainstorm` → appropriate type (`feature`, `bugfix`, `chore`, etc.)
+  3. Change `**Phase**` to `1`
+  4. Append the standard 8-phase `## Checklist` to the task file
+  5. Proceed directly into **Phase 1: Plan** without creating a new file.
+
+> 💡 If the user decides the idea is **not worth pursuing**, change `**Status**` to `abandoned` and leave the file as an archived record.
 
 ### Phase 1: Plan
 
@@ -316,6 +344,7 @@ Before any code updates, these items must be addressed. Adapt to the project's t
 ### Without taskmgr
 Create `.tasks/YYYYMMDDHHMMSS_name.md` directly with this template:
 
+**Standard Task Template:**
 ```markdown
 # Task: {{Task Name}}
 **Created**: {{YYYY-MM-DD HH:MM:SS}}
@@ -344,6 +373,33 @@ Provide a short description of what this task achieves.
 ## Notes
 
 ## Risks
+
+## Commit Reference
+```
+
+**Brainstorm / Ideation Template** (for `Status: ideating`):
+```markdown
+# Task: {{Topic or Idea Name}}
+**Created**: {{YYYY-MM-DD HH:MM:SS}}
+**Updated**: —
+**Completed**: —
+**Status**: ideating          <!-- ideating | pending | in-progress | done | abandoned -->
+**Priority**: medium          <!-- low | medium | high | critical -->
+**Type**: brainstorm          <!-- brainstorm | feature | bugfix | refactor | chore | docs -->
+**Stack**: shared             <!-- frontend | backend | shared -->
+**Phase**: 0                  <!-- 0 = ideating, 1–8 = implementation phases -->
+**Blocked By**: —
+
+## Core Concept
+What is the core problem or idea being explored?
+
+## Explored Alternatives
+What other approaches were considered and why set aside?
+
+## Unresolved Questions
+What still needs to be answered before this can become a task?
+
+## Notes
 
 ## Commit Reference
 ```
