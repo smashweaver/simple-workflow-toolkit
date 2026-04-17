@@ -1,4 +1,4 @@
-# Workflow Agent Skill
+# Diskarte
 
 A reusable Claude Code skill that enforces a structured 8-phase development workflow for agentic coding agents. Ensures agents act as advisors and co-pilots rather than autonomous coders.
 
@@ -40,7 +40,7 @@ The skill walks you through 8 phases: plan, analyze, risk assess, approve, imple
 ## Project Structure
 
 ```
-workflow-agent-skill/
+diskarte/
 ├── skills/
 │   ├── workflow/    # Structured 8-phase development process
 │   ├── coding/      # Behavioral guidelines (surgical changes, simplicity)
