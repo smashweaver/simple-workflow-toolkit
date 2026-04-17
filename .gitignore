@@ -1,0 +1,21 @@
+# Commit workflow temp files
+commit.diff
+commit.draft
+
+# Task tracking (per-project, not committed)
+.tasks/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Env
+.env
+.env.local
+.env.*.local
