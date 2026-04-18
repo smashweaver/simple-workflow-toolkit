@@ -42,14 +42,15 @@ The skill walks you through 8 phases: plan, analyze, risk assess, approve, imple
 ```
 diskarte/
 ├── skills/
-│   ├── workflow/    # Structured 8-phase development process
-│   ├── coding/      # Behavioral guidelines (surgical changes, simplicity)
-│   ├── commit/      # Diff-first, draft-and-approve commit workflow
-│   └── mermaid/     # Mermaid diagram syntax rules
+│   ├── workflow/           # Structured 8-phase development process
+│   │   └── scripts/
+│   │       └── taskmgr.sh  # Universal AI Task Manager
+│   ├── coding/             # Behavioral guidelines (surgical changes, simplicity)
+│   ├── commit/             # Diff-first, draft-and-approve commit workflow
+│   └── mermaid/            # Mermaid diagram syntax rules
 ├── scripts/
-│   ├── install-skill.sh  # Installs skills into any project
-│   └── taskmgr.sh       # Universal AI Task Manager
-└── AGENTS.md        # Source methodology document (Source of Truth)
+│   └── install-skill.sh    # Installs skills into any project
+└── AGENTS.md               # Source methodology document (Source of Truth)
 ```
 
 ## Skills Suite
