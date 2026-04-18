@@ -10,9 +10,10 @@ ARG=$2
 
 function show_help {
     echo "Usage:"
-    echo "  taskmgr init         - Initialize .tasks/ directory and update .gitignore"
-    echo "  taskmgr new \"Final Feature Name\"   - Create a new timestamped task file"
-    echo "  taskmgr list         - List existing tasks"
+    echo "  taskmgr init              - Initialize .tasks/ directory and update .gitignore"
+    echo "  taskmgr new \"Final Feature Name\"  - Create a new timestamped task file"
+    echo "  taskmgr brainstorm \"Topic\"        - Create a Phase 0 ideation task"
+    echo "  taskmgr list              - List existing tasks"
 }
 
 if [ -z "$CMD" ]; then
@@ -108,6 +109,54 @@ Provide a short description of what this task achieves.
 EOF
 
     echo "Created new task: $FILENAME"
+    exit 0
+fi
+
+if [ "$CMD" == "brainstorm" ]; then
+    if [ -z "$ARG" ]; then
+        echo "Error: Must provide a topic (e.g. taskmgr brainstorm \"Remote install from GitHub\")"
+        exit 1
+    fi
+
+    if [ ! -d ".tasks" ]; then
+        echo "Error: No .tasks/ directory found. Run 'taskmgr init' first."
+        exit 1
+    fi
+
+    TIMESTAMP=$(date +"%Y%m%d%H%M%S")
+    DATE_STR=$(date +"%Y-%m-%d %H:%M:%S")
+
+    SAFE_NAME=$(echo "$ARG" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/-/g' -e 's/-\+/-/g' -e 's/^-//' -e 's/-$//')
+    FILENAME=".tasks/${TIMESTAMP}_${SAFE_NAME}.md"
+
+    cat <<EOF > "$FILENAME"
+# Task: $SAFE_NAME
+**Created**: $DATE_STR
+**Updated**: —
+**Completed**: —
+**Status**: ideating
+**Priority**: medium          <!-- low | medium | high | critical -->
+**Type**: brainstorm          <!-- feature | bugfix | refactor | chore | docs -->
+**Stack**: shared             <!-- frontend | backend | shared -->
+**Phase**: 0                  <!-- current active phase (0–8) -->
+**Blocked By**: —             <!-- task filename or n/a -->
+
+## Core Concept
+What is the core problem or idea being explored?
+
+## Explored Alternatives
+What other approaches were considered and why set aside?
+
+## Unresolved Questions
+What still needs to be answered before this can become a task?
+
+## Notes
+
+## Commit Reference
+
+EOF
+
+    echo "Created brainstorm task: $FILENAME"
     exit 0
 fi
 

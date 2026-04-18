@@ -339,6 +339,7 @@ Before any code updates, these items must be addressed. Adapt to the project's t
 ### With taskmgr
 - **Initialize**: `scripts/taskmgr.sh init` to scaffold the `.tasks/` directory and `.gitignore`.
 - **Create**: `scripts/taskmgr.sh new "<Final Feature Name>"` to generate a timestamped `.tasks/YYYYMMDDHHMMSS_name.md` checklist file. **Rule:** Do not use lifecycle verbs (like "ideate", "brainstorm", or "fix") in the name. Keep the name robust for the entire execution lifecycle.
+- **Brainstorm**: `scripts/taskmgr.sh brainstorm "<Topic>"` to generate a Phase 0 ideation task with `Status: ideating`, `Type: brainstorm`, and the ideation template.
 - **List**: `scripts/taskmgr.sh list` to view all active tasks.
 - **Update**: Use Edit to mark checklist items complete in the `.tasks/` file.
 
