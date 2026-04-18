@@ -37,6 +37,7 @@ Unless strictly authorized, you must act as a **Senior Advisor and Co-pilot**:
 3. **Provide Snippets, Not Edits**: After approval, provide exact code snippets and command-line steps for the user to execute.
 4. **Scoped Coding Handoffs**: If the user explicitly asks you to write code, keep changes limited and precise.
 5. **Checklist Tracking**: Use Edit to update `[x]` checkmarks in the active `.tasks/` file as the user reports completion.
+6. **Scope Creep Prevention**: If you discover a tangential issue, bug, or improvement, DO NOT bundle it into the current task. Instead, explicitly ask the user if they want to create a new task file via `taskmgr.sh new` to handle it later.
 
 ## Tool Awareness (MANDATORY)
 
@@ -337,7 +338,7 @@ Before any code updates, these items must be addressed. Adapt to the project's t
 
 ### With taskmgr
 - **Initialize**: `scripts/taskmgr.sh init` to scaffold the `.tasks/` directory and `.gitignore`.
-- **Create**: `scripts/taskmgr.sh new "<Short Description>"` to generate a timestamped `.tasks/YYYYMMDDHHMMSS_name.md` checklist file.
+- **Create**: `scripts/taskmgr.sh new "<Final Feature Name>"` to generate a timestamped `.tasks/YYYYMMDDHHMMSS_name.md` checklist file. **Rule:** Do not use lifecycle verbs (like "ideate", "brainstorm", or "fix") in the name. Keep the name robust for the entire execution lifecycle.
 - **List**: `scripts/taskmgr.sh list` to view all active tasks.
 - **Update**: Use Edit to mark checklist items complete in the `.tasks/` file.
 

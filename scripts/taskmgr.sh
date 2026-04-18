@@ -11,7 +11,7 @@ ARG=$2
 function show_help {
     echo "Usage:"
     echo "  taskmgr init         - Initialize .tasks/ directory and update .gitignore"
-    echo "  taskmgr new \"Name\"   - Create a new timestamped task file"
+    echo "  taskmgr new \"Final Feature Name\"   - Create a new timestamped task file"
     echo "  taskmgr list         - List existing tasks"
 }
 
@@ -58,8 +58,8 @@ fi
 
 if [ "$CMD" == "new" ]; then
     if [ -z "$ARG" ]; then
-        echo "Error: Must provide a task description."
-        echo "Usage: taskmgr new \"Description\""
+        echo "Error: Must provide a task description (e.g. final feature name)."
+        echo "Usage: taskmgr new \"Final Feature Name\""
         exit 1
     fi
 
