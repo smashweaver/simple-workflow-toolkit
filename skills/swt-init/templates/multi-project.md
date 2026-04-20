@@ -29,15 +29,15 @@ Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot
 ├── .tasks/                     ← cross-project tasks only (optional, rarely used)
 │
 ├── <sub-project-a>/            ← first sub-project
-│   ├── AGENTS.md               ← auto-pinned: Project Stack (run /init here)
+│   ├── AGENTS.md               ← auto-pinned: Project Stack (run /swt:init here)
 │   └── .tasks/                 ← sub-project implementation tasks
 │
 └── <sub-project-b>/            ← second sub-project
-    ├── AGENTS.md               ← auto-pinned: Project Stack (run /init here)
+    ├── AGENTS.md               ← auto-pinned: Project Stack (run /swt:init here)
     └── .tasks/
 ```
 
-> To scaffold a sub-project `AGENTS.md`, run `/init` from within each sub-project directory.
+> To scaffold a sub-project `AGENTS.md`, run `/swt:init` from within each sub-project directory.
 
 ## 4. Inter-Project Contracts
 
@@ -50,7 +50,7 @@ Shared agreements that all sub-projects must honour. Update this section as cont
 
 ## 5. The 8-Phase Workflow
 
-See `skills/workflow/SKILL.md` for the full lifecycle. Always pin the tech stack in the relevant **sub-project** `AGENTS.md`, never in this parent file.
+See `skills/swt-flow/SKILL.md` for the full lifecycle. Always pin the tech stack in the relevant **sub-project** `AGENTS.md`, never in this parent file.
 
 ## 6. Commit Discipline
 

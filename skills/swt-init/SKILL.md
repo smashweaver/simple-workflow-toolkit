@@ -1,10 +1,10 @@
 ---
-name: init
+name: "swt:init"
 description: >
-  Use when setting up a new project or workspace that will consume the Diskarte
-  toolkit. Trigger when the user says things like "/init", "bootstrap this
+  Use when setting up a new project or workspace that will consume the Simple Workflow Toolkit
+  (SWT). Trigger when the user says things like "/swt:init", "bootstrap this
   project", "set up AGENTS.md", "initialize this workspace", or "I'm starting a
-  new project with Diskarte". This skill runs ONCE per project at the very
+  new project with SWT". This skill runs ONCE per project at the very
   beginning, before any tasks or specs are created. It interviews the user to
   determine workspace type, loads the appropriate template, and scaffolds
   AGENTS.md. If AGENTS.md already exists, it runs in defensive diff mode —
@@ -19,15 +19,15 @@ allowed-tools:
   - Grep
 ---
 
-# /init — Workspace Bootstrap
+# /swt:init — Workspace Bootstrap
 
-You are initializing a new project workspace for the Diskarte toolkit. Your job is to scaffold the correct `AGENTS.md` based on the workspace type, using a lean interview and template-loading approach. You are **defensive by default** — never overwrite an existing `AGENTS.md` without explicit user approval.
+You are initializing a new project workspace for the Simple Workflow Toolkit. Your job is to scaffold the correct `AGENTS.md` based on the workspace type, using a lean interview and template-loading approach. You are **defensive by default** — never overwrite an existing `AGENTS.md` without explicit user approval.
 
 ---
 
 ## Session-Start Protocol
 
-> **This is the canonical definition.** The `/workflow` skill cross-references this section. Both skills enforce this protocol at the start of every session.
+> **This is the canonical definition.** The `/swt:flow` skill cross-references this section. Both skills enforce this protocol at the start of every session.
 
 At the start of every session, **before doing anything else**:
 
@@ -40,14 +40,14 @@ At the start of every session, **before doing anything else**:
 5. **Summarise** what you've understood: workspace name, active sub-project (if any), and any open tasks found in `.tasks/`.
 
 > ⚠️ If no `AGENTS.md` exists in the workspace root, prompt the user:
-> *"This workspace has no `AGENTS.md`. Would you like to run `/init` to bootstrap one before we begin?"*
+> *"This workspace has no `AGENTS.md`. Would you like to run `/swt:init` to bootstrap one before we begin?"*
 
 ---
 
 ## Invocation Flow
 
 ```
-/init is invoked
+/swt:init is invoked
   │
   ├─ AGENTS.md exists at workspace root?
   │     ├─ YES → [Diff Mode]      ── see "Defensive Diff Protocol" below
@@ -67,7 +67,7 @@ Ask all three questions in a **single message** — never one at a time.
 > **1 — Workspace type** *(determines which template to use)*
 > - **Single-project** — one codebase at the root (e.g. a standalone app, API, or script)
 > - **Multi-project** — multiple sub-projects under a shared parent (e.g. frontend + backend)
-> - **Toolkit** — a skills or tooling repository (e.g. Diskarte itself)
+> - **Toolkit** — a skills or tooling repository (e.g. Simple Workflow Toolkit itself)
 >
 > **2 — Project name**
 > What is the name of this project or workspace?
@@ -77,12 +77,12 @@ Ask all three questions in a **single message** — never one at a time.
 
 After receiving answers:
 
-1. Load the matching template from `skills/init/templates/` (see **Template Loading** below).
+1. Load the matching template from `skills/swt-init/templates/` (see **Template Loading** below).
 2. Substitute `{{project_name}}` and `{{purpose}}` with the user's answers.
 3. Write `AGENTS.md` to the workspace root.
 4. Confirm to the user and suggest the next step.
 
-> 💡 Stack detection is deliberately left to the `/workflow` skill's auto-pin mechanism. Do not ask about the tech stack here.
+> 💡 Stack detection is deliberately left to the `/swt:flow` skill's auto-pin mechanism. Do not ask about the tech stack here.
 
 ---
 
@@ -90,9 +90,9 @@ After receiving answers:
 
 | User Answer    | Template file                               |
 |----------------|---------------------------------------------|
-| Single-project | `skills/init/templates/single-project.md`   |
-| Multi-project  | `skills/init/templates/multi-project.md`    |
-| Toolkit        | `skills/init/templates/toolkit.md`          |
+| Single-project | `skills/swt-init/templates/single-project.md`   |
+| Multi-project  | `skills/swt-init/templates/multi-project.md`    |
+| Toolkit        | `skills/swt-init/templates/toolkit.md`          |
 
 Read the template file, substitute the two placeholders, then write to `./AGENTS.md` at the workspace root.
 
@@ -170,5 +170,5 @@ After successfully writing or updating `AGENTS.md`, confirm to the user:
 
 - [ ] `AGENTS.md` created or updated at workspace root
 - [ ] `{{project_name}}` and `{{purpose}}` are filled in (no raw placeholders remain)
-- [ ] **Multi-project only**: Remind the user that each sub-project also needs its own `AGENTS.md`. They can run `/init` again from within each sub-project directory, or create the files manually.
-- [ ] Suggest the next step: *"Your workspace is bootstrapped. Run `/workflow` and describe your first task to begin."*
+- [ ] **Multi-project only**: Remind the user that each sub-project also needs its own `AGENTS.md`. They can run `/swt:init` again from within each sub-project directory, or create the files manually.
+- [ ] Suggest the next step: *"Your workspace is bootstrapped. Run `/swt:flow` and describe your first task to begin."*

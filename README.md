@@ -1,10 +1,10 @@
-# Diskarte
+# Simple Workflow Toolkit (SWT)
 
 A reusable Claude Code skill that enforces a structured 8-phase development workflow for agentic coding agents. Ensures agents act as advisors and co-pilots rather than autonomous coders.
 
 ## Overview
 
-This project provides a **Claude Code skill** (`/workflow`) that embeds disciplined software development practices directly into any AI coding session. The skill is based on the methodology in `AGENTS.md` and enforces: planning, analysis, risk assessment, approval gates, careful implementation, documentation, testing, and iterative development.
+This project provides a **Claude Code skill** (`/swt:flow`) that embeds disciplined software development practices directly into any AI coding session. The skill is based on the methodology in `AGENTS.md` and enforces: planning, analysis, risk assessment, approval gates, careful implementation, documentation, testing, and iterative development.
 
 ## Quick Start
 
@@ -19,7 +19,7 @@ This project provides a **Claude Code skill** (`/workflow`) that embeds discipli
 
 Once installed, the skill is available via:
 
-- **Explicit invocation**: Run `/workflow` and describe what you want to build.
+- **Explicit invocation**: Run `/swt:flow` and describe what you want to build.
 - **Auto-trigger**: Describe a non-trivial task — the skill's description will activate it automatically.
 
 The skill walks you through 8 phases: plan, analyze, risk assess, approve, implement, document, test, and iterate.
@@ -40,18 +40,18 @@ The skill walks you through 8 phases: plan, analyze, risk assess, approve, imple
 ## Project Structure
 
 ```
-diskarte/
+swt/
 ├── skills/
-│   ├── workflow/           # Structured 8-phase development process
+│   ├── swt-flow/           # Structured 8-phase development process
 │   │   └── scripts/
-│   │       └── taskmgr.sh  # Universal AI Task Manager
-│   ├── task/               # Task lifecycle: naming, creation, graduation, status
-│   ├── init/               # Workspace bootstrap (scaffolds AGENTS.md)
+│   │       └── swt.sh      # Universal AI Task Manager
+│   ├── swt-task/           # Task lifecycle: naming, creation, graduation, status
+│   ├── swt-init/           # Workspace bootstrap (scaffolds AGENTS.md)
 │   │   └── templates/      # single-project, multi-project, toolkit
-│   ├── spec/               # Idea-to-specification (SPEC.md / PRD generation)
-│   ├── coding/             # Behavioral guidelines (surgical changes, simplicity)
-│   ├── commit/             # Diff-first, draft-and-approve commit workflow
-│   └── mermaid/            # Mermaid diagram syntax rules
+│   ├── swt-spec/           # Idea-to-specification (SPEC.md / PRD generation)
+│   ├── swt-code/           # Behavioral guidelines (surgical changes, simplicity)
+│   ├── swt-commit/         # Diff-first, draft-and-approve commit workflow
+│   └── swt-mermaid/        # Mermaid diagram syntax rules
 ├── scripts/
 │   └── install-skill.sh    # Installs skills into any project
 └── AGENTS.md               # Source methodology document (Source of Truth)
@@ -61,13 +61,13 @@ diskarte/
 
 | Skill | Trigger | Purpose |
 |---|---|---|
-| **Init** | `/init` | Bootstraps `AGENTS.md` for any new workspace. Runs once, before any tasks or specs begin. |
-| **Task** | `/task` | Owns the full task lifecycle — naming validation, creation, graduation, status updates, and filtered listing. |
-| **Workflow** | `/workflow` | Enforces planning, analysis, and approval gates. |
-| **Spec** | `/spec` | Transforms ideas and brainstorms into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
-| **Coding** | (Auto/Context) | Ensures surgical edits and minimal, simple code. |
-| **Commit** | `/commit` | Manages disciplined, impact-focused commit history. |
-| **Mermaid** | (Auto/Context) | Prevents parse errors in documentation diagrams. |
+| **Init** | `/swt:init` | Bootstraps `AGENTS.md` for any new workspace. Runs once, before any tasks or specs begin. |
+| **Task** | `/swt:task` | Owns the full task lifecycle — naming validation, creation, graduation, status updates, and filtered listing. |
+| **Workflow** | `/swt:flow` | Enforces planning, analysis, and approval gates. |
+| **Spec** | `/swt:spec` | Transforms ideas and brainstorms into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
+| **Coding** | `/swt:code` | Ensures surgical edits and minimal, simple code. |
+| **Commit** | `/swt:commit` | Manages disciplined, impact-focused commit history. |
+| **Mermaid** | `/swt:mermaid` | Prevents parse errors in documentation diagrams. |
 
 ## Quick Start
 
@@ -82,8 +82,8 @@ diskarte/
 
 Once installed, use the commands directly or describe tasks that trigger them:
 
-- **Planning**: Run `/workflow` for non-trivial changes.
-- **Committing**: Capture a diff to `commit.diff`, then follow the `/commit` flow.
+- **Planning**: Run `/swt:flow` for non-trivial changes.
+- **Committing**: Capture a diff to `commit.diff`, then follow the `/swt:commit` flow.
 
 ## What Makes This Different
 

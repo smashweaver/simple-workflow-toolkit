@@ -1,16 +1,12 @@
 ---
-name: task
+name: "swt:task"
 description: >
-  Use when creating, updating, graduating, or closing a task file. Trigger when
-  the user says things like "create a task for this", "make a task file", "let's
-  track this", "/task new", "/task brainstorm", or when a non-trivial feature or
-  idea surfaces in conversation that deserves tracking. Also trigger during
-  /workflow Phase 0 graduation ("ready to build"), post-/spec generation, and
-  post-/init bootstrap. This skill is the single authoritative source for all
-  task lifecycle rules: naming, templates, graduation rituals, and status
-  updates. All other skills that create or modify tasks MUST follow this skill's
-  naming rules and use the Name Confirmation Gate.
-user-invokable: true
+  Owns the lifecycle of tasks in the `.tasks/` directory. Trigger when the user
+  says "/swt:task", "list tasks", "create a new task", or "status of task X".
+  Enforces naming conventions (no lifecycle verbs), provides standard templates
+  for implementation and ideation, and handles the Phase 0 (Ideate) to Phase 1
+  (Plan) graduation ritual.
+user-invocable: true
 allowed-tools:
   - Read
   - Write
@@ -20,9 +16,9 @@ allowed-tools:
   - Grep
 ---
 
-# /task — Task Lifecycle Management
+# /swt:task — AI Task Manager
 
-You are the authoritative source for all task file operations in the Diskarte toolkit. Every task file that gets created, graduated, updated, or closed goes through you. You enforce naming rules, select the right template, and always surface the proposed task name for user confirmation before writing anything to disk.
+You are the authoritative source for all task file operations in the Simple Workflow Toolkit. Every task file that gets created, graduated, updated, or closed goes through you. You enforce naming rules, select the right template, and always surface the proposed task name for user confirmation before writing anything to disk.
 
 ---
 
@@ -75,43 +71,43 @@ Before writing **any** task file to disk, the agent MUST:
 
 ## Operations
 
-### `/task new` — Standard task (Phase 1)
+### `/swt:task new` — Standard task (Phase 1)
 
 Creates a new implementation task ready for Phase 1 planning.
 
 **When to trigger:**
 - User explicitly requests a new task
-- `/workflow` detects a non-trivial feature to implement
-- `/spec` generates a `SPEC.md` and offers to create a linked task
+- `/swt:flow` detects a non-trivial feature to implement
+- `/swt:spec` generates a `SPEC.md` and offers to create a linked task
 
 **Steps:**
 1. Propose the slug name → wait for confirmation
 2. Get timestamp: `date +%Y%m%d%H%M%S`
 3. Write `.tasks/YYYYMMDDHHMMSS_slug.md` using the **Standard Task Template** below
 4. Confirm to user: *"Task created: `.tasks/YYYYMMDDHHMMSS_slug.md`. Ready for Phase 1: Plan."*
-5. Use `scripts/taskmgr.sh new "<Name>"` if the script is available; otherwise create the file directly.
+5. Use `scripts/swt.sh` if available, otherwise write directly to the `.tasks/` directory.
 
 ---
 
-### `/task brainstorm` — Ideation task (Phase 0)
+### `/swt:task brainstorm` — Ideation task (Phase 0)
 
 Creates a Phase 0 brainstorm task for exploratory thinking before a plan exists.
 
 **When to trigger:**
 - User says "let's brainstorm", "I have an idea", "help me think through..."
 - Exploratory conversation that doesn't yet have a defined plan
-- `/workflow` Phase 0 entry signals (see `/workflow` skill)
+- `/swt:flow` Phase 0 entry signals (see `/swt:flow` skill)
 
 **Steps:**
 1. Propose the slug name (name the **topic/thing**, not the activity) → wait for confirmation
 2. Get timestamp
 3. Write `.tasks/YYYYMMDDHHMMSS_slug.md` using the **Brainstorm Template** below
 4. Begin ideation conversation — do not rush into planning
-5. Use `scripts/taskmgr.sh brainstorm "<Topic>"` if available.
+5. Use `scripts/swt.sh` brainstorm "<Topic>"` if available.
 
 ---
 
-### `/task graduate` — Phase 0 → Phase 1 promotion
+### `/swt:task graduate` — Phase 0 → Phase 1 promotion
 
 Promotes a brainstorm task to an implementation task when the user is ready to build.
 
@@ -131,7 +127,7 @@ Promotes a brainstorm task to an implementation task when the user is ready to b
 
 ---
 
-### `/task update` — Mark progress
+### `/swt:task update` — Mark progress
 
 Updates the task checklist and phase field as phases complete.
 
@@ -139,11 +135,11 @@ Updates the task checklist and phase field as phases complete.
 1. Read the active task file
 2. Mark the completed phase: `- [ ]` → `- [x]`
 3. Update `**Phase**` to the next active phase
-4. If all phases are done, DO NOT close the task yet. Instruct the user to stage their files and invoke `/commit`. The task will remain `pending` until the commit is applied.
+4. If all phases are done, DO NOT close the task yet. Instruct the user to stage their files and invoke `/swt:commit`. The task will remain `pending` until the commit is applied.
 
 ---
 
-### `/task list` — List tasks
+### `/swt:task list` — List tasks
 
 Lists task files in the `.tasks/` directory, optionally filtered by status.
 
@@ -156,12 +152,12 @@ Lists task files in the `.tasks/` directory, optionally filtered by status.
 
 **Steps:**
 1. Determine the desired filter based on user request (e.g., "show open tasks").
-2. Invoke `scripts/taskmgr.sh list [filter]`.
+2. Invoke `scripts/swt.sh list [filter]`.
 3. Present the list to the user with their statuses.
 
 ---
 
-### `/task close` — Mark done or abandoned
+### `/swt:task close` — Mark done or abandoned
 
 **Steps:**
 1. Set `**Status**` to `done` or `abandoned`
@@ -173,21 +169,21 @@ Lists task files in the `.tasks/` directory, optionally filtered by status.
 
 ## Auto-Suggest Triggers
 
-Other skills must proactively suggest `/task` when these signals appear. Always use the **Name Confirmation Gate** when auto-suggesting.
+Other skills must proactively suggest `/swt:task` when these signals appear. Always use the **Name Confirmation Gate** when auto-suggesting.
 
 | Signal | Triggered by | Prompt |
 |---|---|---|
-| User describes a non-trivial feature | `/workflow` | *"Shall I create a task file? Proposed name: `feature-name`"* |
-| Phase 0 brainstorm has enough direction | `/workflow` | *"Ready to graduate? Proposed task: `feature-name`"* |
-| `/spec` generates a SPEC.md | `/spec` | *"Spec created. Shall I link a task file? Proposed: `feature-name`"* |
-| `/init` completes bootstrap | `/init` | *"Workspace ready. Create your first task? Proposed: `first-feature`"* |
+| User describes a non-trivial feature | `/swt:flow` | *"Shall I create a task file? Proposed name: `feature-name`"* |
+| Phase 0 brainstorm has enough direction | `/swt:flow` | *"Ready to graduate? Proposed task: `feature-name`"* |
+| `/swt:spec` generates a SPEC.md | `/swt:spec` | *"Spec created. Shall I link a task file? Proposed: `feature-name`"* |
+| `/swt:init` completes bootstrap | `/swt:init` | *"Workspace ready. Create your first task? Proposed: `first-feature`"* |
 
 ---
 
 ## Execution Layer
 
 **Preference order:**
-1. `scripts/taskmgr.sh` — use when available (handles `.tasks/` init, `.gitignore` entries)
+1. `scripts/swt.sh` — use when available (handles `.tasks/` init, `.gitignore` entries)
 2. Direct file creation — fallback if script is not present
 
 Both paths go through the **Name Confirmation Gate** before any file is written.
@@ -262,6 +258,6 @@ Both paths go through the **Name Confirmation Gate** before any file is written.
 
 ## Cross-References
 
-- **`/workflow`** — References this skill for all task creation and lifecycle rules. The Task Manager Protocol in `/workflow` is replaced by a pointer here.
-- **`/spec`** — Calls `/task new` after generating a `SPEC.md` to link an implementation task.
-- **`/init`** — Suggests `/task new` after workspace bootstrap completes.
+- ⚠️ **The /swt:flow skill is the primary consumer of this skill.** All tasks created by `/swt:flow` must follow these rules.
+- **`/swt:spec`** — Calls `/swt:task new` after generating a `SPEC.md` to link an implementation task.
+- **`/swt:init`** — Suggests `/swt:task new` after workspace bootstrap completes.

@@ -1,5 +1,5 @@
 ---
-name: coding
+name: "swt:code"
 description: Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, reviewing, or refactoring code to avoid overcomplication, make surgical changes, surface assumptions, and define verifiable success criteria.
 license: MIT
 ---
@@ -70,4 +70,4 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Companion Skill
 
-These guidelines are designed to be used alongside the **workflow** skill (`skills/workflow/SKILL.md`), which governs the overall development process (planning phases, task tracking, documentation). The Coding guidelines apply specifically during **Phase 5: Implement** and **Phase 7: Test** of that workflow.
+These guidelines are designed to be used alongside the **workflow** skill (`skills/swt-flow/SKILL.md`), which governs the overall development process (planning phases, task tracking, documentation). The Coding guidelines apply specifically during **Phase 5: Implement** and **Phase 7: Test** of that workflow. Triggered via `/swt:flow`.

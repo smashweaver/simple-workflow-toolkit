@@ -23,12 +23,13 @@ This repository provides the following skills. Agents must be aware of all of th
 
 | Skill | Invocation | Purpose |
 |---|---|---|
-| **workflow** | `/workflow` | Enforces the 8-phase development lifecycle: plan, analyze, risk-assess, approve, implement, document, test, iterate. |
-| **spec** | `/spec` | Transforms ideas, brainstorms, or rough notes into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
-| **coding** | (auto / context) | Behavioral guidelines for surgical, minimal, goal-driven code changes. |
-| **commit** | `/commit` | Diff-first, draft-and-approve commit workflow. |
-| **mermaid** | (auto / context) | Prevents parse errors and enforces correct syntax in Mermaid diagrams. |
-| **init** | `/init` | Bootstraps workspace `AGENTS.md` for new projects consuming this toolkit. |
+| **workflow** | `/swt:flow` | Enforces the 8-phase development lifecycle: plan, analyze, risk-assess, approve, implement, document, test, iterate. |
+| **task** | `/swt:task` | Owns the full task lifecycle: naming validation, creation, graduation, status updates, and filtered listing. |
+| **spec** | `/swt:spec` | Transforms ideas, brainstorms, or rough notes into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
+| **coding** | `/swt:code` | Behavioral guidelines for surgical, minimal, goal-driven code changes. |
+| **commit** | `/swt:commit` | Diff-first, draft-and-approve commit workflow. |
+| **mermaid** | `/swt:mermaid` | Prevents parse errors and enforces correct syntax in Mermaid diagrams. |
+| **init** | `/swt:init` | Bootstraps workspace `AGENTS.md` for new projects consuming this toolkit. |
 
 ## 4. Workspace & Sub-Project Layout
 
@@ -38,7 +39,7 @@ The suite is **Workspace-Aware**:
 
 ## 5. The 8-Phase Workflow
 
-See `skills/workflow/SKILL.md` for the full lifecycle. Phases: Plan → Analyze → Risk Assess → Approve → Implement → Document → Test → Iterate.
+See `skills/swt-flow/SKILL.md` for the full lifecycle. Phases: Plan → Analyze → Risk Assess → Approve → Implement → Document → Test → Iterate.
 
 ## 6. Commit Discipline
 

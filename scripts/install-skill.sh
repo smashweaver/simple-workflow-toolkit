@@ -25,8 +25,8 @@ mkdir -p "$SKILLS_DEST"
 # Copy all skills
 cp -r "$SKILLS_SOURCE/"* "$SKILLS_DEST/"
 
-echo "Diskarte skill suite installed to $SKILLS_DEST"
-echo "Skills now available: workflow, coding, commit, mermaid"
+echo "Simple Workflow Toolkit (SWT) installed to $SKILLS_DEST"
+echo "Skills now available: swt:flow, swt:code, swt:commit, swt:mermaid, swt:task, swt:init, swt:spec"
 echo ""
 echo "To use: Start a Claude Code session in the target project."
 echo "Skills will auto-trigger based on context or can be invoked via /commands (if applicable)."

@@ -19,7 +19,7 @@ Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot
 
 ## 3. The 8-Phase Workflow
 
-See `skills/workflow/SKILL.md` for the full lifecycle.
+See `skills/swt-flow/SKILL.md` for the full lifecycle.
 
 | Phase | Purpose |
 |---|---|
@@ -34,7 +34,7 @@ See `skills/workflow/SKILL.md` for the full lifecycle.
 
 ## 4. Project Stack
 
-<!-- To be auto-detected and populated by the /workflow skill on first use. -->
+<!-- To be auto-detected and populated by the /swt:flow skill on first use. -->
 <!-- Do not edit manually unless the stack has changed. -->
 
 ## 5. Commit Discipline

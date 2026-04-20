@@ -1,5 +1,5 @@
 ---
-name: commit
+name: "swt:commit"
 description: Use when writing commit messages, creating commits, or when the user asks about commit message format. Follows a diff-first workflow: staged changes are captured to a `commit.diff` file, the agent drafts a message and saves it to `commit.draft`, the user fine-tunes, then the agent commits and cleans up both files on approval. Enforces a structured, impact-focused commit message format.
 user-invocable: true
 allowed-tools:
@@ -7,7 +7,7 @@ allowed-tools:
   - Read
 ---
 
-# /commit — Commit Message Guidelines
+# /swt:commit — Commit Message Guidelines
 
 Clear, impact-focused commit messages make code history readable and maintainable. These guidelines help you write messages that explain _why_ a change matters, not just _what_ changed.
 
@@ -102,7 +102,7 @@ git commit -F commit.draft
 Immediately after a successful commit:
 1. Inspect the `commit.task` file for a `Closes: .tasks/...` directive.
 2. If found, retrieve the newly created commit hash using: `git rev-parse HEAD`
-3. Execute the `/task close` operation on the linked task file:
+3. Execute the `/swt:task close` operation on the linked task file:
    - Change `**Status**` to `done`
    - Change `**Completed**` to today's date
    - Prepend the commit hash and a brief description under `## Commit Reference`.
@@ -227,10 +227,10 @@ Use one of these types:
 When writing bullet points, focus on behavior, outcomes, and impact rather than pointing to specific files. This applies to all projects, whether the beneficiary is a human user, another developer, or an AI agent/toolkit.
 
 ```
-❌ * skills/workflow/SKILL.md: Task Manager Protocol replaced with a pointer to /task
+❌ * skills/swt-flow/SKILL.md: Task Manager Protocol replaced with a pointer to /swt:task
    * src/components/Button.tsx: Updated styling
 
-✅ * Task rules now discoverable from one place — agents no longer need to cross-reference /workflow
+✅ * Task rules now discoverable from one place — agents no longer need to cross-reference /swt:flow
    * Buttons now follow brand guidelines across the checkout flow
 ```
 

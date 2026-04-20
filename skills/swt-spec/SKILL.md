@@ -5,7 +5,7 @@ description: >
   structured specification or PRD (Product Requirements Document). Trigger this
   skill whenever the user says things like "write a spec for", "generate a PRD",
   "turn this idea into a spec", "I want to document this feature", "help me
-  write requirements", "spec this out", or when a /workflow Phase 0 brainstorm
+  write requirements", "spec this out", or when a /swt:flow Phase 0 brainstorm
   is graduating to Phase 1 and a formal spec is needed. Also trigger when the
   user uploads or pastes raw notes/ideas and asks to structure them. This skill
   produces a SPEC.md file that serves as the source of truth before
@@ -22,7 +22,7 @@ allowed-tools:
   - Grep
 ---
 
-# /spec — Idea to Specification
+# /swt:spec — Idea to Specification
 
 You are a seasoned product manager and systems architect. Your job is to
 transform raw ideas, brainstorms, and rough concepts into a clear, structured
@@ -40,7 +40,7 @@ specification that a development team can act on without ambiguity.
 
 ## Invocation Modes
 
-### Mode A — From a `/workflow` Phase 0 brainstorm (graduation)
+### Mode A — From a `/swt:flow` Phase 0 brainstorm (graduation)
 Triggered when the user is ready to graduate a brainstorm task to Phase 1.
 
 1. Read the `.tasks/` brainstorm file for the idea's context, notes, and unresolved questions.
@@ -60,7 +60,7 @@ Triggered directly by the user with a raw idea, paste, or uploaded document.
 1. Read any provided notes, docs, or context.
 2. Run the **Clarification Interview** (below).
 3. Generate the `SPEC.md` in the current directory or a `/specs/` folder if one exists.
-4. Offer to create a `/workflow` task file to begin implementation.
+4. Offer to create a `/swt:flow` task file to begin implementation.
 
 ---
 
@@ -253,8 +253,8 @@ Ideas that came up during spec writing but are intentionally deferred.
 
 1. **Always write to a file.** Never output the spec only in chat.
    - Always write to `./specs/YYYYMMDDHHMMSS_{{slug}}.md` relative to the project root.
-   - If `specs/` does not exist, create it silently (no need to ask permission) — same behaviour as `taskmgr init` creating `.tasks/`.
-   - If in a `/workflow` context, use the sub-project root (same level as `.tasks/`), not the workspace root.
+   - If `specs/` does not exist, create it silently (no need to ask permission) — same behaviour as `swt.sh init` creating `.tasks/`.
+   - If in a `/swt:flow` context, use the sub-project root (same level as `.tasks/`), not the workspace root.
 
 2. **Slug the filename** from the feature name: lowercase, hyphens, no special chars. Prefix with a timestamp matching the current local time.
    - Format: `YYYYMMDDHHMMSS_{{slug}}.md`
@@ -265,17 +265,17 @@ Ideas that came up during spec writing but are intentionally deferred.
    - What was inferred vs. explicitly told
    - Which open questions need answers before implementation
    - Whether an MVP slice is clearly defined or needs further scoping
-   - Offer to create or link a `/workflow` task
+   - Offer to create or link a `/swt:flow` task
 
 4. **Version bump** on updates: 0.1 → 0.2 → … → 1.0 (approved).
 
 ---
 
-## Integration with /workflow
+## Integration with /swt:flow
 
-This skill is designed to complement the `/workflow` skill's 8-phase lifecycle:
+This skill is designed to complement the `/swt:flow` skill's 8-phase lifecycle:
 
-| /workflow Phase | /spec Role |
+| /swt:flow Phase | /spec Role |
 |-----------------|-----------|
 | Phase 0: Ideate | Reads brainstorm notes as input |
 | Phase 0 → 1 graduation | **Generates SPEC.md** and links it to the task |
@@ -303,4 +303,4 @@ Before presenting the spec to the user, verify:
 - [ ] Open Questions are listed (even if the answer is "none — all resolved")
 - [ ] Non-Goals section explicitly names at least one thing out of scope
 - [ ] File is written to disk, not just output in chat
-- [ ] Linked Task field is populated if in a /workflow context
+- [ ] Linked Task field is populated if in a /swt:flow context

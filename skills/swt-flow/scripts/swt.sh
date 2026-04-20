@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Universal AI Task Manager (taskmgr)
+# Universal AI Task Manager (swt.sh)
 # Facilitates semantic agent interaction with a local .tasks/ directory
 
 set -e
@@ -10,10 +10,10 @@ ARG=$2
 
 function show_help {
     echo "Usage:"
-    echo "  taskmgr init              - Initialize .tasks/ directory and update .gitignore"
-    echo "  taskmgr new \"Final Feature Name\"  - Create a new timestamped task file"
-    echo "  taskmgr brainstorm \"Topic\"        - Create a Phase 0 ideation task"
-    echo "  taskmgr list [status|open|all]    - List tasks (optional filter: open, pending, done, etc.)"
+    echo "  swt.sh init              - Initialize .tasks/ directory and update .gitignore"
+    echo "  swt.sh new \"Final Feature Name\"  - Create a new timestamped task file"
+    echo "  swt.sh brainstorm \"Topic\"        - Create a Phase 0 ideation task"
+    echo "  swt.sh list [status|open|all]    - List tasks (optional filter: open, pending, done, etc.)"
 }
 
 if [ -z "$CMD" ]; then
@@ -42,7 +42,7 @@ fi
 
 if [ "$CMD" == "list" ]; then
     if [ ! -d ".tasks" ]; then
-        echo "No .tasks/ directory found. Run 'taskmgr init' first."
+        echo "No .tasks/ directory found. Run 'swt.sh init' first."
         exit 1
     fi
 
@@ -80,12 +80,12 @@ fi
 if [ "$CMD" == "new" ]; then
     if [ -z "$ARG" ]; then
         echo "Error: Must provide a task description (e.g. final feature name)."
-        echo "Usage: taskmgr new \"Final Feature Name\""
+        echo "Usage: swt.sh new \"Final Feature Name\""
         exit 1
     fi
 
     if [ ! -d ".tasks" ]; then
-        echo "Error: No .tasks/ directory found. Run 'taskmgr init' first."
+        echo "Error: No .tasks/ directory found. Run 'swt.sh init' first."
         exit 1
     fi
 
@@ -134,12 +134,12 @@ fi
 
 if [ "$CMD" == "brainstorm" ]; then
     if [ -z "$ARG" ]; then
-        echo "Error: Must provide a topic (e.g. taskmgr brainstorm \"Remote install from GitHub\")"
+        echo "Error: Must provide a topic (e.g. swt.sh brainstorm \"Remote install from GitHub\")"
         exit 1
     fi
 
     if [ ! -d ".tasks" ]; then
-        echo "Error: No .tasks/ directory found. Run 'taskmgr init' first."
+        echo "Error: No .tasks/ directory found. Run 'swt.sh init' first."
         exit 1
     fi
 

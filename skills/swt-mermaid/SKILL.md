@@ -1,5 +1,5 @@
 ---
-name: mermaid
+name: "swt:mermaid"
 description: Use when creating Mermaid diagrams for documentation. Provides syntax rules and common pitfalls to avoid parse errors in GitHub and Markdown viewers.
 user-invocable: true
 allowed-tools:
@@ -8,7 +8,7 @@ allowed-tools:
   - Edit
 ---
 
-# /mermaid — Mermaid Diagram Guidelines
+# /swt:mermaid — Mermaid Diagram Guidelines
 
 These rules ensure Mermaid diagrams render correctly in Markdown viewers like GitHub and documentation tools.
 
