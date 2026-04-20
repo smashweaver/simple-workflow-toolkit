@@ -350,81 +350,21 @@ Before any code updates, these items must be addressed. Adapt to the project's t
 
 ---
 
-## Task Manager Protocol
+## Task Management
 
-**Preference**: If `scripts/taskmgr.sh` exists, use it. Otherwise, use `.tasks/` markdown files directly.
+> All task creation, naming rules, templates, graduation rituals, and status updates are owned by the **`/task` skill** (`skills/task/SKILL.md`). Read that skill before creating or modifying any task file.
 
-### With taskmgr
-- **Initialize**: `scripts/taskmgr.sh init` to scaffold the `.tasks/` directory and `.gitignore`.
-- **Create**: `scripts/taskmgr.sh new "<Final Feature Name>"` to generate a timestamped `.tasks/YYYYMMDDHHMMSS_name.md` checklist file. **Rule:** Do not use lifecycle verbs (like "ideate", "brainstorm", or "fix") in the name. Keep the name robust for the entire execution lifecycle.
-- **Brainstorm**: `scripts/taskmgr.sh brainstorm "<Topic>"` to generate a Phase 0 ideation task with `Status: ideating`, `Type: brainstorm`, and the ideation template.
-- **List**: `scripts/taskmgr.sh list` to view all active tasks.
-- **Update**: Use Edit to mark checklist items complete in the `.tasks/` file.
+**Quick reference:**
+- **New task**: `/task new` or `scripts/taskmgr.sh new "<Feature Name>"`
+- **Brainstorm task**: `/task brainstorm` or `scripts/taskmgr.sh brainstorm "<Topic>"`
+- **Graduate Phase 0 → 1**: `/task graduate`
+- **List tasks**: `scripts/taskmgr.sh list`
+- **Update progress**: Edit the `.tasks/` file to mark `[x]` checkboxes
 
-### Without taskmgr
-Create `.tasks/YYYYMMDDHHMMSS_name.md` directly with this template:
-
-**Standard Task Template:**
-```markdown
-# Task: {{Task Name}}
-**Created**: {{YYYY-MM-DD HH:MM:SS}}
-**Updated**: —
-**Completed**: —
-**Status**: pending
-**Priority**: medium          <!-- low | medium | high | critical -->
-**Type**: feature             <!-- feature | bugfix | refactor | chore | docs -->
-**Stack**: frontend           <!-- frontend | backend | shared -->
-**Phase**: 1                  <!-- current active phase (1–8) -->
-**Blocked By**: —             <!-- task filename or n/a -->
-
-## Objective
-Provide a short description of what this task achieves.
-
-## Checklist
-- [ ] Phase 1: Plan
-- [ ] Phase 2: Analyze
-- [ ] Phase 3: Risk Assessment
-- [ ] Phase 4: Approval
-- [ ] Phase 5: Implement
-- [ ] Phase 6: Document
-- [ ] Phase 7: Test
-- [ ] Phase 8: Iterative Development
-
-## Notes
-
-## Risks
-
-## Commit Reference
-```
-
-**Brainstorm / Ideation Template** (for `Status: ideating`):
-```markdown
-# Task: {{Topic or Idea Name}}
-**Created**: {{YYYY-MM-DD HH:MM:SS}}
-**Updated**: —
-**Completed**: —
-**Status**: ideating          <!-- ideating | pending | in-progress | done | abandoned -->
-**Priority**: medium          <!-- low | medium | high | critical -->
-**Type**: brainstorm          <!-- brainstorm | feature | bugfix | refactor | chore | docs -->
-**Stack**: shared             <!-- frontend | backend | shared -->
-**Phase**: 0                  <!-- 0 = ideating, 1–8 = implementation phases -->
-**Blocked By**: —
-
-## Core Concept
-What is the core problem or idea being explored?
-
-## Explored Alternatives
-What other approaches were considered and why set aside?
-
-## Unresolved Questions
-What still needs to be answered before this can become a task?
-
-## Notes
-
-## Commit Reference
-```
+> ⚠️ **Naming rule** (enforced by `/task`): Name the thing being built, not the phase. No lifecycle verbs (`ideate-`, `brainstorm-`, `fix-`). The `/task` skill always proposes the name for confirmation before writing.
 
 ---
+
 
 ## How /workflow Works
 
