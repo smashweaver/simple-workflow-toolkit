@@ -13,7 +13,7 @@ function show_help {
     echo "  taskmgr init              - Initialize .tasks/ directory and update .gitignore"
     echo "  taskmgr new \"Final Feature Name\"  - Create a new timestamped task file"
     echo "  taskmgr brainstorm \"Topic\"        - Create a Phase 0 ideation task"
-    echo "  taskmgr list              - List existing tasks"
+    echo "  taskmgr list [status|open|all]    - List tasks (optional filter: open, pending, done, etc.)"
 }
 
 if [ -z "$CMD" ]; then
@@ -45,15 +45,35 @@ if [ "$CMD" == "list" ]; then
         echo "No .tasks/ directory found. Run 'taskmgr init' first."
         exit 1
     fi
+
+    FILTER=$2
     files=$(ls .tasks/*.md 2>/dev/null | sort || true)
+    
     if [ -z "$files" ]; then
          echo "No tasks found in .tasks/"
-    else
-         echo "Tasks found:"
-         for f in $files; do
-             echo " - $f"
-         done
+         exit 0
     fi
+
+    echo "Tasks found:"
+    for f in $files; do
+        # Extract status (handles cases with comments or trailing spaces)
+        STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$f" | head -n 1)
+        
+        SHOW=true
+        if [ "$FILTER" == "open" ]; then
+            if [[ "$STATUS" == "done" || "$STATUS" == "abandoned" ]]; then
+                SHOW=false
+            fi
+        elif [ -n "$FILTER" ] && [ "$FILTER" != "all" ]; then
+            if [ "$STATUS" != "$FILTER" ]; then
+                SHOW=false
+            fi
+        fi
+
+        if [ "$SHOW" == "true" ]; then
+             echo " - [$STATUS] $f"
+        fi
+    done
     exit 0
 fi
 

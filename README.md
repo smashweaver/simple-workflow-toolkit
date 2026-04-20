@@ -62,7 +62,7 @@ diskarte/
 | Skill | Trigger | Purpose |
 |---|---|---|
 | **Init** | `/init` | Bootstraps `AGENTS.md` for any new workspace. Runs once, before any tasks or specs begin. |
-| **Task** | `/task` | Owns the full task lifecycle — naming validation, creation, graduation, status updates. |
+| **Task** | `/task` | Owns the full task lifecycle — naming validation, creation, graduation, status updates, and filtered listing. |
 | **Workflow** | `/workflow` | Enforces planning, analysis, and approval gates. |
 | **Spec** | `/spec` | Transforms ideas and brainstorms into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
 | **Coding** | (Auto/Context) | Ensures surgical edits and minimal, simple code. |

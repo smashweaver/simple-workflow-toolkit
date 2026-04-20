@@ -143,6 +143,24 @@ Updates the task checklist and phase field as phases complete.
 
 ---
 
+### `/task list` — List tasks
+
+Lists task files in the `.tasks/` directory, optionally filtered by status.
+
+**Filter options:**
+- `open`: Tasks NOT in `done` or `abandoned` status (default recommendation for "what's next").
+- `pending`: Standard implementation tasks.
+- `ideating`: Phase 0 brainstorm tasks.
+- `done`: Completed tasks.
+- `all`: Every task file (same as no filter).
+
+**Steps:**
+1. Determine the desired filter based on user request (e.g., "show open tasks").
+2. Invoke `scripts/taskmgr.sh list [filter]`.
+3. Present the list to the user with their statuses.
+
+---
+
 ### `/task close` — Mark done or abandoned
 
 **Steps:**
