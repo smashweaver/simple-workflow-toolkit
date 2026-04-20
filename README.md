@@ -45,6 +45,7 @@ diskarte/
 │   ├── workflow/           # Structured 8-phase development process
 │   │   └── scripts/
 │   │       └── taskmgr.sh  # Universal AI Task Manager
+│   ├── spec/               # Idea-to-specification (SPEC.md / PRD generation)
 │   ├── coding/             # Behavioral guidelines (surgical changes, simplicity)
 │   ├── commit/             # Diff-first, draft-and-approve commit workflow
 │   └── mermaid/            # Mermaid diagram syntax rules
@@ -58,6 +59,7 @@ diskarte/
 | Skill | Trigger | Purpose |
 |---|---|---|
 | **Workflow** | `/workflow` | Enforces planning, analysis, and approval gates. |
+| **Spec** | `/spec` | Transforms ideas and brainstorms into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
 | **Coding** | (Auto/Context) | Ensures surgical edits and minimal, simple code. |
 | **Commit** | `/commit` | Manages disciplined, impact-focused commit history. |
 | **Mermaid** | (Auto/Context) | Prevents parse errors in documentation diagrams. |

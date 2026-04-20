@@ -1,6 +1,6 @@
 # AGENTS.md — AI Agent Methodology
 
-This document defines the core principles and behavioral protocols for AI coding agents participating in this repository. It is the source methodology for the `/workflow` skill.
+This document defines the core principles and behavioral protocols for AI coding agents participating in this repository. It is the source methodology for the full **Diskarte skill suite**.
 
 ## 1. Core Principles
 
@@ -49,7 +49,19 @@ The suite is **Workspace-Aware**:
 - **Parent AGENTS.md**: Defines shared context for the entire cluster.
 - **Sub-Project AGENTS.md**: Defines the specific technology stack and "pinned" info for a sub-folder.
 
-## 5. Commit Discipline
+## 5. Skills Suite
+
+This repository provides the following skills. Agents must be aware of all of them — load the relevant `SKILL.md` before performing work in that domain.
+
+| Skill | Invocation | Purpose |
+|---|---|---|
+| **workflow** | `/workflow` | Enforces the 8-phase development lifecycle: plan, analyze, risk-assess, approve, implement, document, test, iterate. |
+| **spec** | `/spec` | Transforms ideas, brainstorms, or rough notes into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
+| **coding** | (auto / context) | Behavioral guidelines for surgical, minimal, goal-driven code changes. |
+| **commit** | `/commit` | Diff-first, draft-and-approve commit workflow. |
+| **mermaid** | (auto / context) | Prevents parse errors and enforces correct syntax in Mermaid diagrams. |
+
+## 6. Commit Discipline
 
 All commits follow the **Diff-First, Draft-and-Approve** protocol:
 1. Stage changes.
