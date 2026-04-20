@@ -1,6 +1,7 @@
 # Commit workflow temp files
 commit.diff
 commit.draft
+commit.task
 
 # Task tracking (per-project, not committed)
 .tasks/

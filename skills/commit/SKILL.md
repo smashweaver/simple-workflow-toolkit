@@ -20,6 +20,7 @@ This skill follows a **diff-first, draft-and-approve** commit process. The user 
 Two temporary files are used, both gitignored:
 - **`commit.diff`** — the staged diff exported from git
 - **`commit.draft`** — the agent-drafted commit message, ready to edit
+- **`commit.task`** — the agent-tracked task reference (Closes: .tasks/...)
 
 ### Step 1 — Stage your changes
 Selectively stage only the files and hunks relevant to this commit:
@@ -44,9 +45,9 @@ The agent will:
 2. **Scan for active tasks** — search for `.tasks/*.md` files in the **current directory**, **parent directory**, and any **sub-project directories** to understand the active work context and align terminology.
 3. **Consult `AGENTS.md`** — read both the project-level and parent-level `AGENTS.md` for strategic goals and conventions.
 4. **Analyze the changes** — identify what changed, why, and the impact.
-5. **Draft a commit message** — following the format and principles below. If an active task was found in Step 2, append a footer separated by a blank line at the very end of the message: `Closes: .tasks/YYYYMMDDHHMMSS_slug.md`
-6. **Save the draft to `commit.draft`** — write the message to the file silently.
-7. **Display the draft** — show the contents of `commit.draft` for review. Let the user know the mapped task will be auto-closed.
+5. **Draft a commit message** — following the format and principles below. Store the message in `commit.draft`.
+6. **Track task closure** — if an active task was found in Step 2, write the reference to `commit.task`: `Closes: .tasks/YYYYMMDDHHMMSS_slug.md`.
+7. **Display the draft** — show the contents of `commit.draft` and `commit.task` for review. Let the user know the mapped task will be auto-closed.
 
 > ⚠️ **The agent MUST NOT execute any `git commit` command at this stage.**
 
@@ -99,7 +100,7 @@ git commit -F commit.draft
 
 ### Step 7 — Post-Commit Task Auto-Close
 Immediately after a successful commit:
-1. Inspect the `commit.draft` file for a `Closes: .tasks/...` directive.
+1. Inspect the `commit.task` file for a `Closes: .tasks/...` directive.
 2. If found, retrieve the newly created commit hash using: `git rev-parse HEAD`
 3. Execute the `/task close` operation on the linked task file:
    - Change `**Status**` to `done`
@@ -109,12 +110,12 @@ Immediately after a successful commit:
 ### Step 8 — Cleanup (agent-executed)
 After the commit and task updates are complete, delete both temp files:
 ```bash
-rm commit.diff commit.draft
+rm commit.diff commit.draft commit.task
 ```
 
 > **Tip:** Add both files to `.gitignore` so they are never accidentally staged:
 > ```bash
-> echo -e "commit.diff\ncommit.draft" >> .gitignore
+> echo -e "commit.diff\ncommit.draft\ncommit.task" >> .gitignore
 > ```
 
 ---

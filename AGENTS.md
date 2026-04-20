@@ -68,7 +68,7 @@ This repository provides the following skills. Agents must be aware of all of th
 All commits follow the **Diff-First, Draft-and-Approve** protocol:
 1. Stage changes.
 2. Export `commit.diff`.
-3. Agent drafts to `commit.draft`.
+3. Agent drafts to `commit.draft` and tracks tasks in `commit.task`.
 4. User fine-tunes; Agent iterates with probing questions.
 5. Apply commit on approval (`git commit -F commit.draft`).
-6. Cleanup temp files.
+6. Cleanup temp files (`commit.diff`, `commit.draft`, `commit.task`).
