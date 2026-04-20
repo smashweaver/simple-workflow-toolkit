@@ -57,6 +57,7 @@ This repository provides the following skills. Agents must be aware of all of th
 |---|---|---|
 | **workflow** | `/workflow` | Enforces the 8-phase development lifecycle: plan, analyze, risk-assess, approve, implement, document, test, iterate. |
 | **spec** | `/spec` | Transforms ideas, brainstorms, or rough notes into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
+| **init** | `/init` | Bootstraps workspace `AGENTS.md` for any new project consuming this toolkit. Runs once, before any tasks or specs are created. |
 | **coding** | (auto / context) | Behavioral guidelines for surgical, minimal, goal-driven code changes. |
 | **commit** | `/commit` | Diff-first, draft-and-approve commit workflow. |
 | **mermaid** | (auto / context) | Prevents parse errors and enforces correct syntax in Mermaid diagrams. |

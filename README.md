@@ -45,6 +45,8 @@ diskarte/
 │   ├── workflow/           # Structured 8-phase development process
 │   │   └── scripts/
 │   │       └── taskmgr.sh  # Universal AI Task Manager
+│   ├── init/               # Workspace bootstrap (scaffolds AGENTS.md)
+│   │   └── templates/      # single-project, multi-project, toolkit
 │   ├── spec/               # Idea-to-specification (SPEC.md / PRD generation)
 │   ├── coding/             # Behavioral guidelines (surgical changes, simplicity)
 │   ├── commit/             # Diff-first, draft-and-approve commit workflow
@@ -58,6 +60,7 @@ diskarte/
 
 | Skill | Trigger | Purpose |
 |---|---|---|
+| **Init** | `/init` | Bootstraps `AGENTS.md` for any new workspace. Runs once, before any tasks or specs begin. |
 | **Workflow** | `/workflow` | Enforces planning, analysis, and approval gates. |
 | **Spec** | `/spec` | Transforms ideas and brainstorms into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
 | **Coding** | (Auto/Context) | Ensures surgical edits and minimal, simple code. |
