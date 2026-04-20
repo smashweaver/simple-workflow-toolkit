@@ -222,6 +222,18 @@ Use one of these types:
    * New contributors onboard 40% faster with explicit examples
 ```
 
+### Don't use file references in bullet points
+
+When writing bullet points, focus on behavior, outcomes, and impact rather than pointing to specific files. This applies to all projects, whether the beneficiary is a human user, another developer, or an AI agent/toolkit.
+
+```
+❌ * skills/workflow/SKILL.md: Task Manager Protocol replaced with a pointer to /task
+   * src/components/Button.tsx: Updated styling
+
+✅ * Task rules now discoverable from one place — agents no longer need to cross-reference /workflow
+   * Buttons now follow brand guidelines across the checkout flow
+```
+
 ## Quality Checklist
 
 Before committing, verify:
