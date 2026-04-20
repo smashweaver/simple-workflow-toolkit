@@ -41,13 +41,14 @@ Ask the agent to draft a commit message:
 > *"Generate a commit message for the diff in `commit.diff`"*
 
 The agent will:
-1. **Read `commit.diff`** — never run `git diff` directly; always read from the file.
-2. **Scan for active tasks** — search for `.tasks/*.md` files in the **current directory**, **parent directory**, and any **sub-project directories** to understand the active work context and align terminology.
-3. **Consult `AGENTS.md`** — read both the project-level and parent-level `AGENTS.md` for strategic goals and conventions.
-4. **Analyze the changes** — identify what changed, why, and the impact.
-5. **Draft a commit message** — following the format and principles below. Store the message in `commit.draft`.
-6. **Track task closure** — if an active task was found in Step 2, write the reference to `commit.task`: `Closes: .tasks/YYYYMMDDHHMMSS_slug.md`.
-7. **Display the draft** — show the contents of `commit.draft` and `commit.task` for review. Let the user know the mapped task will be auto-closed.
+1. **Re-read this `SKILL.md` file** — always refresh your understanding of these specific commit guidelines before drafting.
+2. **Read `commit.diff`** — never run `git diff` directly; always read from the file.
+3. **Scan for active tasks** — search for `.tasks/*.md` files in the **current directory**, **parent directory**, and any **sub-project directories** to understand the active work context and align terminology.
+4. **Consult `AGENTS.md`** — read both the project-level and parent-level `AGENTS.md` for strategic goals and conventions.
+5. **Analyze the changes** — identify what changed, why, and the impact.
+6. **Draft a commit message** — following the format and principles below. Store the message in `commit.draft`.
+7. **Track task closure** — if an active task was found in Step 3, write the reference to `commit.task`: `Closes: .tasks/YYYYMMDDHHMMSS_slug.md`. STRICTLY separate this metadata from the `commit.draft` message.
+8. **Display the draft** — show the contents of `commit.draft` and `commit.task` for review. Let the user know the mapped task will be auto-closed.
 
 > ⚠️ **The agent MUST NOT execute any `git commit` command at this stage.**
 
@@ -173,6 +174,7 @@ Use one of these types:
 - Use natural language, short but expressive
 - Focus on **benefits and impact**, not implementation details
 - Focus on **intent and effect** — explain what problem you're solving and how the change improves the codebase
+- **Conciseness Enforcement**: Combine the commit title and primary intent into a single sentence where possible. Avoid redundant introductory paragraphs that simply restate the title before the bullet points.
 - Each bullet point should add distinct information (avoid redundancy)
 - Use bullet points only when there are multiple meaningful changes
 - Benefits should be **specific and measurable**, not vague

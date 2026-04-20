@@ -65,7 +65,11 @@ This repository provides the following skills. Agents must be aware of all of th
 
 ## 6. Commit Discipline
 
-All commits follow the **Diff-First, Draft-and-Approve** protocol:
+> 🚫 **Forbidden:** Agents are STRICTLY FORBIDDEN from using standard `git commit -m` commands directly. All commits must go through the Draft-and-Approve protocol below.
+> 💡 **Enforce Default:** Whenever prompted for a git commit or help with a git commit message, agents MUST default to invoking the `/swt:commit` skill.
+
+All commits follow the **Diff-First, Draft-and-Approve** protocol. There is a strict separation of concerns: `commit.draft` is ONLY for the human-readable, impact-focused commit message, while `commit.task` is ONLY for automation metadata (e.g., `Closes: .tasks/...`). Do not mix them.
+
 1. Stage changes.
 2. Export `commit.diff`.
 3. Agent drafts to `commit.draft` and tracks tasks in `commit.task`.
