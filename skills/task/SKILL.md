@@ -139,7 +139,7 @@ Updates the task checklist and phase field as phases complete.
 1. Read the active task file
 2. Mark the completed phase: `- [ ]` → `- [x]`
 3. Update `**Phase**` to the next active phase
-4. If all phases done, proceed to `/task close`
+4. If all phases are done, DO NOT close the task yet. Instruct the user to stage their files and invoke `/commit`. The task will remain `pending` until the commit is applied.
 
 ---
 

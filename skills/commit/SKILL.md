@@ -44,9 +44,9 @@ The agent will:
 2. **Scan for active tasks** — search for `.tasks/*.md` files in the **current directory**, **parent directory**, and any **sub-project directories** to understand the active work context and align terminology.
 3. **Consult `AGENTS.md`** — read both the project-level and parent-level `AGENTS.md` for strategic goals and conventions.
 4. **Analyze the changes** — identify what changed, why, and the impact.
-5. **Draft a commit message** — following the format and principles below.
+5. **Draft a commit message** — following the format and principles below. If an active task was found in Step 2, append a footer separated by a blank line at the very end of the message: `Closes: .tasks/YYYYMMDDHHMMSS_slug.md`
 6. **Save the draft to `commit.draft`** — write the message to the file silently.
-7. **Display the draft** — show the contents of `commit.draft` for review.
+7. **Display the draft** — show the contents of `commit.draft` for review. Let the user know the mapped task will be auto-closed.
 
 > ⚠️ **The agent MUST NOT execute any `git commit` command at this stage.**
 
@@ -97,8 +97,17 @@ Only on explicit "Apply" confirmation, the agent runs:
 git commit -F commit.draft
 ```
 
-### Step 7 — Cleanup (agent-executed)
-Immediately after a successful commit, the agent deletes both temp files:
+### Step 7 — Post-Commit Task Auto-Close
+Immediately after a successful commit:
+1. Inspect the `commit.draft` file for a `Closes: .tasks/...` directive.
+2. If found, retrieve the newly created commit hash using: `git rev-parse HEAD`
+3. Execute the `/task close` operation on the linked task file:
+   - Change `**Status**` to `done`
+   - Change `**Completed**` to today's date
+   - Prepend the commit hash and a brief description under `## Commit Reference`.
+
+### Step 8 — Cleanup (agent-executed)
+After the commit and task updates are complete, delete both temp files:
 ```bash
 rm commit.diff commit.draft
 ```
