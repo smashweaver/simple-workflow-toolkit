@@ -47,8 +47,9 @@ The agent will:
 4. **Consult `AGENTS.md`** — read both the project-level and parent-level `AGENTS.md` for strategic goals and conventions.
 5. **Analyze the changes** — identify what changed, why, and the impact.
 6. **Draft a commit message** — following the format and principles below. Store the message in `commit.draft`.
-7. **Track task closure** — if an active task was found in Step 3, write the reference to `commit.task`: `Closes: .tasks/YYYYMMDDHHMMSS_slug.md`. STRICTLY separate this metadata from the `commit.draft` message.
-8. **Display the draft** — show the contents of `commit.draft` and `commit.task` for review. Let the user know the mapped task will be auto-closed.
+7. **Agent Self-Correction Pass** — Before finalizing, the agent MUST review the draft against the "Agent Self-Correction Guardrails" below.
+8. **Track task closure** — if an active task was found in Step 3, write the reference to `commit.task`: `Closes: .tasks/YYYYMMDDHHMMSS_slug.md`. STRICTLY separate this metadata from the `commit.draft` message.
+9. **Display the draft** — show the contents of `commit.draft` and `commit.task` for review. Let the user know the mapped task will be auto-closed.
 
 > ⚠️ **The agent MUST NOT execute any `git commit` command at this stage.**
 
@@ -129,10 +130,10 @@ rm commit.diff commit.draft commit.task
 
 Optional detailed bullets (if applicable):
 
-- What users gain from the change
-- How the change improves user experience
-- What problems it solves or prevents
-- Performance or architectural improvements
+* What users gain from the change
+* How the change improves user experience
+* What problems it solves or prevents
+* Performance or architectural improvements
 
 ## Types
 
@@ -236,7 +237,21 @@ When writing bullet points, focus on behavior, outcomes, and impact rather than 
    * Buttons now follow brand guidelines across the checkout flow
 ```
 
-## Quality Checklist
+## Quality Checklist & Agent Guardrails
+
+### Agent Self-Correction Guardrails
+
+> [!IMPORTANT]
+> Agents MUST run this check before presenting any `commit.draft` to the user. If any red flags are found, the agent MUST self-correct and update the draft.
+
+| Red Flag | Reason | Correction |
+|---|---|---|
+| Bullet starts with `-` | Violates syntax convention | Use `*` for all bullets |
+| Bullet contains `/` or `.` | Likely a file or directory reference | Focus on **behavioral outcomes** and **intent** |
+| Bullet repeats scope | Redundancy | Remove the repetition; focus on impact |
+| Intro paragraph present | Adds noise | Remove; move the primary intent to the commit title |
+
+### Human/Final Verification
 
 Before committing, verify:
 
@@ -311,7 +326,7 @@ git commit -m "Initial commit: GraphQL project using Apollo Server and TypeScrip
 * Standard project structure for faster onboarding"
 ```
 
-## Formatting Rules
+## Mandatory Syntax Rules
 
 - Use **one `-m` flag** for the title, **one `-m` flag** for all bullets
 - Use actual newlines within the string to separate bullet points
