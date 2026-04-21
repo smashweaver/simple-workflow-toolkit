@@ -144,7 +144,7 @@ Updates the task checklist and phase field as phases complete.
 Lists task files in the `.tasks/` directory, optionally filtered by status.
 
 **Filter options:**
-- `open`: Tasks NOT in `done` or `abandoned` status (default recommendation for "what's next").
+- `open`: Tasks NOT in `done` or `abandoned` status. **MANDATORY**: Use this filter whenever the user asks "what's next?", "what should I do next?", "what are we working on?", "list open tasks", or "show task status".
 - `pending`: Standard implementation tasks.
 - `ideating`: Phase 0 brainstorm tasks.
 - `done`: Completed tasks.

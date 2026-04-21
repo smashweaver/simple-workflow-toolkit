@@ -78,23 +78,26 @@ When the user says anything like:
 - *"what was I doing?"*
 - *"catch me up"*
 - *"resume"*
+- *"what should I do next?"*
+- *"what's next?"*
 - or any equivalent phrasing that signals a session resume
 
 You **MUST** perform the following steps before responding with anything else:
 
-1. **Scan `.tasks/`** in the current directory, parent directory, and any sub-project directories for `.md` files.
-2. **Read each task file** and identify:
+1. **Read the latest digest** in `.digests/` — identify the key outcomes and next steps from the previous session.
+2. **Use `/swt:task list open`** — invoke the `swt-task` skill to retrieve the authoritative list of active work.
+3. **Read the identified task files** and identify:
    - Tasks with `**Status**: ideating` — these are **active brainstorms** awaiting a decision
    - Tasks with `**Status**: in-progress` or `**Status**: pending` — these are **active implementation tasks**
    - Tasks with `**Status**: done` or `**Status**: abandoned` — these are **closed**, skip unless user asks
-3. **Identify the current phase** for each active task using the `**Phase**:` field and the `## Checklist` to see which items remain unchecked.
-4. **Summarise clearly**:
+4. **Identify the current phase** for each active task using the `**Phase**:` field and the `## Checklist` to see which items remain unchecked.
+5. **Summarise clearly**:
    - What task(s) are active
    - What phase each is in
    - What the next unchecked step is
    - Any blockers noted in the task file
 
-5. **Ask the user** which task to resume, or confirm the most recent one if only one is active.
+6. **Ask the user** which task to resume. **HARD STOP**: Do not proceed with implementation or planning until the user explicitly confirms which task to work on.
 
 > ⚠️ **Never rely on conversation history alone to reconstruct context.** Always read the task files. They are the source of truth for what is in progress.
 
