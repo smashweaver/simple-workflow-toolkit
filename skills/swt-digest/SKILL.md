@@ -3,7 +3,7 @@ name: "swt:digest"
 description: >
   Automates the creation of structured session summaries for continuity.
   Trigger at the end of a session, after a major milestone, or when the user
-  asks for a summary. Stores timestamped files in `.digest/`.
+  asks for a summary. Stores timestamped files in `.digests/`.
 user-invocable: true
 allowed-tools:
   - Read
@@ -20,9 +20,9 @@ You are responsible for capturing the "soul" of a coding session. Your goal is t
 
 ## Storage & Naming
 
-Summaries are stored in the `.digest/` directory at the project root.
+Summaries are stored in the `.digests/` directory at the project root.
 
-- **Directory**: `.digest/` (ensure this is gitignored)
+- **Directory**: `.digests/` (ensure this is gitignored)
 - **Filename**: `YYYYMMDDHHMMSS_digest.md` (e.g., `20260422054014_digest.md`)
 
 ---
@@ -89,6 +89,6 @@ Proactively suggest `/swt:digest` when:
 ## Execution Layer
 
 1. Get timestamp: `date +%Y%m%d%H%M%S`
-2. Create `.digest/` directory if it doesn't exist.
+2. Create `.digests/` directory if it doesn't exist.
 3. Write the file.
-4. Confirm to user: *"Session summary created: `.digest/YYYYMMDDHHMMSS_digest.md`. See you next time!"*
+4. Confirm to user: *"Session summary created: `.digests/YYYYMMDDHHMMSS_digest.md`. See you next time!"*
