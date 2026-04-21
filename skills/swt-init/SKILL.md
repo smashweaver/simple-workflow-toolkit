@@ -7,8 +7,8 @@ description: >
   new project with SWT". This skill runs ONCE per project at the very
   beginning, before any tasks or specs are created. It interviews the user to
   determine workspace type, loads the appropriate template, and scaffolds
-  AGENTS.md. If AGENTS.md already exists, it runs in defensive diff mode —
-  never overwrites blindly.
+  AGENTS.md. For workspaces, it also initializes directory structures. If 
+  AGENTS.md already exists, it runs in defensive diff mode — never overwrites blindly.
 user-invocable: true
 allowed-tools:
   - Read
@@ -60,14 +60,21 @@ At the start of every session, **before doing anything else**:
 
 ## Interview Mode
 
-Ask all three questions in a **single message** — never one at a time.
+### Smart Detection
+
+Before asking the user, the agent should attempt to infer the workspace type:
+- **Workspace**: If the current directory contains subdirectories with `AGENTS.md` or stack markers (e.g., `package.json`, `pyproject.toml`).
+- **Single**: If the directory is empty or contains only a single project's files.
+
+### The Prompt
+
+Ask all questions in a **single message**. Pre-select the default based on smart detection.
 
 > "To scaffold the right `AGENTS.md` for your workspace, I need three quick answers:"
 >
-> **1 — Workspace type** *(determines which template to use)*
-> - **Single-project** — one codebase at the root (e.g. a standalone app, API, or script)
-> - **Multi-project** — multiple sub-projects under a shared parent (e.g. frontend + backend)
-> - **Toolkit** — a skills or tooling repository (e.g. Simple Workflow Toolkit itself)
+> **1 — Workspace type**
+> - **Single** [default] — one codebase at the root (standalone app, API, etc.)
+> - **Workspace** — a container for multiple independent repos (e.g., frontend + backend)
 >
 > **2 — Project name**
 > What is the name of this project or workspace?
@@ -77,10 +84,11 @@ Ask all three questions in a **single message** — never one at a time.
 
 After receiving answers:
 
-1. Load the matching template from `skills/swt-init/templates/` (see **Template Loading** below).
-2. Substitute `{{project_name}}` and `{{purpose}}` with the user's answers.
-3. Write `AGENTS.md` to the workspace root.
-4. Confirm to the user and suggest the next step.
+1. Load the matching template from `skills/swt-init/templates/`.
+2. Substitute `{{project_name}}` and `{{purpose}}` placeholders.
+3. If **Workspace**, perform **Workspace Scaffolding** (see below).
+4. Write `AGENTS.md` to the workspace root.
+5. Confirm to the user and suggest the next step.
 
 > 💡 Stack detection is deliberately left to the `/swt:flow` skill's auto-pin mechanism. Do not ask about the tech stack here.
 
@@ -88,17 +96,30 @@ After receiving answers:
 
 ## Template Loading
 
-| User Answer    | Template file                               |
-|----------------|---------------------------------------------|
-| Single-project | `skills/swt-init/templates/single-project.md`   |
-| Multi-project  | `skills/swt-init/templates/multi-project.md`    |
-| Toolkit        | `skills/swt-init/templates/toolkit.md`          |
+| User Answer | Template file                       |
+|-------------|-------------------------------------|
+| Single      | `skills/swt-init/templates/single-project.md` |
+| Workspace   | `skills/swt-init/templates/workspace.md`      |
 
 Read the template file, substitute the two placeholders, then write to `./AGENTS.md` at the workspace root.
 
 **Placeholders:**
 - `{{project_name}}` — replaced with the user's answer to Q2
 - `{{purpose}}` — replaced with the user's answer to Q3
+
+---
+
+## Workspace Scaffolding
+
+When the type is **Workspace**, the agent must also perform these actions if they haven't been done:
+
+1. **Git Init**: Run `git init` to version the workspace meta-files.
+2. **.gitignore**: Create a `.gitignore` with:
+   - `.tasks/` (unless tasks are intended to be shared via git)
+   - Sub-project directory names (to prevent them being treated as submodules)
+   - Common OS/IDE cruft (`.DS_Store`, `.vscode/`, etc.)
+3. **Task Directory**: `mkdir -p .tasks/` to store cross-project tasks.
+4. **README**: Create a `README.md` skeleton with the project name and purpose.
 
 ---
 
@@ -109,9 +130,8 @@ When `AGENTS.md` already exists at the workspace root, **do not modify it until 
 ### Step 1 — Ask which template to compare against
 
 > *"An `AGENTS.md` already exists. Which template should I compare it against to identify what's missing or unexpected?"*
-> 1. Single-project
-> 2. Multi-project
-> 3. Toolkit
+> 1. Single
+> 2. Workspace
 
 ### Step 2 — Parse the existing file
 
@@ -170,5 +190,5 @@ After successfully writing or updating `AGENTS.md`, confirm to the user:
 
 - [ ] `AGENTS.md` created or updated at workspace root
 - [ ] `{{project_name}}` and `{{purpose}}` are filled in (no raw placeholders remain)
-- [ ] **Multi-project only**: Remind the user that each sub-project also needs its own `AGENTS.md`. They can run `/swt:init` again from within each sub-project directory, or create the files manually.
+- [ ] **Workspace only**: Remind the user that each sub-project also needs its own `AGENTS.md`. They can run `/swt:init` again from within each sub-project directory.
 - [ ] Suggest the next step: *"Your workspace is bootstrapped. Run `/swt:flow` and describe your first task to begin."*

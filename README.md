@@ -11,8 +11,11 @@ This project provides a **Claude Code skill** (`/swt:flow`) that embeds discipli
 ### Install into a project
 
 ```bash
-# Clone or download this repo, then:
+# Standard install (copies files)
 ./scripts/install-skill.sh /path/to/project
+
+# Link install (creates symlinks — recommended for development)
+./scripts/install-skill.sh --link /path/to/project
 ```
 
 ### Use in a Claude Code session
@@ -47,7 +50,7 @@ swt/
 │   │       └── swt.sh      # Universal AI Task Manager
 │   ├── swt-task/           # Task lifecycle: naming, creation, graduation, status
 │   ├── swt-init/           # Workspace bootstrap (scaffolds AGENTS.md)
-│   │   └── templates/      # single-project, multi-project, toolkit
+│   │   └── templates/      # single, workspace
 │   ├── swt-spec/           # Idea-to-specification (SPEC.md / PRD generation)
 │   ├── swt-code/           # Behavioral guidelines (surgical changes, simplicity)
 │   ├── swt-commit/         # Diff-first, draft-and-approve commit workflow
@@ -75,9 +78,20 @@ swt/
 
 ### 1. Install into a project
 
+We recommend setting `SWT_HOME` in your `.bashrc` or `.profile` for easy symlinking:
+
 ```bash
-# Installs all skills into the target project
-./scripts/install-skill.sh /path/to/project
+export SWT_HOME="$HOME/tools/swt"
+```
+
+Then run the install script:
+
+```bash
+# For a single project
+./scripts/install-skill.sh --link /path/to/project
+
+# Global install (recommended)
+./scripts/install-skill.sh --link ~/.claude
 ```
 
 ### 2. Use in a Claude Code session
