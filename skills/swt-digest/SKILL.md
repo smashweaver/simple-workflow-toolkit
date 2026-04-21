@@ -32,15 +32,18 @@ Summaries are stored in the `.digests/` directory at the project root.
 When `/swt:digest` is invoked, follow these steps:
 
 ### 1. Gather Context
+- **Previous Digests (Window of 5)**: List the last 5 files in `.digests/` (e.g., `ls -1 .digests/*_digest.md | tail -n 5`).
+- **Redundancy Filtering**: Analyze the headers of these files. If Digest B lists Digest A as a "Synthesized Parent," Digest A is redundant.
+- **Orphan Capture**: Read the content of any "orphaned" digests (not accounted for by successors) plus the latest digest to ensure 100% detail retention.
 - **Tasks**: Scan the `.tasks/` directory for files that are NOT `done` or `abandoned`.
 - **Changes**: Check `git status` or `git diff --cached` to see what was modified.
-- **Conversation**: Review the recent history to identify key outcomes, architectural decisions, and roadblocks.
+- **Conversation**: Review recent history and the identified previous digests to identify key outcomes, architectural decisions, and roadblocks.
 
 ### 2. Synthesize Outcomes
-Identify the 3–5 most important achievements or decisions from the session. Focus on the *why* and the *impact*.
+Identify the 3–5 most important achievements or decisions from the session. Focus on the *why* and the *impact*. **Recursive Awareness**: Carry forward any critical architectural decisions from the previous digest that remain relevant.
 
 ### 3. Identify Next Steps
-Look at the active tasks and current conversation to determine the immediate priorities for the next session.
+Look at the active tasks, current conversation, and the "Next Steps" from the previous digest. If previous steps are still unresolved, carry them forward or update them to reflect new priorities.
 
 ### 4. Write the Digest
 Use the **Session Summary Template** below.
@@ -73,6 +76,11 @@ Use the **Session Summary Template** below.
 
 1. **{{Step 1}}**: {{Actionable item}}
 2. ...
+
+## Synthesized Parent Digests
+
+- {{Filename of synthesized digest 1}}
+- {{Filename of synthesized digest 2}}
 ```
 
 ---
@@ -90,5 +98,7 @@ Proactively suggest `/swt:digest` when:
 
 1. Get timestamp: `date +%Y%m%d%H%M%S`
 2. Create `.digests/` directory if it doesn't exist.
-3. Write the file.
-4. Confirm to user: *"Session summary created: `.digests/YYYYMMDDHHMMSS_digest.md`. See you next time!"*
+3. Scan last 5 digests: `ls -1 .digests/*_digest.md 2>/dev/null | tail -n 5`
+4. Analyze headers and read "orphaned" + latest digests to synthesize the "Chain of Truth".
+5. Write the file.
+6. Confirm to user: *"Session summary created: `.digests/YYYYMMDDHHMMSS_digest.md`. See you next time!"*

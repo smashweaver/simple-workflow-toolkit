@@ -68,7 +68,7 @@ swt/
 | **Spec** | `/swt:spec` | Transforms ideas and brainstorms into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
 | **Coding** | `/swt:code` | Ensures surgical edits and minimal, simple code. |
 | **Commit** | `/swt:commit` | Manages disciplined, impact-focused commit history. |
-| **Digest** | `/swt:digest` | Automates structured session summaries for continuity. |
+| **Digest** | `/swt:digest` | Automates session summaries with multi-digest recursive continuity. |
 | **Mermaid** | `/swt:mermaid` | Prevents parse errors in documentation diagrams. |
 
 ## Quick Start
