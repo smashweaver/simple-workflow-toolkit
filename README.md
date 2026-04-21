@@ -51,6 +51,7 @@ swt/
 │   ├── swt-spec/           # Idea-to-specification (SPEC.md / PRD generation)
 │   ├── swt-code/           # Behavioral guidelines (surgical changes, simplicity)
 │   ├── swt-commit/         # Diff-first, draft-and-approve commit workflow
+│   ├── swt-digest/           # Automated session summaries for continuity
 │   └── swt-mermaid/        # Mermaid diagram syntax rules
 ├── scripts/
 │   └── install-skill.sh    # Installs skills into any project
@@ -67,6 +68,7 @@ swt/
 | **Spec** | `/swt:spec` | Transforms ideas and brainstorms into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
 | **Coding** | `/swt:code` | Ensures surgical edits and minimal, simple code. |
 | **Commit** | `/swt:commit` | Manages disciplined, impact-focused commit history. |
+| **Digest** | `/swt:digest` | Automates structured session summaries for continuity. |
 | **Mermaid** | `/swt:mermaid` | Prevents parse errors in documentation diagrams. |
 
 ## Quick Start
