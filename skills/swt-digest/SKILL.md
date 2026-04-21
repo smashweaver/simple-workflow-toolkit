@@ -33,6 +33,7 @@ When `/swt:digest` is invoked, follow these steps:
 
 ### 1. Gather Context
 - **Previous Digests (Window of 5)**: List the last 5 files in `.digests/` (e.g., `ls -1 .digests/*_digest.md | tail -n 5`).
+- **Deep History Retrieval**: If a current digest lists a parent in `.digests/archive/` that you need to examine for more detail, do not hesitate to read it. The archive is your "Long-Term Memory."
 - **Redundancy Filtering**: Analyze the headers of these files. If Digest B lists Digest A as a "Synthesized Parent," Digest A is redundant.
 - **Orphan Capture**: Read the content of any "orphaned" digests (not accounted for by successors) plus the latest digest to ensure 100% detail retention.
 - **Tasks**: Scan the `.tasks/` directory for files that are NOT `done` or `abandoned`.
@@ -79,8 +80,8 @@ Use the **Session Summary Template** below.
 
 ## Synthesized Parent Digests
 
-- {{Filename of synthesized digest 1}}
-- {{Filename of synthesized digest 2}}
+- .digests/archive/{{Filename of synthesized digest 1}}
+- .digests/archive/{{Filename of synthesized digest 2}}
 ```
 
 ---
