@@ -101,4 +101,5 @@ Proactively suggest `/swt:digest` when:
 3. Scan last 5 digests: `ls -1 .digests/*_digest.md 2>/dev/null | tail -n 5`
 4. Analyze headers and read "orphaned" + latest digests to synthesize the "Chain of Truth".
 5. Write the file.
-6. Confirm to user: *"Session summary created: `.digests/YYYYMMDDHHMMSS_digest.md`. See you next time!"*
+6. **Archive parents**: Move all files listed in "Synthesized Parent Digests" to `.digests/archive/`.
+7. Confirm to user: *"Session summary created: `.digests/YYYYMMDDHHMMSS_digest.md`. (Archived {{N}} parents). See you next time!"*
