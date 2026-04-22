@@ -62,7 +62,7 @@ This repository provides the following skills. Agents must be aware of all of th
 | **init** | `/swt:init` | Bootstraps workspace `AGENTS.md` for any new project consuming this toolkit. Runs once, before any tasks or specs are created. |
 | **coding** | `/swt:code` | Behavioral guidelines for surgical, minimal, goal-driven code changes. |
 | **commit** | `/swt:commit` | Diff-first, draft-and-approve commit workflow. |
-| **digest** | `/swt:digest` | Automates session summaries with multi-digest recursive synthesis. Supports `--milestone` for master project roll-ups. |
+| **digest** | `/swt:digest` | Automates session summaries with multi-digest recursive synthesis. |
 | **mermaid** | `/swt:mermaid` | Prevents parse errors and enforces correct syntax in Mermaid diagrams. |
 
 ## 6. Commit Discipline
