@@ -59,6 +59,8 @@ Use Read/Write/Edit for file operations, Grep for content search, Glob for file 
 At the start of **every session**, before reviewing tasks or planning anything:
 
 1. **Read the latest session digest** in `.digests/` — understand the previous agent's outcomes and strategic intent. Use `bash ls` + `read` (NOT glob/search tools) since these directories are gitignored.
+   - `ls -t .digests/*.md | head -1` — latest digest (timestamped filename sorts newest first)
+   - If root empty: `ls -t .digests/archive/*.md | head -1`
 2. **Read the root `AGENTS.md`** — understand workspace context, project name, purpose, and conventions.
 3. **Detect sub-projects** — scan for directories containing their own `AGENTS.md` or stack marker files (`package.json`, `pyproject.toml`, `go.mod`, etc.).
 4. **If multiple sub-projects are found**: Ask the user —
@@ -88,6 +90,8 @@ When the user says anything like:
 You **MUST** perform the following steps before responding with anything else:
 
 1. **Read the latest digest** in `.digests/` — identify the key outcomes and next steps from the previous session. Use `bash ls` + `read` (NOT glob/search tools) since these directories are gitignored.
+   - `ls -t .digests/*.md | head -1` — latest digest
+   - If root empty: `ls -t .digests/archive/*.md | head -1`
 2. **Use `/swt:task list open`** — invoke the `swt-task` skill to retrieve the authoritative list of active work. Use `bash ls` + `read` for task files in `.tasks/`.
 3. **Read the identified task files** and identify:
    - Tasks with `**Status**: ideating` — these are **active brainstorms** awaiting a decision
