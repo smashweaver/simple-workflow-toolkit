@@ -128,6 +128,13 @@ This comprehensive synthesis rolls up the recent evolution of the {{Project Name
 
 ---
 
+## Protocol Guardrails
+
+- **No Autonomous Generation**: Agents are STRICTLY FORBIDDEN from generating digests unless explicitly requested by the user or triggered by a documented ritual (e.g., end-of-session goodbye).
+- **Source of Truth Verification**: Never invent progress. If a task status is unclear, ask the user before writing it into the digest.
+
+---
+
 ## Auto-Suggest Triggers
 
 Proactively suggest `/swt:digest` when:

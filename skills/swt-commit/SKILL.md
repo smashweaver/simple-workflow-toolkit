@@ -13,6 +13,20 @@ Clear, impact-focused commit messages make code history readable and maintainabl
 
 ---
 
+## 🛑 Protocol Audit Ritual (MANDATORY)
+
+Before drafting any commit message, the agent MUST output the following audit signature to prove compliance:
+
+> **Protocol Audit**:
+> - [x] Re-read `swt:commit/SKILL.md`
+> - [x] Checked for red flags (no dots/slashes in bullets, no jargon)
+> - [x] Verified Phase 8 (Review & Refine) is closed
+
+> [!CAUTION]
+> **Zero Tolerance for Structural Noise**: Bullets MUST focus on outcomes. Any mention of file paths, extensions, or internal refactoring details is a protocol failure.
+
+---
+
 ## Diff-First Workflow
 
 > 🛑 **Gate 5 Rule (The Finality Loop)**: A commit is the absolute final act of a task. You MUST NOT proceed with `/swt:commit` until Phase 8 (Review & Refine) is fully verified and explicitly closed by the user. If the user asks for a commit prematurely, remind them to complete Phase 8 first.
@@ -44,14 +58,15 @@ Ask the agent to draft a commit message:
 
 The agent will:
 1. **Re-read this `SKILL.md` file** — always refresh your understanding of these specific commit guidelines before drafting.
-2. **Read `commit.diff`** — never run `git diff` directly; always read from the file.
-3. **Scan for active tasks** — search for `.tasks/*.md` files in the **current directory**, **parent directory**, and any **sub-project directories** to understand the active work context and align terminology.
-4. **Consult `AGENTS.md`** — read both the project-level and parent-level `AGENTS.md` for strategic goals and conventions.
-5. **Analyze the changes** — identify what changed, why, and the impact.
-6. **Draft a commit message** — following the format and principles below. Store the message in `commit.draft`.
-7. **Agent Self-Correction Pass** — Before finalizing, the agent MUST review the draft against the "Agent Self-Correction Guardrails" below.
-8. **Track task closure** — if an active task was found in Step 3, write the reference to `commit.task`: `Closes: .tasks/YYYYMMDDHHMMSS_slug.md`. STRICTLY separate this metadata from the `commit.draft` message.
-9. **Display the draft** — show the contents of `commit.draft` and `commit.task` for review. Let the user know the mapped task will be auto-closed.
+2. **Execute Protocol Audit Ritual** — output the audit signature at the start of your response.
+3. **Read `commit.diff`** — never run `git diff` directly; always read from the file.
+4. **Scan for active tasks** — search for `.tasks/*.md` files in the **current directory**, **parent directory**, and any **sub-project directories** to understand the active work context and align terminology.
+5. **Consult `AGENTS.md`** — read both the project-level and parent-level `AGENTS.md` for strategic goals and conventions.
+6. **Analyze the changes** — identify what changed, why, and the impact.
+7. **Draft a commit message** — following the format and principles below. Store the message in `commit.draft`.
+8. **Agent Self-Correction Pass** — Before finalizing, the agent MUST review the draft against the "Agent Self-Correction Guardrails" above. There is no automated linting; this is a mandatory manual ritual.
+9. **Track task closure** — if an active task was found in Step 3, write the reference to `commit.task`: `Closes: .tasks/YYYYMMDDHHMMSS_slug.md`. STRICTLY separate this metadata from the `commit.draft` message.
+10. **Display the draft** — show the contents of `commit.draft` and `commit.task` for review. Let the user know the mapped task will be auto-closed.
 
 > ⚠️ **The agent MUST NOT execute any `git commit` command at this stage.**
 
@@ -121,6 +136,37 @@ rm commit.diff commit.draft commit.task
 > ```bash
 > echo -e "commit.diff\ncommit.draft\ncommit.task" >> .gitignore
 > ```
+
+---
+
+## Quality Checklist & Agent Guardrails
+
+### Agent Self-Correction Guardrails
+
+> [!IMPORTANT]
+> Agents MUST run this check before presenting any `commit.draft` to the user. If any red flags are found, the agent MUST self-correct and update the draft.
+
+| Red Flag | Reason | Correction |
+|---|---|---|
+| Bullet starts with `-` | Violates syntax convention | Use `*` for all bullets |
+| Bullet contains `/` or `.` | Likely a file or directory reference | Focus on **behavioral outcomes** and **intent** |
+| Bullet repeats scope | Redundancy | Remove the repetition; focus on impact |
+| Bullet contains jargon | Too technical | Replace with natural language outcome |
+| Bullet describes structure | Implementation noise | Remove; focus on the behavior/benefit enabled by that structure |
+| Intro paragraph present | Adds noise | Remove; move the primary intent to the commit title |
+
+### Human/Final Verification
+
+Before committing, verify:
+
+- [ ] Would someone understand the **impact** without knowing implementation?
+- [ ] Can I remove any bullet that just restates the title?
+- [ ] Am I describing a **problem solved** or steps taken?
+- [ ] Am I focusing on the **intent and effect** of the change, not just implementation details?
+- [ ] Does each bullet add **new information** (no duplication)?
+- [ ] Are benefits **specific and measurable** (not vague)?
+- [ ] Is my scope **as specific as possible** without being overly narrow?
+- [ ] Does my scope accurately reflect the **primary functional area** changed?
 
 ---
 
@@ -236,6 +282,7 @@ When writing bullet points, focus on behavior, outcomes, and impact rather than 
 ```
 ✅ * Task rules now discoverable from one place — agents no longer need to cross-reference /swt:flow
    * Buttons now follow brand guidelines across the checkout flow
+```
 
 ### Don't highlight internal structural details
 
@@ -248,36 +295,6 @@ Avoid mentioning encapsulation, file organization, or internal refactoring unles
 ✅ * link logic is now fully portable across project environments
    * route listing service enables reusable analysis features
 ```
-```
-
-## Quality Checklist & Agent Guardrails
-
-### Agent Self-Correction Guardrails
-
-> [!IMPORTANT]
-> Agents MUST run this check before presenting any `commit.draft` to the user. If any red flags are found, the agent MUST self-correct and update the draft.
-
-| Red Flag | Reason | Correction |
-|---|---|---|
-| Bullet starts with `-` | Violates syntax convention | Use `*` for all bullets |
-| Bullet contains `/` or `.` | Likely a file or directory reference | Focus on **behavioral outcomes** and **intent** |
-| Bullet repeats scope | Redundancy | Remove the repetition; focus on impact |
-| Bullet contains jargon | Too technical | Replace with natural language outcome |
-| Bullet describes structure | Implementation noise | Remove; focus on the behavior/benefit enabled by that structure |
-| Intro paragraph present | Adds noise | Remove; move the primary intent to the commit title |
-
-### Human/Final Verification
-
-Before committing, verify:
-
-- [ ] Would someone understand the **impact** without knowing implementation?
-- [ ] Can I remove any bullet that just restates the title?
-- [ ] Am I describing a **problem solved** or steps taken?
-- [ ] Am I focusing on the **intent and effect** of the change, not just implementation details?
-- [ ] Does each bullet add **new information** (no duplication)?
-- [ ] Are benefits **specific and measurable** (not vague)?
-- [ ] Is my scope **as specific as possible** without being overly narrow?
-- [ ] Does my scope accurately reflect the **primary functional area** changed?
 
 ## Examples
 

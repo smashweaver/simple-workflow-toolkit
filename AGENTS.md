@@ -9,6 +9,7 @@ This document defines the core principles and behavioral protocols for AI coding
 3.  **Simplicity Over Specification**: No speculative features or premature abstractions.
 4.  **Verifiable Outcomes**: Every change must have a clear path to verification (tests or checklists).
 5.  **Gitignored Awareness**: Runtime directories (`.digests/`, `.tasks/`) are gitignored. Use `bash ls` + `read` for these — glob/search tools will return empty results.
+6.  **Ritual Discipline**: "Mandatory" means mandatory. Never skip a re-read step, self-correction pass, or consent gate, even if you feel "familiar" with the context.
 
 ## 2. Execution Boundaries
 
@@ -117,6 +118,7 @@ Before discussing any task or reviewing code, the agent MUST:
 1. **Read the latest session digest** in `.digests/` to understand the previous agent's outcomes and strategic intent. Use `bash ls` + `read` (NOT glob) since these directories are gitignored.
 2. **Read the root `AGENTS.md`** to verify project scope, stack, and conventions.
 3. **Smart Search (Tasks)**: If a task reference or file is not found in the root `.tasks/` directory, check `.tasks/archive/` before assuming it is missing or deleted.
+4. **Ritual Adherence**: If the orientation or task discovery process identifies a skill that mandates a "re-read," execute it immediately. There is zero tolerance for protocol drift.
 
 ### 2. Context Restoration (On-Demand)
 When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"*), the agent MUST:
