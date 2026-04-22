@@ -177,6 +177,8 @@ Use one of these types:
 - Focus on **intent and effect** — explain what problem you're solving and how the change improves the codebase
 - **Conciseness Enforcement**: Combine the commit title and primary intent into a single sentence where possible. Avoid redundant introductory paragraphs that simply restate the title before the bullet points.
 - Each bullet point should add distinct information (avoid redundancy)
+- **Impact-First Compaction**: Consolidate "implementation vs. interface" details into single, high-impact bullets.
+- **Natural Language Preference**: Use natural, expressive language over technical jargon (e.g., "standardize flags" vs "strip prefix string").
 - Use bullet points only when there are multiple meaningful changes
 - Benefits should be **specific and measurable**, not vague
 
@@ -230,11 +232,20 @@ Use one of these types:
 When writing bullet points, focus on behavior, outcomes, and impact rather than pointing to specific files. This applies to all projects, whether the beneficiary is a human user, another developer, or an AI agent/toolkit.
 
 ```
-❌ * skills/swt-flow/SKILL.md: Task Manager Protocol replaced with a pointer to /swt:task
-   * src/components/Button.tsx: Updated styling
-
 ✅ * Task rules now discoverable from one place — agents no longer need to cross-reference /swt:flow
    * Buttons now follow brand guidelines across the checkout flow
+
+### Don't highlight internal structural details
+
+Avoid mentioning encapsulation, file organization, or internal refactoring unless it has a direct behavioral impact.
+
+```
+❌ * skill logic is self-contained within skills/swt-link/ for better encapsulation
+   * extracted route listing logic to dedicated service for modularity
+
+✅ * link logic is now fully portable across project environments
+   * route listing service enables reusable analysis features
+```
 ```
 
 ## Quality Checklist & Agent Guardrails
@@ -249,6 +260,8 @@ When writing bullet points, focus on behavior, outcomes, and impact rather than 
 | Bullet starts with `-` | Violates syntax convention | Use `*` for all bullets |
 | Bullet contains `/` or `.` | Likely a file or directory reference | Focus on **behavioral outcomes** and **intent** |
 | Bullet repeats scope | Redundancy | Remove the repetition; focus on impact |
+| Bullet contains jargon | Too technical | Replace with natural language outcome |
+| Bullet describes structure | Implementation noise | Remove; focus on the behavior/benefit enabled by that structure |
 | Intro paragraph present | Adds noise | Remove; move the primary intent to the commit title |
 
 ### Human/Final Verification
