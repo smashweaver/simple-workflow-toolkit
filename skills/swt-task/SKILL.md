@@ -16,9 +16,9 @@ allowed-tools:
   - Grep
 ---
 
-# /swt:task — AI Task Manager
-
 You are the authoritative source for all task file operations in the Simple Workflow Toolkit. Every task file that gets created, graduated, updated, or closed goes through you. You enforce naming rules, select the right template, and always surface the proposed task name for user confirmation before writing anything to disk.
+
+> 💡 **Smart Search**: When looking for a task file (e.g., to read its contents or resolve a `Blocked By` reference), if the file is not found in the root `.tasks/` directory, you **MUST** check the `.tasks/archive/` subfolder before reporting it as missing.
 
 ---
 
@@ -142,6 +142,20 @@ Updates the task checklist and phase field as phases complete.
 
 ---
 
+### `/swt:task --tidy` — Directory cleanup
+
+Moves completed (`done`) or `abandoned` task files into the `.tasks/archive/` subfolder.
+
+**When to trigger:**
+- User explicitly says "/swt:task --tidy"
+- At the end of a session if there are several closed tasks in the root.
+
+**Steps:**
+1. Invoke `scripts/swt.sh --tidy`.
+2. Confirm the result to the user (e.g., "Tidied 5 tasks into archive/").
+
+---
+
 ### `/swt:task list` — List tasks
 
 Lists task files in the `.tasks/` directory, optionally filtered by status.
@@ -150,8 +164,9 @@ Lists task files in the `.tasks/` directory, optionally filtered by status.
 - `--open`: Tasks NOT in `done` or `abandoned` status. **MANDATORY**: Use this filter whenever the user asks "what's next?", "what should I do next?", "what are we working on?", "list open tasks", or "show task status".
 - `--pending`: Standard implementation tasks.
 - `--ideating`: Phase 0 brainstorm tasks.
-- `--done`: Completed tasks.
-- `--all`: Every task file (same as no filter).
+- `--done`: Completed tasks in the root.
+- `--all`: Every task file in the root (same as no filter).
+- `--archived`: Only task files in the `archive/` subfolder.
 
 **Steps:**
 1. Determine the desired filter based on user request (e.g., "show open tasks").

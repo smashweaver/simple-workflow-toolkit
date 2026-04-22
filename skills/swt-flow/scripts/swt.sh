@@ -13,12 +13,18 @@ function show_help {
     echo "  swt.sh init              - Initialize .tasks/ directory and update .gitignore"
     echo "  swt.sh new \"Final Feature Name\"  - Create a new timestamped task file"
     echo "  swt.sh brainstorm \"Topic\"        - Create a Phase 0 ideation task"
-    echo "  swt.sh list [--status|--open|--all] - List tasks (optional filter: --open, --pending, --done, etc.)"
+    echo "  swt.sh list [--open|--archived]  - List tasks (filters: --open, --pending, --archived, etc.)"
+    echo "  swt.sh --tidy                    - Move done/abandoned tasks to .tasks/archive/"
 }
 
 if [ -z "$CMD" ]; then
     show_help
     exit 1
+fi
+
+# Normalize flags to commands
+if [ "$CMD" == "--tidy" ]; then
+    CMD="tidy"
 fi
 
 if [ "$CMD" == "init" ]; then
@@ -50,14 +56,22 @@ if [ "$CMD" == "list" ]; then
     # Strip -- prefix if present for standard CLI feel
     FILTER=${FILTER#--}
     
-    files=$(ls .tasks/*.md 2>/dev/null | sort || true)
+    if [ "$FILTER" == "archived" ]; then
+        files=$(ls .tasks/archive/*.md 2>/dev/null | sort || true)
+        if [ -z "$files" ]; then
+             echo "No archived tasks found in .tasks/archive/"
+             exit 0
+        fi
+    else
+        files=$(ls .tasks/*.md 2>/dev/null | sort || true)
+    fi
     
     if [ -z "$files" ]; then
          echo "No tasks found in .tasks/"
          exit 0
     fi
 
-    echo "Tasks found:"
+    echo "Tasks found ($([ -n "$FILTER" ] && echo "$FILTER" || echo "all")):"
     for f in $files; do
         # Extract status (handles cases with comments or trailing spaces)
         STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$f" | head -n 1)
@@ -67,7 +81,7 @@ if [ "$CMD" == "list" ]; then
             if [[ "$STATUS" == "done" || "$STATUS" == "abandoned" ]]; then
                 SHOW=false
             fi
-        elif [ -n "$FILTER" ] && [ "$FILTER" != "all" ]; then
+        elif [ -n "$FILTER" ] && [ "$FILTER" != "all" ] && [ "$FILTER" != "archived" ]; then
             if [ "$STATUS" != "$FILTER" ]; then
                 SHOW=false
             fi
@@ -77,6 +91,29 @@ if [ "$CMD" == "list" ]; then
              echo " - [$STATUS] $f"
         fi
     done
+    exit 0
+fi
+
+if [ "$CMD" == "tidy" ]; then
+    if [ ! -d ".tasks" ]; then
+        echo "Error: No .tasks/ directory found."
+        exit 1
+    fi
+
+    mkdir -p .tasks/archive
+    
+    count=0
+    files=$(ls .tasks/*.md 2>/dev/null || true)
+    for f in $files; do
+        STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$f" | head -n 1)
+        if [[ "$STATUS" == "done" || "$STATUS" == "abandoned" ]]; then
+            mv "$f" .tasks/archive/
+            echo "Archived: $f"
+            count=$((count + 1))
+        fi
+    done
+    
+    echo "Tidy complete. Moved $count tasks to .tasks/archive/."
     exit 0
 fi
 

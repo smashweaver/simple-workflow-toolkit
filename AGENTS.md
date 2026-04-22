@@ -116,6 +116,7 @@ To ensure architectural continuity and prevent context drift, every session MUST
 Before discussing any task or reviewing code, the agent MUST:
 1. **Read the latest session digest** in `.digests/` to understand the previous agent's outcomes and strategic intent. Use `bash ls` + `read` (NOT glob) since these directories are gitignored.
 2. **Read the root `AGENTS.md`** to verify project scope, stack, and conventions.
+3. **Smart Search (Tasks)**: If a task reference or file is not found in the root `.tasks/` directory, check `.tasks/archive/` before assuming it is missing or deleted.
 
 ### 2. Context Restoration (On-Demand)
 When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"*), the agent MUST:

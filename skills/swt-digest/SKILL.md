@@ -36,7 +36,7 @@ When `/swt:digest` is invoked, follow these steps:
 - **Deep History Retrieval**: If a current digest lists a parent in `.digests/archive/` that you need to examine for more detail, do not hesitate to read it. The archive is your "Long-Term Memory."
 - **Redundancy Filtering**: Analyze the headers of these files. If Digest B lists Digest A as a "Synthesized Parent," Digest A is redundant.
 - **Orphan Capture**: Read the content of any "orphaned" digests (not accounted for by successors) plus the latest digest to ensure 100% detail retention.
-- **Tasks**: Scan the `.tasks/` directory for files that are NOT `done` or `abandoned`.
+- **Tasks**: Scan the `.tasks/` directory for files that are NOT `done` or `abandoned`. **IMPORTANT**: Also scan `.tasks/archive/` for tasks that were closed or updated during the current session to ensure they are captured in the summary.
 - **Changes**: Check `git status` or `git diff --cached` to see what was modified.
 - **Conversation**: Review recent history and the identified previous digests to identify key outcomes, architectural decisions, and roadblocks.
 
