@@ -92,3 +92,18 @@ When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"
 1. **Invoke `/swt:task list open`** for an authoritative list of active work.
 2. **Summarize status** based on the digest and task files.
 3. **HARD STOP**: Inform the user and wait for explicit confirmation before starting any implementation or planning work.
+
+## 8. Developing the Toolkit
+
+When contributing to this repository, agents must adhere to the following internal standards:
+
+### 1. Skill Encapsulation
+Each skill lives in its own directory under `skills/`. A skill's logic should be self-contained in its `SKILL.md` or associated scripts. Cross-skill dependencies should be minimized.
+
+### 2. Testing Skills
+New skills or changes to existing skills must be verified by:
+1. Installing the live version via `./scripts/install-skill.sh --link <test-project>`.
+2. Running the skill in the test project to verify triggers and logic.
+
+### 3. Documentation
+Update the root `README.md` and `AGENTS.md` if a new skill is added or a core methodology change is made.

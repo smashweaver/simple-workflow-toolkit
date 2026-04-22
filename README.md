@@ -113,3 +113,12 @@ The `AGENTS.md` file contains the full source methodology, including detailed pr
 ## License
 
 MIT
+
+## Development
+
+### Adding a new skill
+1. Create a new directory in `skills/swt-<name>`.
+2. Add a `SKILL.md` following the standard template.
+3. Add any necessary scripts in the skill's `scripts/` directory.
+4. Update the `Skills Suite` table in the root `README.md`.
+5. Link the skill for local testing: `./scripts/install-skill.sh --link /path/to/test-project`.
