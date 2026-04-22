@@ -1,5 +1,5 @@
 ---
-name: spec
+name: swt:spec
 description: >
   Use when the user wants to turn an idea, brainstorm, or rough concept into a
   structured specification or PRD (Product Requirements Document). Trigger this
