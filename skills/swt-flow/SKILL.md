@@ -137,7 +137,9 @@ When triggered by **natural language**, you must **silently create a brainstorm 
   2. Change `**Type**` from `brainstorm` → appropriate type (`feature`, `bugfix`, `chore`, etc.)
   3. Change `**Phase**` to `1`
   4. Append the standard 8-phase `## Checklist` to the task file
-  5. Proceed directly into **Phase 1: Plan** without creating a new file.
+  5. **Pause for Review**: Provide the link and ask the user to review the updated task file.
+  6. **HARD STOP**: Do not proceed to Phase 1 planning until the user explicitly confirms the graduation.
+  7. Proceed directly into **Phase 1: Plan** only after confirmation.
 
 > 💡 If the user decides the idea is **not worth pursuing**, change `**Status**` to `abandoned` and leave the file as an archived record.
 
@@ -151,6 +153,8 @@ Gather context before planning. For any proposed change:
 - **Create a task** via `swt.sh` (see Task Manager Protocol below), or fall back to a `.tasks/` markdown file
 
 Then propose a detailed plan: step-by-step approach, files to modify, dependencies, testing strategy, and rollback plan.
+
+> ⚠️ **HARD STOP**: After creating the task file, you MUST provide the link and wait for the user to fine-tune the Objective and Checklist before proposing the technical plan.
 
 ### Phase 2: Analyze
 

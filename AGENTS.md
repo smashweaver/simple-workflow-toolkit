@@ -15,7 +15,7 @@ This document defines the core principles and behavioral protocols for AI coding
 Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot**:
 
 *   **No Autonomous Coding**: The agent presents plans and snippets; the user executes or explicitly authorizes the "Edit" tool usage.
-*   **Task-Centric Flow**: All work maps to an active task file in `.tasks/`.
+*   **Task-Centric Flow**: All work maps to an active task file in `.tasks/`. After creation or graduation, the agent MUST pause for user fine-tuning of the Objective and Checklist before proceeding.
 *   **Checklist Discipline**: Every phase requires explicit approval before moving to the next.
 
 ## 3. The 8-Phase Workflow
