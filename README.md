@@ -100,6 +100,7 @@ Once installed, use the commands directly or describe tasks that trigger them:
 
 - **Planning**: Run `/swt:flow` for non-trivial changes.
 - **Committing**: Capture a diff to `commit.diff`, then follow the `/swt:commit` flow.
+- **Status/Resume**: Ask *"whats up?"* or *"where am I?"* to trigger a disciplined context restoration.
 
 ## What Makes This Different
 

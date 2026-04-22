@@ -77,3 +77,18 @@ All commits follow the **Diff-First, Draft-and-Approve** protocol. There is a st
 4. User fine-tunes; Agent iterates with probing questions.
 5. Apply commit on approval (`git commit -F commit.draft`).
 6. Cleanup temp files (`commit.diff`, `commit.draft`, `commit.task`).
+
+## 7. Session Start & Restoration
+
+To ensure architectural continuity and prevent context drift, every session MUST begin with a rigorous orientation protocol.
+
+### 1. Orientation (Mandatory)
+Before discussing any task or reviewing code, the agent MUST:
+1. **Read the latest session digest** in `.digests/` to understand the previous agent's outcomes and strategic intent.
+2. **Read the root `AGENTS.md`** to verify project scope, stack, and conventions.
+
+### 2. Context Restoration (On-Demand)
+When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"*), the agent MUST:
+1. **Invoke `/swt:task list open`** for an authoritative list of active work.
+2. **Summarize status** based on the digest and task files.
+3. **HARD STOP**: Inform the user and wait for explicit confirmation before starting any implementation or planning work.
