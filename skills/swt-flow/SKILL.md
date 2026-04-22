@@ -110,9 +110,9 @@ You **MUST** perform the following steps before responding with anything else:
 
 ---
 
-## The 8-Phase Workflow
+## The 8-Phase Workflow & Consent Gates
 
-When invoked (via `/swt:flow` or when detecting a non-trivial task), guide the user through these phases. **Present each phase's output and get user acknowledgment before proceeding to the next.**
+When invoked (via `/swt:flow` or when detecting a non-trivial task), guide the user through these phases. **The workflow is punctuated by 5 Mandatory Consent Gates (HARD STOPS) where you must wait for user approval.**
 
 ### Phase 0: Ideate (Optional)
 
@@ -137,11 +137,15 @@ When triggered by **natural language**, you must **silently create a brainstorm 
   2. Change `**Type**` from `brainstorm` → appropriate type (`feature`, `bugfix`, `chore`, etc.)
   3. Change `**Phase**` to `1`
   4. Append the standard 8-phase `## Checklist` to the task file
-  5. Proceed directly into **Phase 1: Plan** without creating a new file.
+  5. **Gate 1 (Alignment)**: Provide the link and **HARD STOP**. Ask the user to fine-tune the updated task file.
+  6. Proceed directly into **Phase 1: Plan** ONLY after explicit confirmation.
 
 > 💡 If the user decides the idea is **not worth pursuing**, change `**Status**` to `abandoned` and leave the file as an archived record.
 
 ### Phase 1: Plan
+
+> 🛑 **Gate 1: The Alignment Loop**
+> Immediately after creating a new task file via `swt.sh`, you MUST provide the link and **HARD STOP**. Allow the user to fine-tune the `Objective` and `Checklist` before any planning begins.
 
 Gather context before planning. For any proposed change:
 
@@ -180,6 +184,9 @@ Classify severity: **low**, **medium**, **high**, **critical**.
 
 ### Phase 4: Approval
 
+> 🛑 **Gate 2: The Architecture Loop**
+> **HARD STOP**. Present the complete plan and do not proceed with any implementation until the user explicitly says "GO".
+
 Present the complete plan including:
 - Summary of the proposed change
 - Files/components affected
@@ -191,6 +198,9 @@ Ask the user to approve or provide feedback. **Do not proceed without approval.*
 
 ### Phase 5: Implement
 
+> 🛑 **Gate 3: The Execution Loop**
+> During implementation, pause between logical chunks or individual files. Do not dump a massive, multi-file refactor in a single unverified swoop. Ask the user to verify surgical changes as they happen.
+
 Only after approval:
 
 - **Provide code snippets** the user can review and execute (or write directly if the user asks you to).
@@ -198,7 +208,7 @@ Only after approval:
 - For each change, explain **what** you're doing and **why**.
 - After each change, suggest the user verify it works before moving to the next.
 - If you are authorized to edit files directly (explicit request), use Edit for precision changes.
-- **Apply Coding Guidelines** (`skills/swt-code/SKILL.md`) during all code writing and review: think before coding, simplicity first, surgical changes only, and goal-driven execution with verifiable success criteria.
+- **Apply Coding Guidelines** (`skills/swt-code/SKILL.md`) during all code writing and review.
 
 ### Phase 6: Document
 
@@ -222,11 +232,17 @@ Propose a testing plan based on the change type:
 
 If the project has a test framework, run it via Bash. If not, provide a manual testing checklist.
 
-### Phase 8: Iterative Development
+### Phase 8: Review & Refine
 
-- **MVP first**: Confirm the minimal viable functionality works before adding extras.
-- **Refactor second**: After MVP is verified, propose refactoring for maintainability, SOLID adherence, and code organization.
+> 🛑 **Gate 4: The Refinement Loop**
+> **HARD STOP**. After Phase 7 (Testing) proves the MVP works, present the final state to the user. Ask them to review the UI/UX or edge cases before the code is finalized.
+
+- **User Review first**: Allow the user to fine-tune the actual implementation based on their test drive.
+- **Refactor second**: After MVP is verified and polished, propose refactoring for maintainability, SOLID adherence, and code organization.
 - **Verify**: Ensure tests still pass after refactoring.
+
+> 🛑 **Gate 5: The Finality Loop (Commit Sequence)**
+> **HARD STOP**. The commit is the final act of a task. Never invoke `/swt:commit` until Phase 8 is explicitly closed and the user says they are ready to commit.
 
 ---
 

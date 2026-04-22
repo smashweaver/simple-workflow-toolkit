@@ -15,6 +15,8 @@ Clear, impact-focused commit messages make code history readable and maintainabl
 
 ## Diff-First Workflow
 
+> 🛑 **Gate 5 Rule (The Finality Loop)**: A commit is the absolute final act of a task. You MUST NOT proceed with `/swt:commit` until Phase 8 (Review & Refine) is fully verified and explicitly closed by the user. If the user asks for a commit prematurely, remind them to complete Phase 8 first.
+
 This skill follows a **diff-first, draft-and-approve** commit process. The user stages only the relevant changes, exports the diff, and lets the agent draft and store a commit message — then approves before the agent executes the commit and cleans up.
 
 Two temporary files are used, both gitignored:

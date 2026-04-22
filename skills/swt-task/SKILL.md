@@ -84,8 +84,9 @@ Creates a new implementation task ready for Phase 1 planning.
 1. Propose the slug name → wait for confirmation
 2. Get timestamp: `date +%Y%m%d%H%M%S`
 3. Write `.tasks/YYYYMMDDHHMMSS_slug.md` using the **Standard Task Template** below
-4. Confirm to user: *"Task created: `.tasks/YYYYMMDDHHMMSS_slug.md`. Ready for Phase 1: Plan."*
-5. Use `scripts/swt.sh` if available, otherwise write directly to the `.tasks/` directory.
+4. **Gate 1 (Alignment)**: Provide the link and ask: *"Task created: `[slug](path)`. Please review the Objective and Checklist. Ready to proceed to Phase 1: Plan?"*
+5. **HARD STOP**: Do not proceed with technical planning until the user explicitly confirms or fine-tunes the task file.
+6. Use `scripts/swt.sh` if available, otherwise write directly to the `.tasks/` directory.
 
 ---
 
@@ -102,8 +103,9 @@ Creates a Phase 0 brainstorm task for exploratory thinking before a plan exists.
 1. Propose the slug name (name the **topic/thing**, not the activity) → wait for confirmation
 2. Get timestamp
 3. Write `.tasks/YYYYMMDDHHMMSS_slug.md` using the **Brainstorm Template** below
-4. Begin ideation conversation — do not rush into planning
-5. Use `scripts/swt.sh` brainstorm "<Topic>"` if available.
+4. **Gate 1 (Alignment)**: Provide the link and ask: *"Brainstorm created: `[slug](path)`. Please review the Core Concept. Ready to begin?"*
+5. **HARD STOP**: Do not begin the ideation conversation until the user explicitly confirms the task file.
+6. Use `scripts/swt.sh brainstorm "<Topic>"` if available.
 
 ---
 
@@ -122,8 +124,9 @@ Promotes a brainstorm task to an implementation task when the user is ready to b
    - `**Type**`: `brainstorm` → appropriate type (`feature`, `bugfix`, `chore`, `docs`, `refactor`)
    - `**Phase**`: `0` → `1`
 3. Append the standard 8-phase `## Checklist` if not already present
-4. Confirm: *"Task graduated. Proceeding to Phase 1: Plan."*
-5. Move immediately into Phase 1 planning — no new file needed.
+4. **Gate 1 (Alignment)**: Provide the link and ask: *"Task graduated: `[slug](path)`. Please review the updated Objective and Checklist. Ready to proceed to Phase 1: Plan?"*
+5. **HARD STOP**: Do not proceed with technical planning until the user explicitly confirms the graduation.
+6. Move into Phase 1 planning only after confirmation.
 
 ---
 

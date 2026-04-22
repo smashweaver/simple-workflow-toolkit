@@ -18,7 +18,14 @@ Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot
 *   **Task-Centric Flow**: All work maps to an active task file in `.tasks/`.
 *   **Checklist Discipline**: Every phase requires explicit approval before moving to the next.
 
-## 3. The 8-Phase Workflow
+## 3. The 8-Phase Workflow & Consent Gates
+
+To ensure the user maintains control, the workflow is punctuated by **5 Mandatory Consent Gates (HARD STOPS)**. Agents must NEVER blow past these gates, even if they have "automatic approval" capabilities.
+
+### Gate 1: The Alignment Loop (Phase 1 Entry)
+*   **Trigger**: Immediately after a task file is created or graduated.
+*   **Action**: Provide a link to the task file and **HARD STOP**.
+*   **Goal**: Allow the user to fine-tune the `Objective` and `Checklist` before any planning begins.
 
 ### Phase 1: Plan
 Gather context, map dependencies, and propose a detailed step-by-step implementation plan.
@@ -29,20 +36,40 @@ Assess the impact on existing components, state management, performance, and API
 ### Phase 3: Risk Assessment
 Identify security, performance, or compatibility risks. Define mitigations for each.
 
+### Gate 2: The Architecture Loop (Phase 4)
+*   **Trigger**: After presenting the Plan, Analysis, and Risks.
+*   **Action**: **HARD STOP**. Wait for explicit "GO" from the user.
+*   **Goal**: Ensure the technical approach is sound before touching code.
+
 ### Phase 4: Approval
-Present the unified plan to the user. **Halt until explicit "GO" is received.**
+*(This phase is the user's explicit action of opening Gate 2).*
+
+### Gate 3: The Execution Loop (Phase 5)
+*   **Trigger**: During code generation/modification.
+*   **Action**: Pause between logical chunks or files. Do not dump a massive, multi-file refactor in a single unverified swoop.
+*   **Goal**: Verify surgical changes as they happen.
 
 ### Phase 5: Implement
 Perform surgical edits. Follow the "Coding Guidelines" for simplicity and purpose.
 
 ### Phase 6: Document
-Update READMEs, Mermaid diagrams, and internal docs. Generate a structured commit message using `commit.diff` and `commit.draft`.
+Update READMEs, Mermaid diagrams, and internal docs.
 
 ### Phase 7: Test
 Run automated tests or provide a manual verification checklist. Zero tolerance for unverified code.
 
-### Phase 8: Iterate
-Verify that the MVP meets the objective. Refactor only if necessary for SOLID principles.
+### Gate 4: The Refinement Loop (Phase 8 Entry)
+*   **Trigger**: After Testing (Phase 7) proves the MVP works.
+*   **Action**: **HARD STOP**. Ask the user to review the working MVP.
+*   **Goal**: Allow the user to tweak UI/UX or edge cases before the code is finalized.
+
+### Phase 8: Review & Refine
+Verify that the MVP meets the objective. Polish the implementation based on user feedback during Gate 4. Refactor only if necessary for SOLID principles.
+
+### Gate 5: The Finality Loop (Commit Sequence)
+*   **Trigger**: After Phase 8 is complete and the user confirms they are finished refining.
+*   **Action**: Initiate the `/swt:commit` workflow.
+*   **Goal**: The commit is the final act. Never rush to commit before Gate 4 is cleared.
 
 ## 4. Workspaces & Projects
 
@@ -71,6 +98,8 @@ This repository provides the following skills. Agents must be aware of all of th
 > 💡 **Enforce Default:** Whenever prompted for a git commit or help with a git commit message, agents MUST default to invoking the `/swt:commit` skill.
 
 All commits follow the **Diff-First, Draft-and-Approve** protocol. There is a strict separation of concerns: `commit.draft` is ONLY for the human-readable, impact-focused commit message, while `commit.task` is ONLY for automation metadata (e.g., `Closes: .tasks/...`). Do not mix them.
+
+> 🛑 **Gate 5 Rule:** A commit is the absolute final act of a task. Never invoke `/swt:commit` until Phase 8 (Review & Refine) is fully verified and explicitly closed by the user.
 
 1. Stage changes.
 2. Export `commit.diff`.
