@@ -144,15 +144,15 @@ Updates the task checklist and phase field as phases complete.
 Lists task files in the `.tasks/` directory, optionally filtered by status.
 
 **Filter options:**
-- `open`: Tasks NOT in `done` or `abandoned` status. **MANDATORY**: Use this filter whenever the user asks "what's next?", "what should I do next?", "what are we working on?", "list open tasks", or "show task status".
-- `pending`: Standard implementation tasks.
-- `ideating`: Phase 0 brainstorm tasks.
-- `done`: Completed tasks.
-- `all`: Every task file (same as no filter).
+- `--open`: Tasks NOT in `done` or `abandoned` status. **MANDATORY**: Use this filter whenever the user asks "what's next?", "what should I do next?", "what are we working on?", "list open tasks", or "show task status".
+- `--pending`: Standard implementation tasks.
+- `--ideating`: Phase 0 brainstorm tasks.
+- `--done`: Completed tasks.
+- `--all`: Every task file (same as no filter).
 
 **Steps:**
 1. Determine the desired filter based on user request (e.g., "show open tasks").
-2. Invoke `scripts/swt.sh list [filter]`.
+2. Invoke `scripts/swt.sh list [--filter]`.
 3. Present the list to the user with their statuses.
 
 ---

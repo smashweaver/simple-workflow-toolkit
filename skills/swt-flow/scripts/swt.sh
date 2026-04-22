@@ -13,7 +13,7 @@ function show_help {
     echo "  swt.sh init              - Initialize .tasks/ directory and update .gitignore"
     echo "  swt.sh new \"Final Feature Name\"  - Create a new timestamped task file"
     echo "  swt.sh brainstorm \"Topic\"        - Create a Phase 0 ideation task"
-    echo "  swt.sh list [status|open|all]    - List tasks (optional filter: open, pending, done, etc.)"
+    echo "  swt.sh list [--status|--open|--all] - List tasks (optional filter: --open, --pending, --done, etc.)"
 }
 
 if [ -z "$CMD" ]; then
@@ -47,6 +47,9 @@ if [ "$CMD" == "list" ]; then
     fi
 
     FILTER=$2
+    # Strip -- prefix if present for standard CLI feel
+    FILTER=${FILTER#--}
+    
     files=$(ls .tasks/*.md 2>/dev/null | sort || true)
     
     if [ -z "$files" ]; then
