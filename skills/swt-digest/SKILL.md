@@ -3,7 +3,8 @@ name: "swt:digest"
 description: >
   Automates the creation of structured session summaries for continuity.
   Trigger at the end of a session, after a major milestone, or when the user
-  asks for a summary. Stores timestamped files in `.digests/`.
+  asks for a summary. Supports `--milestone` (or `-m`) for project roll-ups.
+  Stores timestamped files in `.digests/`.
 user-invocable: true
 allowed-tools:
   - Read
@@ -23,7 +24,8 @@ You are responsible for capturing the "soul" of a coding session. Your goal is t
 Summaries are stored in the `.digests/` directory at the project root.
 
 - **Directory**: `.digests/` (ensure this is gitignored)
-- **Filename**: `YYYYMMDDHHMMSS_digest.md` (e.g., `20260422054014_digest.md`)
+- **Filename (Session)**: `YYYYMMDDHHMMSS_digest.md`
+- **Filename (Milestone)**: `YYYYMMDDHHMMSS_milestone.md`
 
 ---
 
@@ -32,10 +34,15 @@ Summaries are stored in the `.digests/` directory at the project root.
 When `/swt:digest` is invoked, follow these steps:
 
 ### 1. Gather Context
-- **Previous Digests (Window of 5)**: List the last 5 files in `.digests/` (e.g., `ls -1 .digests/*_digest.md | tail -n 5`).
+- **Mode Detection**: Check if the command was invoked with `--milestone` or `-m`.
+- **Standard Mode (Session Summary)**:
+    - **Previous Digests (Window of 5)**: List the last 5 files in `.digests/` (e.g., `ls -1 .digests/*_digest.md | tail -n 5`).
+    - **Orphan Capture**: Read the content of any "orphaned" digests (not accounted for by successors) plus the latest digest to ensure 100% detail retention.
+- **Milestone Mode (Project Roll-up)**:
+    - **Find Boundary**: Locate the latest `*_milestone.md` file in `.digests/` or `.digests/archive/`.
+    - **Filter Scope**: Only consider `*_digest.md` files in the root that have a timestamp **newer** than that milestone. These are your "unsynthesized" candidates.
+    - **Deep Roll-up**: Synthesize all candidates into a single master document.
 - **Deep History Retrieval**: If a current digest lists a parent in `.digests/archive/` that you need to examine for more detail, do not hesitate to read it. The archive is your "Long-Term Memory."
-- **Redundancy Filtering**: Analyze the headers of these files. If Digest B lists Digest A as a "Synthesized Parent," Digest A is redundant.
-- **Orphan Capture**: Read the content of any "orphaned" digests (not accounted for by successors) plus the latest digest to ensure 100% detail retention.
 - **Tasks**: Scan the `.tasks/` directory for files that are NOT `done` or `abandoned`. **IMPORTANT**: Also scan `.tasks/archive/` for tasks that were closed or updated during the current session to ensure they are captured in the summary.
 - **Changes**: Check `git status` or `git diff --cached` to see what was modified.
 - **Conversation**: Review recent history and the identified previous digests to identify key outcomes, architectural decisions, and roadblocks.
@@ -47,7 +54,8 @@ Identify the 3–5 most important achievements or decisions from the session. Fo
 Look at the active tasks, current conversation, and the "Next Steps" from the previous digest. If previous steps are still unresolved, carry them forward or update them to reflect new priorities.
 
 ### 4. Write the Digest
-Use the **Session Summary Template** below.
+- Use the **Session Summary Template** for standard sessions.
+- Use the **Project Milestone Template** if `--milestone` was specified.
 
 ---
 
@@ -84,6 +92,40 @@ Use the **Session Summary Template** below.
 - .digests/archive/{{Filename of synthesized digest 2}}
 ```
 
+### Project Milestone Template
+
+```markdown
+# SWT Project Milestone Digest — {{YYYY-MM-DD}}
+
+This comprehensive synthesis rolls up the recent evolution of the {{Project Name}} into a single "Source of Truth," capturing the major architectural pillars and current project state. This digest serves as a master roll-up of all previous unsynthesized session summaries.
+
+## Key Outcomes & Architecture Pillars
+
+- **{{Pillar Title}}**: {{Brief explanation of the pillar, its implementation, and its impact on the project's foundation.}}
+- ...
+
+## Project History & Evolution
+
+- **{{Milestone Title}}**: {{A high-level summary of a major project phase or breakthrough captured in this roll-up.}}
+- ...
+
+## Active Tasks in `.tasks/`
+
+- **[{{task-slug}}]({{file-path}})**: ({{Priority}}) {{Status summary}}
+- ...
+
+## Immediate Next Steps
+
+1. **{{Step 1}}**: {{Actionable item}}
+2. ...
+
+## Synthesized Parent Digests
+
+- This digest synthesizes the following unsynthesized history:
+- .digests/archive/{{Filename 1}}
+- .digests/archive/{{Filename 2}}
+```
+
 ---
 
 ## Auto-Suggest Triggers
@@ -99,8 +141,10 @@ Proactively suggest `/swt:digest` when:
 
 1. Get timestamp: `date +%Y%m%d%H%M%S`
 2. Create `.digests/` directory if it doesn't exist.
-3. Scan last 5 digests: `ls -1 .digests/*_digest.md 2>/dev/null | tail -n 5`
-4. Analyze headers and read "orphaned" + latest digests to synthesize the "Chain of Truth".
-5. Write the file.
-6. **Archive parents**: Move all files listed in "Synthesized Parent Digests" to `.digests/archive/`.
-7. Confirm to user: *"Session summary created: `.digests/YYYYMMDDHHMMSS_digest.md`. (Archived {{N}} parents). See you next time!"*
+3. **Scan for Context**:
+    - **Standard**: Scan last 5 digests: `ls -1 .digests/*_digest.md 2>/dev/null | tail -n 5`
+    - **Milestone**: Find boundary (`*_milestone.md`) and filter root `_digest.md` files by timestamp.
+4. Synthesize the "Chain of Truth" based on the selected mode.
+5. Write the file (`_digest.md` or `_milestone.md`).
+6. **Archive processed parents**: Move all files identified as synthesized parents into `.digests/archive/`.
+7. Confirm to user: *"Digest created: `.digests/YYYYMMDDHHMMSS_{digest|milestone}.md`. (Archived {{N}} parents). See you next time!"*
