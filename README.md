@@ -50,11 +50,13 @@ swt/
 │   │       └── swt.sh      # Universal AI Task Manager
 │   ├── swt-task/           # Task lifecycle: naming, creation, graduation, status
 │   ├── swt-init/           # Workspace bootstrap (scaffolds AGENTS.md)
-│   │   └── templates/      # single, workspace
+│   ├── swt-link/           # Universal skill linker (dogfooding/install)
+│   │   └── scripts/
+│   │       └── link.sh     # Skill linker backend
 │   ├── swt-spec/           # Idea-to-specification (SPEC.md / PRD generation)
 │   ├── swt-code/           # Behavioral guidelines (surgical changes, simplicity)
 │   ├── swt-commit/         # Diff-first, draft-and-approve commit workflow
-│   ├── swt-digest/           # Automated session summaries for continuity
+│   ├── swt-digest/         # Automated session summaries for continuity
 │   └── swt-mermaid/        # Mermaid diagram syntax rules
 ├── scripts/
 │   └── install-skill.sh    # Installs skills into any project
@@ -68,7 +70,8 @@ swt/
 | **Init** | `/swt:init` | Bootstraps `AGENTS.md` for any new workspace. Runs once, before any tasks or specs begin. |
 | **Task** | `/swt:task` | Owns the full task lifecycle — naming validation, creation, graduation, status updates, and filtered listing. |
 | **Workflow** | `/swt:flow` | Enforces planning, analysis, and approval gates. |
-| **Spec** | `/swt:spec` | Transforms ideas and brainstorms into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
+| **Link** | `/swt:link` | Universal skill linker for dogfooding and project installation. |
+| **Spec** | `/swt:spec` | Transforms ideas and brainstorms into a structured `SPEC.md` (PRD). |
 | **Coding** | `/swt:code` | Ensures surgical edits and minimal, simple code. |
 | **Commit** | `/swt:commit` | Manages disciplined, impact-focused commit history. |
 | **Digest** | `/swt:digest` | Automates session summaries with multi-digest recursive continuity. |
@@ -100,7 +103,8 @@ Once installed, use the commands directly or describe tasks that trigger them:
 
 - **Planning**: Run `/swt:flow` for non-trivial changes.
 - **Committing**: Capture a diff to `commit.diff`, then follow the `/swt:commit` flow.
-- **Status/Resume**: Ask *"whats up?"* or *"where am I?"* to trigger a disciplined context restoration.
+- **Linking**: Run `/swt:link` to refresh skills or install them into a new folder.
+- **Status/Resume**: Ask *"whats up?"* or *"where am I?"* to trigger context restoration.
 
 ## What Makes This Different
 
@@ -116,9 +120,25 @@ MIT
 
 ## Development
 
-### Adding a new skill
+### Developing the Toolkit
+
+#### Multi-Agent Dogfooding
+To test live changes across multiple agents (Claude Code, Antigravity, OpenCode, Gemini CLI), use the universal linker skill:
+
+```bash
+# Link skills locally into .agents/, .claude/, and .gemini/
+/swt:link
+
+# Link skills globally (~/.agents/, etc.)
+/swt:link --global
+
+# Link skills into a specific directory
+/swt:link /path/to/project
+```
+
+#### Adding a new skill
 1. Create a new directory in `skills/swt-<name>`.
 2. Add a `SKILL.md` following the standard template.
 3. Add any necessary scripts in the skill's `scripts/` directory.
 4. Update the `Skills Suite` table in the root `README.md`.
-5. Link the skill for local testing: `./scripts/install-skill.sh --link /path/to/test-project`.
+5. Link the skill for local testing: `/swt:link`.

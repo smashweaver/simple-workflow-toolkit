@@ -24,4 +24,7 @@ Thumbs.db
 .env.local
 .env.*.local
 
-
+# Agent discovery directories (local dogfooding)
+.agents/
+.claude/
+.gemini/
