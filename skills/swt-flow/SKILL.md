@@ -80,6 +80,8 @@ When the user says anything like:
 - *"resume"*
 - *"what should I do next?"*
 - *"what's next?"*
+- *"where am I?"*
+- *"what's up?"*
 - or any equivalent phrasing that signals a session resume
 
 You **MUST** perform the following steps before responding with anything else:
