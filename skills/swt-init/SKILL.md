@@ -31,13 +31,14 @@ You are initializing a new project workspace for the Simple Workflow Toolkit. Yo
 
 At the start of every session, **before doing anything else**:
 
-1. **Read the root `AGENTS.md`** — understand the workspace context, project name, purpose, and any conventions defined there.
-2. **Detect sub-projects** — scan for directories containing their own `AGENTS.md` or stack marker files (`package.json`, `pyproject.toml`, `go.mod`, `composer.json`, etc.).
-3. **If multiple sub-projects are found**: Ask the user explicitly —
+1. **Read the latest session digest** in `.digests/` — understand the previous agent's outcomes and strategic intent. Use `bash ls` + `read` (NOT glob/search tools) since these directories are gitignored.
+2. **Read the root `AGENTS.md`** — understand the workspace context, project name, purpose, and any conventions defined there.
+3. **Detect sub-projects** — scan for directories containing their own `AGENTS.md` or stack marker files (`package.json`, `pyproject.toml`, `go.mod`, `composer.json`, etc.).
+4. **If multiple sub-projects are found**: Ask the user explicitly —
    > *"Which sub-project are we focusing on today? [list sub-project names]"*
    — before proceeding with any task.
-4. **If only one project context**: Orient silently and proceed.
-5. **Summarise** what you've understood: workspace name, active sub-project (if any), and any open tasks found in `.tasks/`.
+5. **If only one project context**: Orient silently and proceed.
+6. **Summarise** what you've understood: workspace name, active sub-project (if any), and any open tasks found in `.tasks/`.
 
 > ⚠️ If no `AGENTS.md` exists in the workspace root, prompt the user:
 > *"This workspace has no `AGENTS.md`. Would you like to run `/swt:init` to bootstrap one before we begin?"*

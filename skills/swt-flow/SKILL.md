@@ -58,13 +58,14 @@ Use Read/Write/Edit for file operations, Grep for content search, Glob for file 
 
 At the start of **every session**, before reviewing tasks or planning anything:
 
-1. **Read the root `AGENTS.md`** — understand workspace context, project name, purpose, and conventions.
-2. **Detect sub-projects** — scan for directories containing their own `AGENTS.md` or stack marker files (`package.json`, `pyproject.toml`, `go.mod`, etc.).
-3. **If multiple sub-projects are found**: Ask the user —
+1. **Read the latest session digest** in `.digests/` — understand the previous agent's outcomes and strategic intent. Use `bash ls` + `read` (NOT glob/search tools) since these directories are gitignored.
+2. **Read the root `AGENTS.md`** — understand workspace context, project name, purpose, and conventions.
+3. **Detect sub-projects** — scan for directories containing their own `AGENTS.md` or stack marker files (`package.json`, `pyproject.toml`, `go.mod`, etc.).
+4. **If multiple sub-projects are found**: Ask the user —
    > *"Which sub-project are we focusing on today? [list them]"*
    — before proceeding.
-4. **If only one project context**: Orient silently and proceed.
-5. **Summarise** workspace name, active sub-project (if any), and any open tasks in `.tasks/`.
+5. **If only one project context**: Orient silently and proceed.
+6. **Summarise** workspace name, active sub-project (if any), and any open tasks in `.tasks/`.
 
 > 💡 If no `AGENTS.md` exists at the workspace root, suggest running `/swt:init` before beginning any work.
 
