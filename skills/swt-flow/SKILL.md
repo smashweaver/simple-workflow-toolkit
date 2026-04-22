@@ -86,8 +86,8 @@ When the user says anything like:
 
 You **MUST** perform the following steps before responding with anything else:
 
-1. **Read the latest digest** in `.digests/` — identify the key outcomes and next steps from the previous session.
-2. **Use `/swt:task list open`** — invoke the `swt-task` skill to retrieve the authoritative list of active work.
+1. **Read the latest digest** in `.digests/` — identify the key outcomes and next steps from the previous session. Use `bash ls` + `read` (NOT glob/search tools) since these directories are gitignored.
+2. **Use `/swt:task list open`** — invoke the `swt-task` skill to retrieve the authoritative list of active work. Use `bash ls` + `read` for task files in `.tasks/`.
 3. **Read the identified task files** and identify:
    - Tasks with `**Status**: ideating` — these are **active brainstorms** awaiting a decision
    - Tasks with `**Status**: in-progress` or `**Status**: pending` — these are **active implementation tasks**

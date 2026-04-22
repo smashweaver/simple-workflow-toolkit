@@ -8,6 +8,7 @@ This document defines the core principles and behavioral protocols for AI coding
 2.  **Surgical Changes**: Touch only what you must. Avoid "cleaning up" adjacent code unless it's part of the task.
 3.  **Simplicity Over Specification**: No speculative features or premature abstractions.
 4.  **Verifiable Outcomes**: Every change must have a clear path to verification (tests or checklists).
+5.  **Gitignored Awareness**: Runtime directories (`.digests/`, `.tasks/`) are gitignored. Use `bash ls` + `read` for these — glob/search tools will return empty results.
 
 ## 2. Execution Boundaries
 
@@ -84,7 +85,7 @@ To ensure architectural continuity and prevent context drift, every session MUST
 
 ### 1. Orientation (Mandatory)
 Before discussing any task or reviewing code, the agent MUST:
-1. **Read the latest session digest** in `.digests/` to understand the previous agent's outcomes and strategic intent.
+1. **Read the latest session digest** in `.digests/` to understand the previous agent's outcomes and strategic intent. Use `bash ls` + `read` (NOT glob) since these directories are gitignored.
 2. **Read the root `AGENTS.md`** to verify project scope, stack, and conventions.
 
 ### 2. Context Restoration (On-Demand)
