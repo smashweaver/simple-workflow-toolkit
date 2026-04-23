@@ -40,7 +40,7 @@ When `/swt:digest` is invoked, follow these steps:
     - **Orphan Capture**: Read the content of any "orphaned" digests (not accounted for by successors) plus the latest digest to ensure 100% detail retention.
 - **Milestone Mode (Project Roll-up)**:
     - **Find Boundary**: Locate the latest `*_milestone.md` file in `.digests/` or `.digests/archive/`.
-    - **Filter Scope**: Only consider `*_digest.md` files in the root that have a timestamp **newer** than that milestone. These are your "unsynthesized" candidates.
+    - **Filter Scope**: Consider `*_digest.md` files in **both** `.digests/` and `.digests/archive/` that have a timestamp **newer** than that milestone. These are your "unsynthesized" candidates.
     - **Deep Roll-up**: Synthesize all candidates into a single master document.
 - **Deep History Retrieval**: If a current digest lists a parent in `.digests/archive/` that you need to examine for more detail, do not hesitate to read it. The archive is your "Long-Term Memory."
 - **Tasks**: Scan the `.tasks/` directory for files that are NOT `done` or `abandoned`. **IMPORTANT**: Also scan `.tasks/archive/` for tasks that were closed or updated during the current session to ensure they are captured in the summary.
@@ -150,7 +150,7 @@ Proactively suggest `/swt:digest` when:
 2. Create `.digests/` directory if it doesn't exist.
 3. **Scan for Context**:
     - **Standard**: Scan last 5 digests: `ls -1 .digests/*_digest.md 2>/dev/null | tail -n 5`
-    - **Milestone**: Find boundary (`*_milestone.md`) and filter root `_digest.md` files by timestamp.
+    - **Milestone**: Find boundary (`*_milestone.md`) in `.digests/` or `.digests/archive/`, then filter `*_digest.md` files in **both** locations by timestamp.
 4. Synthesize the "Chain of Truth" based on the selected mode.
 5. Write the file (`_digest.md` or `_milestone.md`).
 6. **Archive processed parents**: Move all files identified as synthesized parents into `.digests/archive/`.
