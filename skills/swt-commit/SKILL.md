@@ -19,6 +19,7 @@ Before drafting any commit message, the agent MUST output the following audit si
 
 > **Protocol Audit**:
 > - [x] Re-read `swt:commit/SKILL.md`
+> - [x] Task state validated (`skills/swt-task/scripts/task.sh validate <file>`)
 > - [x] Checked for red flags (no dots/slashes in bullets, no jargon)
 > - [x] Verified Phase 8 (Review & Refine) is closed
 
@@ -61,12 +62,13 @@ The agent will:
 2. **Execute Protocol Audit Ritual** — output the audit signature at the start of your response.
 3. **Read `commit.diff`** — never run `git diff` directly; always read from the file.
 4. **Scan for active tasks** — search for `.tasks/*.md` files in the **current directory**, **parent directory**, and any **sub-project directories** to understand the active work context and align terminology.
-5. **Consult `AGENTS.md`** — read both the project-level and parent-level `AGENTS.md` for strategic goals and conventions.
-6. **Analyze the changes** — identify what changed, why, and the impact.
-7. **Draft a commit message** — following the format and principles below. Store the message in `commit.draft`.
-8. **Agent Self-Correction Pass** — Before finalizing, the agent MUST review the draft against the "Agent Self-Correction Guardrails" above. There is no automated linting; this is a mandatory manual ritual.
-9. **Track task closure** — if an active task was found in Step 3, write the reference to `commit.task`: `Closes: .tasks/YYYYMMDDHHMMSS_slug.md`. STRICTLY separate this metadata from the `commit.draft` message.
-10. **Display the draft** — show the contents of `commit.draft` and `commit.task` for review. Let the user know the mapped task will be auto-closed.
+5. **Execute Task Validation** — run `bash skills/swt-task/scripts/task.sh validate <task_file>` to ensure Phases 5–7 are marked as complete. If validation fails, STOP and fix the task file before drafting.
+6. **Consult `AGENTS.md`** — read both the project-level and parent-level `AGENTS.md` for strategic goals and conventions.
+7. **Analyze the changes** — identify what changed, why, and the impact.
+8. **Draft a commit message** — following the format and principles below. Store the message in `commit.draft`.
+9. **Agent Self-Correction Pass** — Before finalizing, the agent MUST review the draft against the "Agent Self-Correction Guardrails" above. There is no automated linting; this is a mandatory manual ritual.
+10. **Track task closure** — if an active task was found in Step 4, write the reference to `commit.task`: `Closes: .tasks/YYYYMMDDHHMMSS_slug.md`. STRICTLY separate this metadata from the `commit.draft` message.
+11. **Display the draft** — show the contents of `commit.draft` and `commit.task` for review. Let the user know the mapped task will be auto-closed.
 
 > ⚠️ **The agent MUST NOT execute any `git commit` command at this stage.**
 

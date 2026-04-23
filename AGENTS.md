@@ -10,6 +10,7 @@ This document defines the core principles and behavioral protocols for AI coding
 4.  **Verifiable Outcomes**: Every change must have a clear path to verification (tests or checklists).
 5.  **Gitignored Awareness**: Runtime directories (`.digests/`, `.tasks/`) are gitignored. Use `bash ls` + `read` for these — glob/search tools will return empty results.
 6.  **Ritual Discipline**: "Mandatory" means mandatory. Never skip a re-read step, self-correction pass, or consent gate, even if you feel "familiar" with the context.
+7.  **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `skills/swt-task/scripts/task.sh validate`.
 
 ## 2. Execution Boundaries
 
@@ -124,8 +125,9 @@ Before discussing any task or reviewing code, the agent MUST:
 ### 2. Context Restoration (On-Demand)
 When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"*), the agent MUST:
 1. **Invoke `/swt:task list open`** for an authoritative list of active work.
-2. **Summarize status** based on the digest and task files.
-3. **HARD STOP**: Inform the user and wait for explicit confirmation before starting any implementation or planning work.
+2. **Execute Task Validation**: Run `skills/swt-task/scripts/task.sh validate <task_file>` for all active tasks to ensure the checklist is synchronized.
+3. **Summarize status** based on the digest and task files.
+4. **HARD STOP**: Inform the user and wait for explicit confirmation before starting any implementation or planning work.
 
 ## 8. Developing the Toolkit
 

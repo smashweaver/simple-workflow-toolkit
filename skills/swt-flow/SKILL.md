@@ -37,7 +37,8 @@ Unless strictly authorized, you must act as a **Senior Advisor and Co-pilot**:
 3. **Provide Snippets, Not Edits**: After approval, provide exact code snippets and command-line steps for the user to execute.
 4. **Scoped Coding Handoffs**: If the user explicitly asks you to write code, keep changes limited and precise.
 5. **Checklist Tracking**: Use Edit to update `[x]` checkmarks in the active `.tasks/` file as the user reports completion.
-6. **Scope Creep Prevention**: If you discover a tangential issue, bug, or improvement, DO NOT bundle it into the current task. Instead, explicitly ask the user if they want to create a new task file via `swt.sh new` to handle it later.
+6. **Locked Gate Validation**: You MUST run `bash skills/swt-task/scripts/task.sh validate <task_file>` before initiating any Phase 5 (Implement) edits or proposing a Phase 8 (Refine) review. If validation fails, you are forbidden from proceeding.
+7. **Scope Creep Prevention**: If you discover a tangential issue, bug, or improvement, DO NOT bundle it into the current task. Instead, explicitly ask the user if they want to create a new task file via `swt.sh new` to handle it later.
 
 ## Tool Awareness (MANDATORY)
 
@@ -103,8 +104,8 @@ You **MUST** perform the following steps before responding with anything else:
    - What phase each is in
    - What the next unchecked step is
    - Any blockers noted in the task file
-
-6. **Ask the user** which task to resume. **HARD STOP**: Do not proceed with implementation or planning until the user explicitly confirms which task to work on.
+6. **Execute Task Validation** — run `bash skills/swt-task/scripts/task.sh validate <task_file>` for each active task. Report the validation status in your summary.
+7. **Ask the user** which task to resume. **HARD STOP**: Do not proceed with implementation or planning until the user explicitly confirms which task to work on.
 
 > ⚠️ **Never rely on conversation history alone to reconstruct context.** Always read the task files. They are the source of truth for what is in progress.
 

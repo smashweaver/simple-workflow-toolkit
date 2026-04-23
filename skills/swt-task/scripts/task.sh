@@ -117,6 +117,52 @@ if [ "$CMD" == "tidy" ]; then
     exit 0
 fi
 
+if [ "$CMD" == "validate" ]; then
+    if [ -z "$ARG" ]; then
+        # Default to checking for an active task if one is inferred? 
+        # For now, require explicit file.
+        echo "Error: Must provide a task file to validate."
+        exit 1
+    fi
+    FILE=$ARG
+    if [ ! -f "$FILE" ]; then
+        echo "Error: File $FILE not found."
+        exit 1
+    fi
+
+    # 1. Get current phase
+    PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\d+' "$FILE" | head -n 1)
+
+    if [ -z "$PHASE" ]; then
+        echo "Error: Could not determine current Phase from $FILE."
+        exit 1
+    fi
+
+    # Phase 0 (Ideating) doesn't always have a checklist
+    if [ "$PHASE" -eq 0 ]; then
+        STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$FILE" | head -n 1)
+        if [ "$STATUS" == "ideating" ]; then
+            echo "✅ Phase 0 validated (Status: ideating)."
+            exit 0
+        else
+            echo "🛑 PROTOCOL VIOLATION: Phase 0 task must have Status: ideating."
+            exit 1
+        fi
+    fi
+
+    # 2. Check the checklist for that phase
+    # Matches: - [x] Phase N  OR  - [/] Phase N
+    CHECK=$(grep -iP "\- \[[x/]\] Phase $PHASE" "$FILE" || true)
+
+    if [ -z "$CHECK" ]; then
+        echo "🛑 PROTOCOL VIOLATION: Phase $PHASE is not marked as in-progress [/] or complete [x] in $FILE."
+        exit 1
+    fi
+
+    echo "✅ Task state validated: Phase $PHASE is correctly marked."
+    exit 0
+fi
+
 if [ "$CMD" == "new" ]; then
     if [ -z "$ARG" ]; then
         echo "Error: Must provide a task description (e.g. final feature name)."
