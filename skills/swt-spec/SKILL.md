@@ -35,6 +35,7 @@ specification that a development team can act on without ambiguity.
 3. **Developer-first language** — Specs are for builders. Be precise, not fluffy.
 4. **Scope ruthlessly** — Distinguish MVP from future work. A spec that tries to cover everything covers nothing.
 5. **One source of truth** — Output is always a `SPEC.md` file. Never just dump it in the chat.
+6. **Scenario-Based Trade-offs** — Mandatory: For all explorations, present trade-offs using Scenario A (Discipline), Scenario B (Automation), and Scenario C (Enforcement).
 
 ---
 
@@ -77,6 +78,7 @@ them into a single message — never ask one question at a time in a loop.
 4. **MVP scope**: What's the minimum viable slice? What's explicitly out of scope for now?
 5. **Key constraints**: Tech stack, deadlines, budget, compliance, or integration requirements?
 6. **Known unknowns**: What are you most uncertain about?
+7. **Scenario Framework**: Propose Scenario A (Discipline), Scenario B (Automation), and Scenario C (Enforcement) trade-offs for the proposed implementation.
 
 If the idea is already well-described (e.g. a rich Phase 0 brainstorm or a
 detailed paste), skip questions that are already answered and note that you're

@@ -24,6 +24,18 @@ Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot
 
 To ensure the user maintains control, the workflow is punctuated by **5 Mandatory Consent Gates (HARD STOPS)**. Agents must NEVER blow past these gates, even if they have "automatic approval" capabilities.
 
+### Phase 0: Ideate (Brainstorming)
+Every non-trivial feature or architectural change begins with a Phase 0 brainstorm. Before graduating to Phase 1 (Plan), the agent MUST present a **Scenario-Based Trade-off Analysis**:
+
+| Scenario | Type | Description |
+|---|---|---|
+| **Scenario A** | **Discipline** | Methodology-only. Update `AGENTS.md` rules. Zero code overhead. |
+| **Scenario B** | **Automation** | Helper scripts or templates. Make the ritual easier but not mandatory. |
+| **Scenario C** | **Enforcement** | Hard Gates. Physically block execution unless the ritual is met. |
+
+> [!NOTE]
+> For trivial changes, Scenarios B and C can be marked as "N/A" or "Not recommended for simplicity."
+
 ### Gate 1: The Alignment Loop (Phase 1 Entry)
 *   **Trigger**: Immediately after a task file is created or graduated.
 *   **Action**: Provide a link to the task file and **HARD STOP**.
@@ -138,6 +150,9 @@ Each skill lives in its own directory under `skills/`. A skill's logic should be
 
 > [!RULE]
 > **The Scripts Subfolder Rule**: All skill-specific logic, automation, or runner scripts MUST reside in a `scripts/` sub-directory within the skill's folder (e.g., `skills/swt-task/scripts/task.sh`).
+
+### 2. Scenario-Based Explorations
+When proposing a new project-wide rule or toolkit feature, agents MUST present the Scenario A/B/C framework. This ensures the user receives clear implementation guidance and can consciously choose the right balance between human discipline and scripted enforcement.
 
 ### 3. Testing Skills
 

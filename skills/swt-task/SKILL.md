@@ -262,7 +262,9 @@ Both paths go through the **Name Confirmation Gate** before any file is written.
 {{What is the core problem or idea being explored?}}
 
 ## Explored Alternatives
-{{What other approaches were considered and why set aside?}}
+- **Scenario A (Discipline)**: {{Methodology/Rule change only}}
+- **Scenario B (Automation)**: {{Helper scripts/Templates}}
+- **Scenario C (Enforcement)**: {{Hard gates/Physical blocks}}
 
 ## Unresolved Questions
 {{What still needs to be answered before this graduates to a task?}}
