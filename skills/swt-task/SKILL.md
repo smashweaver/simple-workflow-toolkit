@@ -86,7 +86,7 @@ Creates a new implementation task ready for Phase 1 planning.
 3. Write `.tasks/YYYYMMDDHHMMSS_slug.md` using the **Standard Task Template** below
 4. **Gate 1 (Alignment)**: Provide the link and ask: *"Task created: `[slug](path)`. Please review the Objective and Checklist. Ready to proceed to Phase 1: Plan?"*
 5. **HARD STOP**: Do not proceed with technical planning until the user explicitly confirms or fine-tunes the task file.
-6. Use `./task.sh` if available, otherwise write directly to the `.tasks/` directory.
+6. Use `scripts/task.sh` if available, otherwise write directly to the `.tasks/` directory.
 
 ---
 
@@ -105,7 +105,7 @@ Creates a Phase 0 brainstorm task for exploratory thinking before a plan exists.
 3. Write `.tasks/YYYYMMDDHHMMSS_slug.md` using the **Brainstorm Template** below
 4. **Gate 1 (Alignment)**: Provide the link and ask: *"Brainstorm created: `[slug](path)`. Please review the Core Concept. Ready to begin?"*
 5. **HARD STOP**: Do not begin the ideation conversation until the user explicitly confirms the task file.
-6. Use `./task.sh brainstorm "<Topic>"` if available.
+6. Use `scripts/task.sh brainstorm "<Topic>"` if available.
 
 ---
 
@@ -151,7 +151,7 @@ Moves completed (`done`) or `abandoned` task files into the `.tasks/archive/` su
 - At the end of a session if there are several closed tasks in the root.
 
 **Steps:**
-1. Invoke `./task.sh --tidy`.
+1. Invoke `scripts/task.sh --tidy`.
 2. Confirm the result to the user (e.g., "Tidied 5 tasks into archive/").
 
 ---
@@ -170,7 +170,7 @@ Lists task files in the `.tasks/` directory, optionally filtered by status.
 
 **Steps:**
 1. Determine the desired filter based on user request (e.g., "show open tasks").
-2. Invoke `./task.sh list [--filter]`.
+2. Invoke `scripts/task.sh list [--filter]`.
 3. Present the list to the user with their statuses.
 
 ---
@@ -201,7 +201,7 @@ Other skills must proactively suggest `/swt:task` when these signals appear. Alw
 ## Execution Layer
 
 **Preference order:**
-1. `./task.sh` — use when available (handles `.tasks/` init, `.gitignore` entries)
+1. `scripts/task.sh` — use when available (handles `.tasks/` init, `.gitignore` entries)
 2. Direct file creation — fallback if script is not present
 
 Both paths go through the **Name Confirmation Gate** before any file is written.

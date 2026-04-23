@@ -88,6 +88,7 @@ This repository provides the following skills. Agents must be aware of all of th
 | **task** | `/swt:task` | Owns the full task lifecycle: naming validation, creation, graduation, status updates, and filtered listing. |
 | **spec** | `/swt:spec` | Transforms ideas, brainstorms, or rough notes into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
 | **init** | `/swt:init` | Bootstraps workspace `AGENTS.md` for any new project consuming this toolkit. Runs once, before any tasks or specs are created. |
+| **link** | `/swt:link` | Universal skill linker for SWT. Symlinks skills into agent discovery paths for dogfooding or installation. |
 | **coding** | `/swt:code` | Behavioral guidelines for surgical, minimal, goal-driven code changes. |
 | **commit** | `/swt:commit` | Diff-first, draft-and-approve commit workflow. |
 | **digest** | `/swt:digest` | Automates session summaries with multi-digest recursive synthesis. |
@@ -135,12 +136,6 @@ Each skill lives in its own directory under `skills/`. A skill's logic should be
 
 > [!RULE]
 > **The Scripts Subfolder Rule**: All skill-specific logic, automation, or runner scripts MUST reside in a `scripts/` sub-directory within the skill's folder (e.g., `skills/swt-task/scripts/task.sh`).
-
-### 2. The Frontend/Backend Model
-To facilitate agent discovery, we follow a symmetric exposure pattern:
-- **Frontend**: The `SKILL.md` file (human/agent instructions).
-- **Backend**: The `scripts/` folder (implementation logic).
-- **Exposure**: Each skill MUST expose its primary backend runner via a symlink at the skill's root (e.g., `skills/swt-task/task.sh` -> `scripts/task.sh`).
 
 ### 3. Testing Skills
 
