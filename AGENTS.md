@@ -133,7 +133,17 @@ When contributing to this repository, agents must adhere to the following intern
 ### 1. Skill Encapsulation
 Each skill lives in its own directory under `skills/`. A skill's logic should be self-contained in its `SKILL.md` or associated scripts. Cross-skill dependencies should be minimized.
 
-### 2. Testing Skills
+> [!RULE]
+> **The Scripts Subfolder Rule**: All skill-specific logic, automation, or runner scripts MUST reside in a `scripts/` sub-directory within the skill's folder (e.g., `skills/swt-task/scripts/task.sh`).
+
+### 2. The Frontend/Backend Model
+To facilitate agent discovery, we follow a symmetric exposure pattern:
+- **Frontend**: The `SKILL.md` file (human/agent instructions).
+- **Backend**: The `scripts/` folder (implementation logic).
+- **Exposure**: Each skill MUST expose its primary backend runner via a symlink at the skill's root (e.g., `skills/swt-task/task.sh` -> `scripts/task.sh`).
+
+### 3. Testing Skills
+
 New skills or changes to existing skills must be verified by:
 1. Installing the live version via `./scripts/install-skill.sh --link <test-project>`.
 2. Running the skill in the test project to verify triggers and logic.

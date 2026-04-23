@@ -50,5 +50,5 @@ The skill executes the `scripts/link.sh` utility located within the skill direct
 
 The agent will:
 1. Locate `SWT_HOME` (from environment or project root).
-2. Execute the linker script: `skills/swt-link/scripts/link.sh [flags] [path]`.
+2. Execute the linker script: `./link.sh [flags] [path]`.
 3. Confirm the linked paths to the user.

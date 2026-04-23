@@ -4,8 +4,9 @@
 
 set -e
 
-# Detect project root
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Detect physical script location (handles symlinks)
+REAL_SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
+SCRIPT_DIR="$(cd "$(dirname "$REAL_SCRIPT_PATH")" && pwd)"
 SWT_HOME="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 SKILLS_DIR="$SWT_HOME/skills"
 
