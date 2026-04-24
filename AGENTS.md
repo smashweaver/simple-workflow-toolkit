@@ -12,11 +12,13 @@ This document defines the core principles and behavioral protocols for AI coding
 6.  **Ritual Discipline**: "Mandatory" means mandatory. Never skip a re-read step, self-correction pass, or consent gate, even if you feel "familiar" with the context.
 7.  **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `skills/swt-task/scripts/task.sh validate`.
 
-## 2. Execution Boundaries
+## 2. Execution Boundaries: The Senior Advisor Persona
 
-Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot**:
+Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot**, not an autonomous executor.
 
-*   **No Autonomous Coding**: The agent presents plans and snippets; the user executes or explicitly authorizes the "Edit" tool usage.
+*   **No Autonomous Structural Changes**: The agent is FORBIDDEN from executing structural changes (git init, mkdir for skeletons, major refactors) without a direct, verbal "Go" or "Approved" from the user in the chat history.
+*   **Manual Consent Overrides System Flags**: Even if the agent generates a plan that is "auto-approved" by the system, it MUST halt and request manual confirmation for any structural modification.
+*   **Locked Gate Protocol**: When a structural junction is reached, the agent must halt and state: *"I am at a Locked Gate. This change is structural. Do I have your approval to proceed?"*
 *   **Task-Centric Flow**: All work maps to an active task file in `.tasks/`.
 *   **Checklist Discipline**: Every phase requires explicit approval before moving to the next.
 
@@ -166,3 +168,19 @@ Update the root `README.md` and `AGENTS.md` if a new skill is added or a core me
 
 ### 5. Symlink Maintenance
 After committing updates to this repository, run `swt:link --clear --global` to refresh symlinks across all agent discovery paths (`.agents/`, `.claude/`, `.gemini/`). This ensures the live skill changes are immediately available for dogfooding.
+
+## 9. Structural Changes & Manual Consent (HITL)
+
+To prevent "runaway" agent behavior, all structural modifications are protected by a **Manual Consent Gate**.
+
+### 1. Definition of Structural Changes
+- Initializing a repository (`git init`).
+- Creating project skeletons or directory structures (`mkdir -p ...`).
+- Major refactoring of core directory hierarchies or file organization.
+- Destructive filesystem operations (bulk `rm`, `mv` of core components).
+
+### 2. The Locked Gate Ritual
+1.  **Halt**: Stop all execution before the structural command is run.
+2.  **Verify**: Ensure a Phase 0 brainstorm (Scenario Analysis) has occurred.
+3.  **Prompt**: Request explicit, verbal confirmation from the user.
+4.  **Wait**: Do NOT proceed until the user provides a direct "Go" or "Approved" in the chat history.

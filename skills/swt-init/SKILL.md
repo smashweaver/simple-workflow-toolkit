@@ -7,8 +7,10 @@ description: >
   new project with SWT". This skill runs ONCE per project at the very
   beginning, before any tasks or specs are created. It interviews the user to
   determine workspace type, loads the appropriate template, and scaffolds
-  AGENTS.md. For workspaces, it also initializes directory structures. If 
-  AGENTS.md already exists, it runs in defensive diff mode — never overwrites blindly.
+  AGENTS.md. For workspaces, it also initializes directory structures. 
+  **Mandatory Phase 0**: Since this is a structural change, a Phase 0 brainstorm 
+  (Scenario A, B, C) MUST be presented and approved before execution.
+  If AGENTS.md already exists, it runs in defensive diff mode — never overwrites blindly.
 user-invocable: true
 allowed-tools:
   - Read
@@ -175,7 +177,10 @@ List each action clearly:
 
 ### Step 5 — Hard stop (MANDATORY)
 
-> *"Shall I apply these changes?"*
+> [!IMPORTANT]
+> Because `swt:init` performs structural changes (git init, mkdir, file creation), you MUST request explicit verbal approval even if system auto-approval is on.
+
+> *"Shall I apply these structural changes? (This requires your explicit verbal 'Go' in chat)"*
 
 **Do not write or edit anything until the user explicitly confirms.**
 

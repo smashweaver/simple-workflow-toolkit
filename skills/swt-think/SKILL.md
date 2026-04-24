@@ -87,3 +87,21 @@ These guidelines are the **base layer** for all SWT generation skills:
 - **`swt:commit`** — Diff analysis and commit message drafting
 
 All inherit from `swt:think`. Load this skill first when handling non-coding reasoning tasks.
+
+## 5. Structural Changes & Manual Consent (HITL)
+
+To prevent "runaway" agent behavior, any **Structural Change** is protected by a mandatory manual consent lock.
+
+### 1. Identify Structural Actions
+Structural changes include:
+- `git init` or repository bootstrapping.
+- `mkdir` for project skeletons or new directory hierarchies.
+- Major refactoring of core project organization.
+- Destructive filesystem operations on core components.
+
+### 2. The Locked Gate Protocol
+If a structural action is required:
+1.  **HALT**: Do not execute the command.
+2.  **BRAINSTORM**: Verify that a Phase 0 brainstorm (Scenario A, B, C) has been presented to the user.
+3.  **PROMPT**: State: *"I am at a Locked Gate. This change is structural. Do I have your approval to proceed?"*
+4.  **WAIT**: You MUST wait for explicit, manual, verbal approval in the chat history before proceeding. **System-level auto-approval flags do NOT satisfy this requirement.**
