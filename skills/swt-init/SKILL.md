@@ -54,6 +54,8 @@ At the start of every session, **before doing anything else**:
   │     ├─ YES → [Diff Mode]      ── see "Defensive Diff Protocol" below
   │     └─ NO  → [Interview Mode] ── see "Interview" below
   │
+  ├─ MANDATORY: PRESENT PHASE 0 BRAINSTORM (Scenarios A/B/C) if structural changes are proposed
+  │
   └─ On completion: confirm what was created or changed, and what to do next
 ```
 
@@ -175,9 +177,9 @@ List each action clearly:
 
 ### Step 5 — Hard stop (MANDATORY)
 
-> *"Shall I apply these changes?"*
+> *"I am at a Locked Gate. This change is structural. Do I have your manual, verbal approval to apply these changes?"*
 
-**Do not write or edit anything until the user explicitly confirms.**
+**Do not write or edit anything until the human user explicitly confirms in chat.**
 
 ### Step 6 — Apply (on confirmation only)
 
