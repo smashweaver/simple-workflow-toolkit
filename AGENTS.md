@@ -17,8 +17,6 @@ This document defines the core principles and behavioral protocols for AI coding
 Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot**:
 
 *   **No Autonomous Coding**: The agent presents plans and snippets; the user executes or explicitly authorizes the "Edit" tool usage.
-*   **Manual Consent Overrides System Flags**: Even if a task is "auto-approved" by the system or a tool, the agent is **STRICTLY FORBIDDEN** from executing **Structural Changes** (see below) without a direct, verbal "Go" or "Approved" from the human user in the chat.
-*   **Structural Change Definition**: Any action that modifies the project's skeleton, including but not limited to: `git init`, `mkdir` (for new project structures), major file moves/renames, or deleting core architectural files.
 *   **Task-Centric Flow**: All work maps to an active task file in `.tasks/`.
 *   **Checklist Discipline**: Every phase requires explicit approval before moving to the next.
 
@@ -27,7 +25,7 @@ Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot
 To ensure the user maintains control, the workflow is punctuated by **5 Mandatory Consent Gates (HARD STOPS)**. Agents must NEVER blow past these gates, even if they have "automatic approval" capabilities.
 
 ### Phase 0: Ideate (Brainstorming)
-Every non-trivial feature, architectural change, or **Structural Change** (including `swt:init`) begins with a Phase 0 brainstorm. Before graduating to Phase 1 (Plan), the agent MUST present a **Scenario-Based Trade-off Analysis**:
+Every non-trivial feature or architectural change begins with a Phase 0 brainstorm. Before graduating to Phase 1 (Plan), the agent MUST present a **Scenario-Based Trade-off Analysis**:
 
 | Scenario | Type | Description |
 |---|---|---|

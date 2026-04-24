@@ -73,19 +73,7 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 5. Structural Changes & Manual Consent
- 
- **The Locked Gate: Manual consent overrides all automation.**
- 
- Before executing any **Structural Change** (directory creation, git initialization, major refactoring, or initialization of new project skeletons):
- 1. **Halt execution.** Do not proceed even if the tool/system says "auto-approved".
- 2. **Verify Phase 0 Ritual**: Ensure a Scenario-Based Brainstorming (A, B, C) has occurred in the chat history for this specific change.
- 3. **Request Manual "Go"**: Explicitly ask the user for a verbal "Go" or "Approved" in the chat.
- 4. **Identify the Gate**: State clearly: *"I am at a Locked Gate. This change is structural. Do I have your approval to proceed?"*
- 
- **Failure to halt at a Locked Gate is a critical protocol violation.**
- 
- ---
+---
 
 ## Companion Skills
 
