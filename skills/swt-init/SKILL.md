@@ -193,3 +193,9 @@ After successfully writing or updating `AGENTS.md`, confirm to the user:
 - [ ] `{{project_name}}` and `{{purpose}}` are filled in (no raw placeholders remain)
 - [ ] **Workspace only**: Remind the user that each sub-project also needs its own `AGENTS.md`. They can run `/swt:init` again from within each sub-project directory.
 - [ ] Suggest the next step: *"Your workspace is bootstrapped. Run `/swt:flow` and describe your first task to begin."*
+
+---
+
+## Companion Skill
+
+This skill **inherits from `swt:think`** (`skills/swt-think/SKILL.md`), which provides base behavioral principles for all AI agent reasoning. This skill adapts those principles specifically for workspace bootstrapping and AGENTS.md generation.

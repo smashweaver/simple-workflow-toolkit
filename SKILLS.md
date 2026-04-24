@@ -12,12 +12,27 @@ The skills are designed to work in sequence. Here is the typical lifecycle of a 
 
 ```mermaid
 flowchart LR
-    A["/swt:task brainstorm\nPhase 0: Ideate"] --> B["/swt:task graduate\nPromote to Phase 1"]
+    A["/swt:task brainstorm\nPhase 0: Ideate"] --> B["/swt:task graduate\nPromote to Phase1"]
     B --> C["/swt:flow\nPlan, Analyze, Approve"]
-    C --> D["Implement\nguided by /swt:code"]
+    C --> D["Implement\nguided by /swt:code\n(inherits /swt:think)"]
     D --> E["/swt:commit\nDraft & Approve"]
     E --> F["/swt:digest\nSave session summary"]
+    G["/swt:think\nBase behavioral guidelines"] -.-> D
+    G -.-> E
+    G -.-> F
 ```
+
+---
+
+## 🧠 Base Behavioral Skills
+
+### `/swt:think` — Reasoning Guidelines
+
+Base behavioral guidelines for all AI agent reasoning. **All other SWT skills inherit from this skill.**
+
+Provides the core principles (Think, Brevity, Focus, Clear Success Criteria) that `swt:code`, `swt:digest`, `swt:task`, `swt:spec`, `swt:init`, and `swt:commit` adapt for their specific contexts.
+
+**When to use**: This skill loads automatically as the base layer when any generation skill is triggered. Agents apply these principles to all non-coding reasoning tasks.
 
 ---
 
@@ -125,6 +140,8 @@ Prevents Mermaid diagram parse errors by enforcing correct syntax rules before w
 ### `/swt:code` — Coding Guidelines
 
 Enforces surgical, minimal, goal-driven code changes. Prevents scope creep, unnecessary refactors, and speculative features.
+
+**Inherits from `/swt:think`** — the base behavioral guidelines for all AI agent reasoning. This skill adapts those principles specifically for coding tasks.
 
 **This is a behavioral skill** — your agent applies these guidelines automatically during every implementation phase.
 

@@ -97,12 +97,13 @@ This repository provides the following skills. Agents must be aware of all of th
 
 | Skill | Invocation | Purpose |
 |---|---|---|
+| **think** | `/swt:think` | Base behavioral guidelines for all AI agent reasoning. Inherited by `swt:code` and all generation skills (digest, task, spec, init, commit). |
 | **workflow** | `/swt:flow` | Enforces the 8-phase development lifecycle: plan, analyze, risk-assess, approve, implement, document, test, iterate. |
 | **task** | `/swt:task` | Owns the full task lifecycle: naming validation, creation, graduation, status updates, and filtered listing. |
 | **spec** | `/swt:spec` | Transforms ideas, brainstorms, or rough notes into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
 | **init** | `/swt:init` | Bootstraps workspace `AGENTS.md` for any new project consuming this toolkit. Runs once, before any tasks or specs are created. |
 | **link** | `/swt:link` | Universal skill linker for SWT. Symlinks skills into agent discovery paths for dogfooding or installation. |
-| **coding** | `/swt:code` | Behavioral guidelines for surgical, minimal, goal-driven code changes. |
+| **coding** | `/swt:code` | Behavioral guidelines for surgical, minimal, goal-driven code changes. Inherits from `swt:think`. |
 | **commit** | `/swt:commit` | Diff-first, draft-and-approve commit workflow. |
 | **digest** | `/swt:digest` | Automates session summaries with multi-digest recursive synthesis. |
 | **mermaid** | `/swt:mermaid` | Prevents parse errors and enforces correct syntax in Mermaid diagrams. |
@@ -160,5 +161,8 @@ New skills or changes to existing skills must be verified by:
 1. Installing the live version via `./scripts/install-skill.sh --link <test-project>`.
 2. Running the skill in the test project to verify triggers and logic.
 
-### 3. Documentation
+### 4. Documentation
 Update the root `README.md` and `AGENTS.md` if a new skill is added or a core methodology change is made.
+
+### 5. Symlink Maintenance
+After committing updates to this repository, run `swt:link --clear --global` to refresh symlinks across all agent discovery paths (`.agents/`, `.claude/`, `.gemini/`). This ensures the live skill changes are immediately available for dogfooding.

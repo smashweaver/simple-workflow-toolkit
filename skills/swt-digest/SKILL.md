@@ -155,3 +155,9 @@ Proactively suggest `/swt:digest` when:
 5. Write the file (`_digest.md` or `_milestone.md`).
 6. **Archive processed parents**: Move all files identified as synthesized parents into `.digests/archive/`.
 7. Confirm to user: *"Digest created: `.digests/YYYYMMDDHHMMSS_{digest|milestone}.md`. (Archived {{N}} parents). See you next time!"*
+
+---
+
+## Companion Skill
+
+This skill **inherits from `swt:think`** (`skills/swt-think/SKILL.md`), which provides base behavioral principles for all AI agent reasoning. This skill adapts those principles specifically for session digest generation.

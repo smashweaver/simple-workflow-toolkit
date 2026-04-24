@@ -38,6 +38,7 @@ Once installed, invoke skills directly or describe your task to trigger them:
 ```
 swt/
 ├── skills/
+│   ├── swt-think/          # Base behavioral guidelines for all reasoning tasks
 │   ├── swt-flow/           # Structured 8-phase development process
 │   ├── swt-task/           # Task lifecycle: naming, creation, graduation, status
 │   │   └── scripts/

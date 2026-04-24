@@ -70,4 +70,6 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Companion Skill
 
-These guidelines are designed to be used alongside the **workflow** skill (`skills/swt-flow/SKILL.md`), which governs the overall development process (planning phases, task tracking, documentation). The Coding guidelines apply specifically during **Phase 5: Implement** and **Phase 7: Test** of that workflow. Triggered via `/swt:flow`.
+These guidelines **inherit from `swt:think`** (`skills/swt-think/SKILL.md`), which provides base behavioral principles for all AI agent reasoning. This skill adapts those principles specifically for coding tasks.
+
+Also designed to be used alongside the **workflow** skill (`skills/swt-flow/SKILL.md`), which governs the overall development process (planning phases, task tracking, documentation). The Coding guidelines apply specifically during **Phase 5: Implement** and **Phase 7: Test** of that workflow. Triggered via `/swt:flow`.

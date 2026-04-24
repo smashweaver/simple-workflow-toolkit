@@ -281,3 +281,9 @@ Both paths go through the **Name Confirmation Gate** before any file is written.
 - ⚠️ **The /swt:flow skill is the primary consumer of this skill.** All tasks created by `/swt:flow` must follow these rules.
 - **`/swt:spec`** — Calls `/swt:task new` after generating a `SPEC.md` to link an implementation task.
 - **`/swt:init`** — Suggests `/swt:task new` after workspace bootstrap completes.
+
+---
+
+## Companion Skill
+
+This skill **inherits from `swt:think`** (`skills/swt-think/SKILL.md`), which provides base behavioral principles for all AI agent reasoning. This skill adapts those principles specifically for task file lifecycle management.

@@ -306,3 +306,9 @@ Before presenting the spec to the user, verify:
 - [ ] Non-Goals section explicitly names at least one thing out of scope
 - [ ] File is written to disk, not just output in chat
 - [ ] Linked Task field is populated if in a /swt:flow context
+
+---
+
+## Companion Skill
+
+This skill **inherits from `swt:think`** (`skills/swt-think/SKILL.md`), which provides base behavioral principles for all AI agent reasoning. This skill adapts those principles specifically for feature specification generation.

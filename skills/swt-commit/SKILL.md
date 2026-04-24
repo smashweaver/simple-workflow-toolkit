@@ -367,3 +367,9 @@ git commit -m "Initial commit: GraphQL project using Apollo Server and TypeScrip
 - Use blank lines to visually separate logical sections (if needed)
 - Do NOT use `-m ""` for empty lines
 - Do not execute the git command — present as a reference for the user to run
+
+---
+
+## Companion Skill
+
+This skill **inherits from `swt:think`** (`skills/swt-think/SKILL.md`), which provides base behavioral principles for all AI agent reasoning. This skill adapts those principles specifically for diff analysis and commit message drafting.
