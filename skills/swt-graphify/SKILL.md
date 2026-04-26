@@ -18,16 +18,14 @@ This skill acts as a **thin wrapper and orchestrator** for the `graphify` engine
 Unlike other skills that contain complex custom scripts, `swt:graphify` is designed to:
 1. **Orchestrate**: Map SWT workflow phases to specific `graphify` commands.
 2. **Enforce**: Mandate "Structural Awareness" checks for agents during Phase 2 and Phase 8.
-3. **Simplify**: Handle tool discovery and execution via `uv tool run` so no manual installation is required.
+3. **Verify**: Ensure the `graphify` engine is present in the system `$PATH`. (Auto-installation is disabled).
 
 ## Discovery Ritual (MANDATORY)
 
 Before execution, `/swt:graphify` must locate its engine:
-1. **Local Skill**: Check `./skills/graphify/SKILL.md`.
-2. **Global Skill**: Check `~/.agents/skills/graphify/SKILL.md`.
-3. **CLI Binary**: Verify `graphify` is reachable via `uv tool run` or `$PATH`.
+1. **CLI Binary**: Verify `graphify` is reachable via `$PATH`.
 
-If no skill is found but the binary is present, `/swt:graphify` will default to the standard CLI commands.
+If the binary is missing, `/swt:graphify` will report an error and provide installation instructions.
 
 | Phase | Usage |
 |---|---|
@@ -37,10 +35,10 @@ If no skill is found but the binary is present, `/swt:graphify` will default to 
 
 ## Core Commands
 
-- `/swt:graphify install` -> Native bootstrap for Antigravity rules & workflows.
-- `/swt:graphify uninstall` -> Full cleanup: removes rules, workflows, and artifacts.
+- `/swt:graphify verify` -> Check if the `graphify` engine is installed in the system.
+- `/swt:graphify uninstall` -> Full cleanup: removes artifacts and states.
 - `/swt:graphify on | off` -> Explicitly enable/disable structural rituals.
-- `/swt:graphify status` -> Check current state and artifact presence.
+- `/swt:graphify status` -> Check current state, engine presence, and artifact presence.
 - `/swt:graphify init` -> Perform a full project build (deep scan).
 - `/swt:graphify update` -> Incremental update of the graph.
 - `/swt:graphify query "<question>"` -> Semantic search of the codebase.
@@ -64,4 +62,4 @@ After implementation:
 ## Execution Layer
 
 All commands are orchestrated via `bash skills/swt-graphify/scripts/graphify.sh`.
-If the graph does not exist, use `/swt:graphify install` or `init` to bootstrap.
+If the engine is missing, run `pip install graphifyy` to install it manually.
