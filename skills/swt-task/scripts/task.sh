@@ -306,12 +306,12 @@ EOF
     fi
 
     if [[ "$TYPE" == "feature" || "$TYPE" == "brainstorm" ]]; then
-        mkdir -p specs
+        mkdir -p .specs
         TIMESTAMP=$(date +"%Y%m%d%H%M%S")
         BASENAME=$(basename "$FILE")
         SLUG=${BASENAME#*_}
         SLUG=${SLUG%.md}
-        SPEC_FILE="specs/${TIMESTAMP}_${SLUG}.md"
+        SPEC_FILE=".specs/${TIMESTAMP}_${SLUG}.md"
         
         cat <<EOF > "$SPEC_FILE"
 # Spec: $SLUG

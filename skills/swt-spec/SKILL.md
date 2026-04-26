@@ -60,7 +60,7 @@ Triggered directly by the user with a raw idea, paste, or uploaded document.
 
 1. Read any provided notes, docs, or context.
 2. Run the **Clarification Interview** (below).
-3. Generate the `SPEC.md` in the current directory or a `/specs/` folder if one exists.
+3. Generate the `SPEC.md` in the current directory or a `/.specs/` folder if one exists.
 4. Offer to create a `/swt:flow` task file to begin implementation.
 
 ---
@@ -254,13 +254,13 @@ Ideas that came up during spec writing but are intentionally deferred.
 ## Output Rules
 
 1. **Always write to a file.** Never output the spec only in chat.
-   - Always write to `./specs/YYYYMMDDHHMMSS_{{slug}}.md` relative to the project root.
-   - If `specs/` does not exist, create it silently (no need to ask permission) — same behaviour as `swt.sh init` creating `.tasks/`.
+   - Always write to `./.specs/YYYYMMDDHHMMSS_{{slug}}.md` relative to the project root.
+   - If `.specs/` does not exist, create it silently (no need to ask permission) — same behaviour as `swt.sh init` creating `.tasks/`.
    - If in a `/swt:flow` context, use the sub-project root (same level as `.tasks/`), not the workspace root.
 
 2. **Slug the filename** from the feature name: lowercase, hyphens, no special chars. Prefix with a timestamp matching the current local time.
    - Format: `YYYYMMDDHHMMSS_{{slug}}.md`
-   - "User Auth via OAuth2" → `specs/20250420143022_user-auth-oauth2.md`
+   - "User Auth via OAuth2" → `.specs/20250420143022_user-auth-oauth2.md`
    - Timestamp is generated at the moment of file creation, not interview start.
 
 3. **After writing**, summarise in chat:
@@ -290,7 +290,7 @@ When called during graduation, append this line to the `.tasks/` brainstorm file
 under `## Notes`:
 
 ```
-**Spec generated**: specs/{{YYYYMMDDHHMMSS_slug}}.md (v0.1, {{YYYY-MM-DD}})
+**Spec generated**: .specs/{{YYYYMMDDHHMMSS_slug}}.md (v0.1, {{YYYY-MM-DD}})
 ```
 
 ---

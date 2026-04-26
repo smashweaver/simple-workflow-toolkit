@@ -9,6 +9,9 @@ commit.task
 # Session digests
 .digests/
 
+# Specifications
+.specs/
+
 # OS
 .DS_Store
 Thumbs.db

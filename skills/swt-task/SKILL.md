@@ -122,8 +122,7 @@ Promotes a brainstorm task to an implementation task when the user is ready to b
 2. This script handles:
    - Metadata update: `Phase: 0` → `1`, `Status: ideating` → `pending`.
    - **Type Check**: 
-     - If `Type: feature`, it scaffolds a `SPEC.md` in `specs/` and links it to the task.
-     - If `Type: refactor`, it appends a `## Verification Checklist` (Lite path).
+     - If `Type: feature`, it scaffolds a `SPEC.md` in `.specs/` and links it to the task.     - If `Type: refactor`, it appends a `## Verification Checklist` (Lite path).
    - Implementation checklist injection (Phases 1-8).
 3. **Gate 1 (Alignment)**: Provide the link and ask: *"Task graduated: `[slug](path)`. Spec/Checklist generated. Please review. Ready to proceed to Phase 1: Plan?"*
 4. **HARD STOP**: Do not proceed with technical planning until the user explicitly confirms the graduation.
