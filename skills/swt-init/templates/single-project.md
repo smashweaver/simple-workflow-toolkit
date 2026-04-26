@@ -19,22 +19,29 @@ Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot
 - **Task-Centric Flow**: All work maps to an active task file in `.tasks/`.
 - **Checklist Discipline**: Every phase requires explicit approval before moving to the next.
 
-## 3. The 8-Phase Workflow
+## 3. The 8-Phase Workflow (with Graphify Integration)
 
 See `skills/swt-flow/SKILL.md` for the full lifecycle.
 
 | Phase | Purpose |
 |---|---|
 | 1. Plan | Gather context, map dependencies, propose a step-by-step plan |
-| 2. Analyze | Assess impact on components, state, performance, and contracts |
+| 2. Analyze | **Graphify Step**: Query the graph for "Affected Concepts" before grepping. |
 | 3. Risk Assessment | Identify risks with mitigations |
 | 4. Approval | Present the complete plan — do not proceed without explicit user approval |
 | 5. Implement | Surgical edits, one file at a time, with explanations |
 | 6. Document | Update docs, diagrams, generate commit messages |
 | 7. Test | Run tests or provide manual verification checklists |
-| 8. Iterate | Verify MVP works, then refactor for maintainability |
+| 8. Iterate | **Structural Audit**: Run `graphify update` to visualize structural changes. |
 
-## 4. Project Stack
+## 4. Graphify Integration
+
+This project uses `graphify` for structural awareness.
+- **Initialization**: Run `graphify .` once to build the initial graph.
+- **Update**: Run `graphify update` after major code changes.
+- **Analysis**: Use `graphify query "[question]"` during Phase 2 to map dependencies.
+
+## 5. Project Stack
 
 <!-- To be auto-detected and populated by the /swt:flow skill on first use. -->
 <!-- Do not edit manually unless the stack has changed. -->

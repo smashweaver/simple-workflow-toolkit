@@ -50,11 +50,22 @@ Shared agreements that all sub-projects must honour. Update this section as cont
 - **Shared data formats**: *(e.g. ISO 8601 dates, snake_case JSON keys)*
 - **Git branching strategy**: *(e.g. `main` = production, `develop` = integration, feature branches per task)*
 
-## 5. The 8-Phase Workflow
+## 5. The 8-Phase Workflow (with Graphify Integration)
 
-See `skills/swt-flow/SKILL.md` for the full lifecycle. Always pin the tech stack in the relevant **sub-project** `AGENTS.md`, never in this parent file.
+See `skills/swt-flow/SKILL.md` for the full lifecycle. 
+- **Analysis**: If `graphify-out/graph.json` exists, use it during Phase 2 (Analyze).
+- **Audit**: Run `graphify update` during Phase 8 (Refine) to visualize structural changes.
 
-## 6. Commit Discipline
+Always pin the tech stack in the relevant **sub-project** `AGENTS.md`, never in this parent file.
+
+## 6. Graphify Integration
+
+This workspace uses `graphify` for structural awareness across sub-projects.
+- **Initialization**: Run `graphify .` once to build the initial cross-project graph.
+- **Update**: Run `graphify update` after major changes to any sub-project.
+- **Cross-Repo Mapping**: Use `graphify merge-graphs` if sub-projects are independent repos.
+
+## 7. Commit Discipline
 
 All commits follow the **Diff-First, Draft-and-Approve** protocol:
 1. Stage changes.

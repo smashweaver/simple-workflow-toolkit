@@ -138,6 +138,7 @@ Then propose a detailed plan: step-by-step approach, files to modify, dependenci
 
 For the planned change, assess:
 
+- **Graph-First Analysis**: If `graphify-out/graph.json` exists, you MUST run `graphify query` to identify "Affected Concepts" and "Design Rationale" across the workspace before falling back to manual grep/glob searches.
 - **Components affected**: Which files/functions need modification?
 - **Dependencies**: What other code relies on what you're changing?
 - **State changes**: Will this alter data flow, caching, or persistence?
@@ -215,6 +216,7 @@ If the project has a test framework, run it via Bash. If not, provide a manual t
 > 🛑 **Gate 4: The Refinement Loop**
 > **HARD STOP**. After Phase 7 (Testing) proves the MVP works, present the final state to the user. Ask them to review the UI/UX or edge cases before the code is finalized.
 
+- **Structural Audit**: If `graphify-out/graph.json` exists, run `graphify update` to visualize how your implementation changed the project's structural graph. Report any new "God Nodes" or unexpected coupling to the user.
 - **User Review first**: Allow the user to fine-tune the actual implementation based on their test drive.
 - **Refactor second**: After MVP is verified and polished, propose refactoring for maintainability, SOLID adherence, and code organization.
 - **Verify**: Ensure tests still pass after refactoring.
