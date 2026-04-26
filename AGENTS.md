@@ -169,7 +169,7 @@ New skills or changes to existing skills must be verified by:
 Update the root `README.md` and `AGENTS.md` if a new skill is added or a core methodology change is made.
 
 ### 5. Symlink Maintenance
-After committing updates to this repository, run `swt:link --clear --global` to refresh symlinks across all agent discovery paths (`.agents/`, `.claude/`, `.gemini/`). This ensures the live skill changes are immediately available for dogfooding.
+After committing updates to this repository, run `swt:link --clear --global` to refresh symlinks across all agent discovery paths (`.agents/`, `.claude/`). This ensures the live skill changes are immediately available for dogfooding.
 
 ## 9. Structural Changes & Manual Consent (HITL)
 

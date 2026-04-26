@@ -86,13 +86,13 @@ Scaffolds an `AGENTS.md` file for any new project consuming SWT. Establishes sha
 
 ### `/swt:link` — Skill Linker
 
-Creates or refreshes symlinks to install SWT skills into agent discovery paths (`.claude/`, `.gemini/`, etc.). Supports dogfooding live changes across multiple agents.
+Creates or refreshes symlinks to install SWT skills into agent discovery paths (`.claude/`, etc.). Supports dogfooding live changes across multiple agents.
 
 **When to use**: After adding a new skill or setting up a new development environment.
 
 ```
 /swt:link              # Link into the current project
-/swt:link --global     # Link globally (~/.claude, ~/.gemini)
+/swt:link --global     # Link globally (~/.claude)
 /swt:link /path        # Link into a specific directory
 ```
 

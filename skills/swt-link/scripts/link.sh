@@ -56,7 +56,6 @@ fi
 TARGET_PATHS=(
     "$BASE_DIR/.agents/skills"
     "$BASE_DIR/.claude/skills"
-    "$BASE_DIR/.gemini/skills"
 )
 
 echo "--- SWT Universal Skill Linker ---"

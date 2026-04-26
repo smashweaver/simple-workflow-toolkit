@@ -3,7 +3,7 @@ name: "swt:link"
 description: >
   Universal skill linker for SWT. Use when the user says "link my skills", 
   "setup dogfooding", or "install SWT into this project". It symlinks all 
-  available SWT skills into .agents/, .claude/, and .gemini/ discovery paths. 
+  available SWT skills into .agents/ and .claude/ discovery paths. 
   Supports an optional path argument.
 user-invocable: true
 allowed-tools:
@@ -37,7 +37,6 @@ The skill executes the `scripts/link.sh` utility located within the skill direct
 ### Discovery Paths Targeted:
 - `.agents/skills`
 - `.claude/skills`
-- `.gemini/skills`
 
 ### Flags supported via prompt:
 - `--clear`: Remove existing SWT links before refreshing.
