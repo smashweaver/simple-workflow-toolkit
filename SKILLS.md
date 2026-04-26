@@ -4,6 +4,35 @@ The Simple Workflow Toolkit is a suite of AI agent skills that enforce disciplin
 
 > **Agent Behavior Note**: Before creating any file or task, your agent will always propose a name and wait for your confirmation. You stay in control of every decision.
 
+## Skill Categories
+
+Based on their purposes and triggers:
+
+### Planning & Design
+- **swt:spec**: Turns ideas into structured PRDs/specs.
+- **swt:think**: Base behavioral guidelines for reasoning in non-coding tasks.
+
+### Workflow & Task Management
+- **swt:flow**: Enforces 8-phase development lifecycle.
+- **swt:task**: Manages task lifecycle (creation, graduation, status).
+- **swt:status**: Aggregates project state for session restoration.
+
+### Implementation & Coding
+- **swt:code**: Guidelines for surgical, minimal code changes.
+
+### Version Control & Commits
+- **swt:commit**: Diff-first, draft-and-approve commit workflow.
+
+### Initialization & Setup
+- **swt:init**: Bootstraps projects with AGENTS.md and scaffolding.
+- **swt:link**: Manages symlinks for skill discovery.
+
+### Documentation & Visualization
+- **swt:mermaid**: Ensures correct syntax in Mermaid diagrams.
+
+### Session Continuity
+- **swt:digest**: Automates structured session summaries.
+
 ---
 
 ## How Skills Work Together
