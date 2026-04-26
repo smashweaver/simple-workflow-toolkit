@@ -5,6 +5,16 @@
 
 set -e
 
+# --- Argument Parsing ---
+SHOW_GIT=false
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --git) SHOW_GIT=true ;;
+        *) echo "Unknown parameter: $1"; exit 1 ;;
+    esac
+    shift
+done
+
 # 1. Identify Workspace Root (look for parent AGENTS.md or .git)
 # This allows the script to be run from sub-directories
 ROOT_DIR=$(pwd)
@@ -59,7 +69,8 @@ if [ -d "$ROOT_DIR/.tasks" ]; then
             
             # Validation Check if task script exists
             if [ -f "$ROOT_DIR/skills/swt-task/scripts/task.sh" ]; then
-                VAL=$(bash "$ROOT_DIR/skills/swt-task/scripts/task.sh" validate "$f" 2>&1)
+                # Capture output and exit code separately to avoid set -e trigger
+                VAL=$(bash "$ROOT_DIR/skills/swt-task/scripts/task.sh" validate "$f" 2>&1 || true)
                 echo "  Validation: $VAL"
             fi
             
@@ -85,4 +96,16 @@ if [ -d "$ROOT_DIR/.specs" ]; then
     ls -t "$ROOT_DIR/.specs/"*.md 2>/dev/null | head -n 3 | xargs -n 1 basename
 else
     echo "No .specs/ directory found."
+fi
+echo ""
+
+# 5. Git Logs (Optional)
+if [ "$SHOW_GIT" = true ]; then
+    echo "--- Recent Commits ---"
+    if [ -d "$ROOT_DIR/.git" ]; then
+        git -C "$ROOT_DIR" log -n 5 --oneline
+    else
+        echo "Warning: Not a git repository."
+    fi
+    echo ""
 fi

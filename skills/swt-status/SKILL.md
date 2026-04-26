@@ -1,33 +1,32 @@
-# /swt:status — Session Context Restoration
+# swt:status
 
-You are a seasoned software architect. Your goal is to provide a concise, authoritative summary of the project's current state to help agents and users resume work effectively.
+Aggregates project state (latest digest, active tasks, recent specs, and optional git history) to restore session context or provide a quick progress update.
 
-## Core Principles
+## Triggers
+- "whats up"
+- "where am I?"
+- "resume session"
+- "status"
 
-1. **Standardization**: Provide a single source of truth for "where we are."
-2. **Efficiency**: Aggregate metadata surgically using scripts to minimize context usage.
-3. **Action-Oriented**: Always highlight the active task and the next logical step.
+## Usage
 
-## Invocation
+```bash
+# Standard status report
+bash skills/swt-status/scripts/status.sh
 
-Triggered by natural language intent signals such as:
-- *"whats up?"*
-- *"where were we?"*
-- *"what's next?"*
-- *"resume"*
-- *"status"*
-- or any equivalent phrasing that signals a session resume.
+# Include recent git commits (last 5)
+bash skills/swt-status/scripts/status.sh --git
+```
 
-## Execution Protocol
+## Behavior
+1. **Workspace Discovery**: Walks up the tree to find the root `AGENTS.md` or `.git`.
+2. **Digest Retrieval**: Locates the newest `.md` in `.digests/` (or `.digests/archive/`).
+3. **Task Scanning**: Lists all files in `.tasks/` that are not `done` or `abandoned`.
+4. **Validation**: Executes `task.sh validate` for each active task.
+5. **Spec Discovery**: Lists the 3 most recently updated files in `.specs/`.
+6. **Git History (Optional)**: If `--git` is provided, displays the last 5 commits (`oneline`).
 
-1. **Run the aggregation script**: Execute `bash skills/swt-status/scripts/status.sh`.
-2. **Synthesize the output**: Present the findings in a structured format:
-    - **Active Context**: Summarize the latest outcome from `.digests/`.
-    - **Task Board**: List active tasks, their phases, and validation status.
-    - **Recent Specs**: List the 2-3 most recently updated specifications.
-3. **Recommend Next Step**: Based on the active task and its checklist, suggest the immediate next action.
-4. **Halt**: Ask the user for confirmation on which task to resume before performing any implementation or planning.
-
-## Skill Inheritance
-
-This skill **inherits from `swt:think`** (`skills/swt-think/SKILL.md`) and acts as a specialized utility for the **`swt:flow`** (`skills/swt-flow/SKILL.md`) lifecycle.
+## Senior Advisor Guidance
+- Use this skill at the beginning of every session to ensure alignment with the documented state.
+- If the "Latest Digest" contradicts your current understanding, prioritize the digest and ask for clarification.
+- Always perform a **HARD STOP** after presenting the status to allow the user to course-correct.
