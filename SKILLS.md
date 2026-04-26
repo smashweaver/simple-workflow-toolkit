@@ -19,6 +19,7 @@ Based on their purposes and triggers:
 
 ### Implementation & Coding
 - **swt:code**: Guidelines for surgical, minimal code changes.
+- **swt:graphify**: Structural awareness and dependency mapping (Opt-in).
 
 ### Version Control & Commits
 - **swt:commit**: Diff-first, draft-and-approve commit workflow.
@@ -40,15 +41,18 @@ Based on their purposes and triggers:
 The skills are designed to work in sequence. Here is the typical lifecycle of a feature from idea to commit:
 
 ```mermaid
-flowchart LR
-    A["/swt:task brainstorm\nPhase 0: Ideate"] --> B["/swt:task graduate\nPromote to Phase1"]
+flowchart TD
+    A["/swt:task brainstorm\nPhase 0: Ideate"] --> B["/swt:task graduate\nPromote to Phase 1"]
     B --> C["/swt:flow\nPlan, Analyze, Approve"]
-    C --> D["Implement\nguided by /swt:code\n(inherits /swt:think)"]
-    D --> E["/swt:commit\nDraft & Approve"]
-    E --> F["/swt:digest\nSave session summary"]
-    G["/swt:think\nBase behavioral guidelines"] -.-> D
-    G -.-> E
-    G -.-> F
+    C --> D["Implement\nguided by /swt:code"]
+    D --> E["/swt:flow (Phase 8)\nReview & Refine"]
+    E --> F["/swt:commit\nDraft & Approve"]
+    F --> G["/swt:digest\nSave summary"]
+    
+    subgraph "Structural Awareness (Opt-in)"
+    H["/swt:graphify query\nPhase 2: Analyze"] -.-> C
+    I["/swt:graphify update\nPhase 8: Refine"] -.-> E
+    end
 ```
 
 ---
@@ -156,6 +160,27 @@ Creates structured session summaries so the next agent session picks up exactly 
 
 ---
 
+## 🔍 Structural Awareness Skills
+
+### `/swt:graphify` — Project Graph Orchestrator
+
+A thin wrapper for the **graphify** engine that provides structural awareness during the development workflow. It helps the agent (and you) understand the "Big Picture" of a codebase beyond simple keyword searches.
+
+**Key commands**:
+
+| Command | Purpose |
+|---|---|
+| `/swt:graphify install` | Native bootstrap for Antigravity rules & workflows |
+| `/swt:graphify uninstall` | Full cleanup: removes rules, workflows, and artifacts |
+| `/swt:graphify on / off` | Explicitly enable/disable structural rituals |
+| `/swt:graphify status` | Check current state and artifact presence |
+| `/swt:graphify init` | Perform a full project build (deep scan) |
+| `/swt:graphify query` | Semantic search of the codebase |
+
+**When to use**: Enable it on complex projects where understanding hidden dependencies and architectural drift is critical.
+
+---
+
 ### `/swt:mermaid` — Diagram Syntax Guard
 
 Prevents Mermaid diagram parse errors by enforcing correct syntax rules before writing any diagram.
@@ -196,8 +221,6 @@ Enforces a "Diff-First, Draft-and-Approve" commit protocol. Your agent **never c
 ```
 /swt:commit
 ```
-
-> **Note**: Direct `git commit -m` commands are forbidden. All commits go through this workflow.
 
 ---
 

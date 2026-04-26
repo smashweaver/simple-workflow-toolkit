@@ -32,6 +32,12 @@ fi
 echo "Root: $ROOT_DIR"
 echo ""
 
+# 1.5 Graphify Status
+if [ -f "$ROOT_DIR/skills/swt-graphify/scripts/graphify.sh" ]; then
+    bash "$ROOT_DIR/skills/swt-graphify/scripts/graphify.sh" status
+    echo ""
+fi
+
 # 2. Latest Digest
 echo "--- Latest Digest ---"
 LATEST_DIGEST=$(ls -t "$ROOT_DIR/.digests/"*.md 2>/dev/null | head -n 1)

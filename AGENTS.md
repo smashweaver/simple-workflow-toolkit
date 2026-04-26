@@ -111,6 +111,7 @@ This repository provides the following skills. Agents must be aware of all of th
 | **commit** | `/swt:commit` | Diff-first, draft-and-approve commit workflow. |
 | **digest** | `/swt:digest` | Automates session summaries with multi-digest recursive synthesis. |
 | **status** | `/swt:status` | Aggregates project state (digest, tasks, specs) for session restoration. |
+| **graphify** | `/swt:graphify` | Structural awareness and dependency mapping (Opt-in). |
 | **mermaid** | `/swt:mermaid` | Prevents parse errors and enforces correct syntax in Mermaid diagrams. |
 
 ## 6. Commit Discipline
@@ -187,3 +188,9 @@ To prevent "runaway" agent behavior, all structural modifications are protected 
 2.  **Verify**: Ensure a Phase 0 brainstorm (Scenario Analysis) has occurred.
 3.  **Prompt**: Request explicit, verbal confirmation from the user.
 4.  **Wait**: Do NOT proceed until the user provides a direct "Go" or "Approved" in the chat history.
+
+## Graphify
+<!-- swt:graphify state -->
+- **Status**: enabled
+- **Engine**: safishamsi/graphify
+
