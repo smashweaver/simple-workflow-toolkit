@@ -110,6 +110,7 @@ This repository provides the following skills. Agents must be aware of all of th
 | **coding** | `/swt:code` | Behavioral guidelines for surgical, minimal, goal-driven code changes. Inherits from `swt:think`. |
 | **commit** | `/swt:commit` | Diff-first, draft-and-approve commit workflow. |
 | **digest** | `/swt:digest` | Automates session summaries with multi-digest recursive synthesis. |
+| **status** | `/swt:status` | Aggregates project state (digest, tasks, specs) for session restoration. |
 | **mermaid** | `/swt:mermaid` | Prevents parse errors and enforces correct syntax in Mermaid diagrams. |
 
 ## 6. Commit Discipline
@@ -134,16 +135,16 @@ To ensure architectural continuity and prevent context drift, every session MUST
 
 ### 1. Orientation (Mandatory)
 Before discussing any task or reviewing code, the agent MUST:
-1. **Read the latest session digest** in `.digests/` to understand the previous agent's outcomes and strategic intent. Use `bash ls` + `read` (NOT glob) since these directories are gitignored.
+1. **Invoke the `swt:status` skill** to orient itself. This aggregates the latest digest, active tasks, and recent specs in a single step.
 2. **Read the root `AGENTS.md`** to verify project scope, stack, and conventions.
 3. **Smart Search (Tasks)**: If a task reference or file is not found in the root `.tasks/` directory, check `.tasks/archive/` before assuming it is missing or deleted.
 4. **Ritual Adherence**: If the orientation or task discovery process identifies a skill that mandates a "re-read," execute it immediately. There is zero tolerance for protocol drift.
 
 ### 2. Context Restoration (On-Demand)
 When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"*), the agent MUST:
-1. **Invoke `/swt:task list open`** for an authoritative list of active work.
-2. **Execute Task Validation**: Run `skills/swt-task/scripts/task.sh validate <task_file>` for all active tasks to ensure the checklist is synchronized.
-3. **Summarize status** based on the digest and task files.
+1. **Invoke the `swt:status` skill** to aggregate latest digest, tasks, and specs.
+2. **Execute Task Validation**: The status skill automatically runs `task.sh validate` for all active tasks.
+3. **Summarize status** based on the aggregated report.
 4. **HARD STOP**: Inform the user and wait for explicit confirmation before starting any implementation or planning work.
 
 ## 8. Developing the Toolkit

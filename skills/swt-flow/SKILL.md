@@ -76,38 +76,15 @@ At the start of **every session**, before reviewing tasks or planning anything:
 
 ## Session Context Restoration (MANDATORY)
 
-When the user says anything like:
-- *"where were we?"*
-- *"what am I working on?"*
-- *"what was I doing?"*
-- *"catch me up"*
-- *"resume"*
-- *"what should I do next?"*
-- *"what's next?"*
-- *"where am I?"*
-- *"what's up?"*
-- or any equivalent phrasing that signals a session resume
+When a session resume is detected (e.g., "whats up?", "resume", "where were we?"), you MUST invoke the **`swt:status`** skill (`skills/swt-status/SKILL.md`) to aggregate project metadata.
 
-You **MUST** perform the following steps before responding with anything else:
+**Execution steps:**
+1. **Run the status aggregator**: Execute `bash skills/swt-status/scripts/status.sh`.
+2. **Synthesize the report**: Summarize the latest digest, active tasks, and recent specs.
+3. **Identify the Next Step**: Explicitly highlight the immediate next action for the primary active task.
+4. **Halt**: Ask the user for confirmation on which task to resume. **HARD STOP**: Do not proceed with implementation or planning until the user explicitly confirms the focus.
 
-1. **Read the latest digest** in `.digests/` — identify the key outcomes and next steps from the previous session. Use `bash ls` + `read` (NOT glob/search tools) since these directories are gitignored.
-   - `ls -t .digests/*.md | head -1` — latest digest
-   - If root empty: `ls -t .digests/archive/*.md | head -1`
-2. **Use `/swt:task list open`** — invoke the `swt-task` skill to retrieve the authoritative list of active work. Use `bash ls` + `read` for task files in `.tasks/`.
-3. **Read the identified task files** and identify:
-   - Tasks with `**Status**: ideating` — these are **active brainstorms** awaiting a decision
-   - Tasks with `**Status**: in-progress` or `**Status**: pending` — these are **active implementation tasks**
-   - Tasks with `**Status**: done` or `**Status**: abandoned` — these are **closed**, skip unless user asks
-4. **Identify the current phase** for each active task using the `**Phase**:` field and the `## Checklist` to see which items remain unchecked.
-5. **Summarise clearly**:
-   - What task(s) are active
-   - What phase each is in
-   - What the next unchecked step is
-   - Any blockers noted in the task file
-6. **Execute Task Validation** — run `bash skills/swt-task/scripts/task.sh validate <task_file>` for each active task. Report the validation status in your summary.
-7. **Ask the user** which task to resume. **HARD STOP**: Do not proceed with implementation or planning until the user explicitly confirms which task to work on.
-
-> ⚠️ **Never rely on conversation history alone to reconstruct context.** Always read the task files. They are the source of truth for what is in progress.
+> ⚠️ **Never rely on conversation history alone to reconstruct context.** Always use `swt:status` to query the filesystem's source of truth.
 
 ---
 
