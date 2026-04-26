@@ -1,3 +1,15 @@
+---
+name: "swt:status"
+description: >
+  Aggregates project state (latest digest, active tasks, recent specs, and
+  optional git history) to restore session context or provide a quick progress
+  update.
+user-invocable: true
+allowed-tools:
+  - Read
+  - Bash
+---
+
 # swt:status
 
 Aggregates project state (latest digest, active tasks, recent specs, and optional git history) to restore session context or provide a quick progress update.
