@@ -38,6 +38,8 @@ The skill executes the `scripts/link.sh` utility located within the skill direct
 - `.agents/skills`
 - `.claude/skills`
 
+> **Note**: `CLAUDE.md` is natively discovered by Claude Code at the project root and does NOT need symlinking. Use `/swt:init --claude` to generate it.
+
 ### Flags supported via prompt:
 - `--clear`: Remove existing SWT links before refreshing.
 - `--global`: Target home directory paths.
