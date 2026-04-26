@@ -69,6 +69,24 @@ Before writing **any** task file to disk, the agent MUST:
 
 ---
 
+## Uplink Protocol (MANDATORY)
+
+The "Uplink" is a mechanism to "throw" ideas or issues back to the core SWT project's backlog (`$SWT_HOME`) from any project.
+
+**When to trigger:**
+- User says "uplink this", "report this to swt", "swt needs a new skill", "this gate is annoying", etc.
+- You identify a meta-issue with the toolkit itself while working on a project task.
+
+**Steps:**
+1. **Detect $SWT_HOME**: Ensure the environment variable is set.
+2. **Determine the Topic**: Use the user's prompt or the identified friction point as the topic.
+3. **Execute**: Run `bash skills/swt-task/scripts/task.sh brainstorm "Topic" --uplink`.
+4. **Notify**: Confirm to the user: *"Insight uplinked to SWT core: `Topic`"*
+
+> 💡 The script automatically captures the current project path, active task, and phase to provide context for the SWT maintainers.
+
+---
+
 ## Operations
 
 ### `/swt:task new` — Standard task (Phase 1)

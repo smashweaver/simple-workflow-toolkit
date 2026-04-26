@@ -222,7 +222,38 @@ if [ "$CMD" == "brainstorm" ]; then
         exit 1
     fi
 
-    if [ ! -d ".tasks" ]; then
+    UPLINK=false
+    if [ "$3" == "--uplink" ] || [ "$4" == "--uplink" ]; then
+        UPLINK=true
+    fi
+
+    TASK_ROOT=".tasks"
+    UPLINK_CONTEXT=""
+
+    if [ "$UPLINK" == "true" ]; then
+        if [ -z "$SWT_HOME" ]; then
+            echo "Error: --uplink specified but SWT_HOME is not set."
+            exit 1
+        fi
+        if [ ! -d "$SWT_HOME/.tasks" ]; then
+            echo "Error: $SWT_HOME/.tasks not found. Cannot uplink."
+            exit 1
+        fi
+        TASK_ROOT="$SWT_HOME/.tasks"
+        
+        # Capture Context
+        C_PWD=$(pwd)
+        # Find active task (most recent non-closed md in .tasks)
+        C_TASK=$(ls -t .tasks/*.md 2>/dev/null | xargs grep -l '\*\*Status\*\*: \(pending\|ideating\|in-progress\)' | head -n 1 || echo "none")
+        C_PHASE="unknown"
+        if [ "$C_TASK" != "none" ]; then
+            C_PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\d+' "$C_TASK" | head -n 1)
+        fi
+        
+        UPLINK_CONTEXT="- **Source Project**: $C_PWD
+- **Source Task**: $(basename "$C_TASK")
+- **Source Phase**: $C_PHASE"
+    elif [ ! -d ".tasks" ]; then
         echo "Error: No .tasks/ directory found. Run 'swt.sh init' first."
         exit 1
     fi
@@ -231,7 +262,7 @@ if [ "$CMD" == "brainstorm" ]; then
     DATE_STR=$(date +"%Y-%m-%d %H:%M:%S")
 
     SAFE_NAME=$(echo "$ARG" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/-/g' -e 's/-\+/-/g' -e 's/^-//' -e 's/-$//')
-    FILENAME=".tasks/${TIMESTAMP}_${SAFE_NAME}.md"
+    FILENAME="${TASK_ROOT}/${TIMESTAMP}_${SAFE_NAME}.md"
 
     cat <<EOF > "$FILENAME"
 # Task: $SAFE_NAME
@@ -246,7 +277,7 @@ if [ "$CMD" == "brainstorm" ]; then
 **Blocked By**: —             <!-- task filename or n/a -->
 
 ## Core Concept
-What is the core problem or idea being explored?
+$ARG
 
 ## Explored Alternatives
 - **Scenario A (Discipline)**: {{Methodology/Rule change only}}
@@ -257,6 +288,7 @@ What is the core problem or idea being explored?
 What still needs to be answered before this can become a task?
 
 ## Notes
+$UPLINK_CONTEXT
 
 ## Commit Reference
 
