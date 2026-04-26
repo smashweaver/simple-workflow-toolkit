@@ -18,6 +18,7 @@ Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot
 - **Locked Gate Protocol**: When a structural junction is reached, the agent must halt and state: *"I am at a Locked Gate. This change is structural. Do I have your approval to proceed?"*
 - **Task-Centric Flow**: All work maps to an active task file in `.tasks/`.
 - **Checklist Discipline**: Every phase requires explicit approval before moving to the next.
+- **Discovery Pointers**: This project uses `GEMINI.md` and `CLAUDE.md` as discovery pointers. These files shim directly to this `AGENTS.md` source of truth. Always verify their presence after an `/swt:init` or `/swt:link` operation.
 
 ## 3. The 8-Phase Workflow
 

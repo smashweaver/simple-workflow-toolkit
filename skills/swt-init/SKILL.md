@@ -8,11 +8,11 @@ description: >
   beginning, before any tasks or specs are created. It interviews the user to
   determine workspace type, loads the appropriate template, and scaffolds
   AGENTS.md. For workspaces, it also initializes directory structures.
+  Automatically generates discovery pointers (GEMINI.md, CLAUDE.md) that link
+  to the methodology source of truth.
   **Mandatory Phase 0**: Since this is a structural change, a Phase 0 brainstorm
   (Scenario A, B, C) MUST be presented and approved before execution.
   If AGENTS.md already exists, it runs in defensive diff mode — never overwrites blindly.
-  Supports `--claude` flag to generate a CLAUDE.md shim for Claude Code users
-  (opt-in only, never the default).
 user-invocable: true
 allowed-tools:
   - Read
@@ -49,32 +49,35 @@ At the start of every session, **before doing anything else**:
 
 ---
 
-## Flag Reference
+## Discovery Pointers (Standard Behavior)
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--claude` | off | Generate a `CLAUDE.md` shim alongside `AGENTS.md`. Claude Code natively reads `CLAUDE.md` at session start. This flag is opt-in only. |
-| `--no-claude` | — | Explicitly skip `CLAUDE.md` generation (redundant unless aliased). |
+To ensure consistent behavioral compliance across different AI engines, `/swt:init` automatically generates and manages thin "Discovery Pointers" in the workspace root.
 
-### CLAUDE.md Behavior
+| File | Engine | Purpose |
+|------|--------|---------|
+| `GEMINI.md` | Gemini / Antigravity | Redirects the agent to `AGENTS.md` at session start. |
+| `CLAUDE.md` | Claude Code | Redirects the agent to `AGENTS.md` at session start. |
 
-- **No existing `CLAUDE.md`**: Creates a thin shim that points to `AGENTS.md`.
-- **Existing `CLAUDE.md`, no SWT directive**: Prepends an `<!-- SWT DIRECTIVE -->` block (idempotent, never overwrites user content).
-- **Existing `CLAUDE.md`, SWT directive present**: Skips silently (idempotent).
+### Pointer Behavior
+
+- **No existing file**: Creates a thin shim that points to `AGENTS.md`.
+- **Existing file, no SWT directive**: Prepends an `<!-- BEGIN SWT DIRECTIVE -->` block (idempotent, never overwrites user content).
+- **Existing file, SWT directive present**: Skips silently (idempotent).
 
 ---
 
 ## Invocation Flow
 
 ```
-/swt:init [--claude] is invoked
+/swt:init is invoked
   │
   ├─ AGENTS.md exists at workspace root?
-  │     ├─ YES ──
-  │     │         ├─ --claude? ── [Retrofit Mode]  ── see below
-  │     │         └─ no flag  ── [Diff Mode]      ── see "Defensive Diff Protocol"
+  │     ├─ YES ── [Diff Mode] ── see "Defensive Diff Protocol" below
   │     └─ NO  ── [Interview Mode] ── see "Interview" below
-  │                └─ if --claude: also generate CLAUDE.md shim
+  │
+  ├─ Management Phase (Always runs)
+  │     ├─ Generate/Update GEMINI.md shim
+  │     └─ Generate/Update CLAUDE.md shim
   │
   └─ On completion: confirm what was created or changed, and what to do next
 ```
@@ -111,7 +114,7 @@ After receiving answers:
 2. Substitute `{{project_name}}` and `{{purpose}}` placeholders.
 3. If **Workspace**, perform **Workspace Scaffolding** (see below).
 4. Write `AGENTS.md` to the workspace root.
-5. If `--claude` flag was passed, generate `CLAUDE.md` shim (see "CLAUDE.md Generation" below).
+5. Generate/Update **GEMINI.md** and **CLAUDE.md** pointers.
 6. Confirm to the user and suggest the next step.
 
 > 💡 Stack detection is deliberately left to the `/swt:flow` skill's auto-pin mechanism. Do not ask about the tech stack here.
@@ -179,22 +182,14 @@ Section                     | In your file | Expected by template
 ----------------------------|:------------:|:---------------------:
 ## Core Principles          |      ✅      | ✅ required
 ## Execution Boundaries     |      ✅      | ✅ required
-## Skills Suite             |      ❌      | ✅ required
+## Skills Suite             |      ✅      | ✅ required
 ## Commit Discipline        |      ✅      | ✅ required
 ## Project Stack            |      ✅      | ⚠️  not expected here
 ```
 
-**Legend:**
-- `✅` — present and expected
-- `❌` — missing; will be **appended** if approved
-- `⚠️` — present but not expected by selected template; flagged only, **never auto-removed**
-
 ### Step 4 — Propose specific actions
 
-List each action clearly:
-
-- *"I will append `## Skills Suite` to your existing file."*
-- *"I found `## Project Stack` — the toolkit template does not expect this section. I'll leave it as-is unless you tell me to remove it."*
+List each action clearly. **Note**: Discovery pointers (`GEMINI.md`, `CLAUDE.md`) will always be checked and updated as part of this process.
 
 ### Step 5 — Hard stop (MANDATORY)
 
@@ -211,67 +206,39 @@ Make targeted appends or edits using Edit — **never rewrite the entire file.**
 
 ---
 
-## Retrofit Mode (--claude + existing AGENTS.md)
+## Discovery Pointer Generation
 
-When `/swt:init --claude` is invoked and `AGENTS.md` already exists, do NOT run the Defensive Diff Protocol. Instead:
+Shared logic for generating or updating `GEMINI.md` and `CLAUDE.md`.
 
-1. **Leave `AGENTS.md` untouched** — retrofit mode only adds `CLAUDE.md`.
-2. **Handle `CLAUDE.md`** (see "CLAUDE.md Generation" below).
-3. **Confirm** what was done:
-   > *"Retrofit complete. `AGENTS.md` was left unchanged. `CLAUDE.md` was [created|updated] at [path]."*
+### Step 1 — Check for existing file
 
----
+If the file exists, check for the SWT directive. If not, create a new shim.
 
-## CLAUDE.md Generation
+### Step 2 — New Pointer (Shim)
 
-Shared logic for generating or updating `CLAUDE.md`. Called from Interview Mode (if `--claude`) or Retrofit Mode.
-
-### Step 1 — Check if CLAUDE.md exists
-
-```bash
-if [[ -f "CLAUDE.md" ]]; then
-  # Exists — check for existing SWT directive
-else
-  # New file — create shim
-fi
-```
-
-### Step 2 — New file (no existing CLAUDE.md)
-
-Write a thin shim to `./CLAUDE.md`:
+Write to `./GEMINI.md` or `./CLAUDE.md`:
 
 ```markdown
-# CLAUDE.md
-# Auto-generated by swt:init --claude — do not edit directly.
+# [GEMINI.md | CLAUDE.md]
+# Auto-generated by swt:init — do not edit directly.
 # All behavioral rules, workflow protocols, and project context are defined in AGENTS.md.
 # Read it at the start of every session.
 
 See AGENTS.md for full methodology.
 ```
 
-### Step 3 — Existing file (CLAUDE.md present)
+### Step 3 — Existing Pointer (Directive)
 
-1. Read the file.
-2. Check if `<!-- BEGIN SWT DIRECTIVE` is already present.
-   - **Yes** → Skip silently (idempotent).
-   - **No** → **Prepend** the SWT directive block at the top of the file.
-
-**SWT Directive Block:**
+Prepend the following block at the top of the file:
 
 ```markdown
-<!-- BEGIN SWT DIRECTIVE — added by swt:init --claude -->
+<!-- BEGIN SWT DIRECTIVE — added by swt:init -->
 ## SWT Integration
 This project uses the Simple Workflow Toolkit. All behavioral rules and workflow
 protocols are defined in AGENTS.md. Read it at the start of every session.
 <!-- END SWT DIRECTIVE -->
 
 ```
-
-**Prepend logic**: Insert the directive block before the first line of the existing file, preserving all original content.
-
-### Step 4 — Confirm
-
-> *"`CLAUDE.md` [created|updated] at [path]. It now references AGENTS.md for session startup."*
 
 ---
 
@@ -281,8 +248,9 @@ After successfully writing or updating `AGENTS.md`, confirm to the user:
 
 - [ ] `AGENTS.md` created or updated at workspace root
 - [ ] `{{project_name}}` and `{{purpose}}` are filled in (no raw placeholders remain)
-- [ ] **If `--claude`**: `CLAUDE.md` created/updated at workspace root (or SWT directive prepended to existing file)
-- [ ] **Workspace only**: Remind the user that each sub-project also needs its own `AGENTS.md`. They can run `/swt:init` again from within each sub-project directory.
+- [ ] `GEMINI.md` discovery pointer created/updated
+- [ ] `CLAUDE.md` discovery pointer created/updated
+- [ ] **Workspace only**: Remind the user that each sub-project also needs its own `AGENTS.md`.
 - [ ] Suggest the next step: *"Your workspace is bootstrapped. Run `/swt:flow` and describe your first task to begin."*
 
 ---

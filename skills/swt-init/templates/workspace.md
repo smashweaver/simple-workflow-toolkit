@@ -22,6 +22,7 @@ Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot
 - **Task-Centric Flow**: All work maps to an active task file in the **relevant sub-project's** `.tasks/`.
 - **Checklist Discipline**: Every phase requires explicit approval before moving to the next.
 - **Sub-project Scoping**: At session start, always confirm which sub-project is in scope before proceeding.
+- **Discovery Pointers**: This workspace uses `GEMINI.md` and `CLAUDE.md` as discovery pointers. These files shim directly to this `AGENTS.md` source of truth. Always verify their presence after an `/swt:init` or `/swt:link` operation.
 
 ## 3. Workspace Structure
 

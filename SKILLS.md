@@ -115,6 +115,8 @@ Scaffolds an `AGENTS.md` file for any new project consuming SWT. Establishes sha
 /swt:init
 ```
 
+Automatically generates or updates **`GEMINI.md`** and **`CLAUDE.md`** discovery pointers at the project root. These shims redirect agents to the `AGENTS.md` source of truth for all behavioral rules and workflow protocols.
+
 ---
 
 ### `/swt:link` — Skill Linker
