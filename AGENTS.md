@@ -38,6 +38,8 @@ Every non-trivial feature or architectural change begins with a Phase 0 brainsto
 > [!NOTE]
 > For trivial changes, Scenarios B and C can be marked as "N/A" or "Not recommended for simplicity."
 
+**The Graduation Ritual**: To move from Phase 0 to Phase 1, the agent MUST invoke `swt.sh graduate <task_file>`. This command automates metadata updates and enforces artifact generation (`SPEC.md` for features, `Verification Checklist` for refactors).
+
 ### Gate 1: The Alignment Loop (Phase 1 Entry)
 *   **Trigger**: Immediately after a task file is created or graduated.
 *   **Action**: Provide a link to the task file and **HARD STOP**.

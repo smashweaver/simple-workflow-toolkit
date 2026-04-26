@@ -13,6 +13,7 @@ function show_help {
     echo "  swt.sh init              - Initialize .tasks/ directory and update .gitignore"
     echo "  swt.sh new \"Final Feature Name\"  - Create a new timestamped task file"
     echo "  swt.sh brainstorm \"Topic\"        - Create a Phase 0 ideation task"
+    echo "  swt.sh graduate <task_file>      - Transition Phase 0 to Phase 1"
     echo "  swt.sh list [--open|--archived]  - List tasks (filters: --open, --pending, --archived, etc.)"
     echo "  swt.sh --tidy                    - Move done/abandoned tasks to .tasks/archive/"
 }
@@ -119,8 +120,6 @@ fi
 
 if [ "$CMD" == "validate" ]; then
     if [ -z "$ARG" ]; then
-        # Default to checking for an active task if one is inferred? 
-        # For now, require explicit file.
         echo "Error: Must provide a task file to validate."
         exit 1
     fi
@@ -151,7 +150,6 @@ if [ "$CMD" == "validate" ]; then
     fi
 
     # 2. Check the checklist for that phase
-    # Matches: - [x] Phase N  OR  - [/] Phase N
     CHECK=$(grep -iP "\- \[[x/]\] Phase $PHASE" "$FILE" || true)
 
     if [ -z "$CHECK" ]; then
@@ -189,7 +187,7 @@ if [ "$CMD" == "new" ]; then
 **Status**: pending
 **Priority**: medium          <!-- low | medium | high | critical -->
 **Type**: feature             <!-- feature | bugfix | refactor | chore | docs -->
-**Stack**: frontend           <!-- frontend | backend | shared -->
+**Stack**: shared             <!-- frontend | backend | shared -->
 **Phase**: 1                  <!-- current active phase (1–8) -->
 **Blocked By**: —             <!-- task filename or n/a -->
 
@@ -265,6 +263,78 @@ What still needs to be answered before this can become a task?
 EOF
 
     echo "Created brainstorm task: $FILENAME"
+    exit 0
+fi
+
+if [ "$CMD" == "graduate" ]; then
+    if [ -z "$ARG" ]; then
+        echo "Error: Must provide a task file to graduate."
+        exit 1
+    fi
+    FILE=$ARG
+    if [ ! -f "$FILE" ]; then
+        echo "Error: File $FILE not found."
+        exit 1
+    fi
+
+    PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\d+' "$FILE" | head -n 1)
+    if [ "$PHASE" -ne 0 ]; then
+        echo "Error: Task is already in Phase $PHASE. Only Phase 0 tasks can be graduated."
+        exit 1
+    fi
+
+    TYPE=$(grep -oP '\*\*Type\*\*:\s*\K\S+' "$FILE" | head -n 1)
+    
+    # Update Status and Phase
+    sed -i "s/^\*\*Status\*\*:\s*ideating/**Status**: pending/" "$FILE"
+    sed -i "s/^\*\*Phase\*\*:\s*0/**Phase**: 1/" "$FILE"
+    
+    # Add implementation checklist if missing
+    if ! grep -q "## Checklist" "$FILE"; then
+        cat <<EOF >> "$FILE"
+
+## Checklist
+- [ ] Phase 1: Plan
+- [ ] Phase 2: Analyze
+- [ ] Phase 3: Risk Assessment
+- [ ] Phase 4: Approval
+- [ ] Phase 5: Implement
+- [ ] Phase 6: Document
+- [ ] Phase 7: Test
+- [ ] Phase 8: Review & Refine
+EOF
+    fi
+
+    if [[ "$TYPE" == "feature" || "$TYPE" == "brainstorm" ]]; then
+        mkdir -p specs
+        TIMESTAMP=$(date +"%Y%m%d%H%M%S")
+        BASENAME=$(basename "$FILE")
+        SLUG=${BASENAME#*_}
+        SLUG=${SLUG%.md}
+        SPEC_FILE="specs/${TIMESTAMP}_${SLUG}.md"
+        
+        cat <<EOF > "$SPEC_FILE"
+# Spec: $SLUG
+**Version**: 0.1
+**Status**: draft
+**Linked Task**: $FILE
+
+## 1. Problem Statement
+(required)
+
+## 5. User Stories
+- [ ] US-001: ...
+
+## 12. MVP Definition
+- [ ] ...
+EOF
+        # Add Spec link to task header (below Phase)
+        sed -i "/^\*\*Phase\*\*:/a **Spec**: $SPEC_FILE" "$FILE"
+        echo "Graduated $FILE to Phase 1. Spec created: $SPEC_FILE"
+    else
+        echo -e "\n## Verification Checklist\n- [ ] ..." >> "$FILE"
+        echo "Graduated $FILE to Phase 1 (Lite path)."
+    fi
     exit 0
 fi
 

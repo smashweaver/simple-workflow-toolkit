@@ -118,15 +118,16 @@ Promotes a brainstorm task to an implementation task when the user is ready to b
 - End of a productive Phase 0 ideation session with clear direction
 
 **Steps:**
-1. Read the active brainstorm task file
-2. Update the following fields:
-   - `**Status**`: `ideating` → `pending`
-   - `**Type**`: `brainstorm` → appropriate type (`feature`, `bugfix`, `chore`, `docs`, `refactor`)
-   - `**Phase**`: `0` → `1`
-3. Append the standard 8-phase `## Checklist` if not already present
-4. **Gate 1 (Alignment)**: Provide the link and ask: *"Task graduated: `[slug](path)`. Please review the updated Objective and Checklist. Ready to proceed to Phase 1: Plan?"*
-5. **HARD STOP**: Do not proceed with technical planning until the user explicitly confirms the graduation.
-6. Move into Phase 1 planning only after confirmation.
+1. Invoke `scripts/task.sh graduate <task_file>`.
+2. This script handles:
+   - Metadata update: `Phase: 0` → `1`, `Status: ideating` → `pending`.
+   - **Type Check**: 
+     - If `Type: feature`, it scaffolds a `SPEC.md` in `specs/` and links it to the task.
+     - If `Type: refactor`, it appends a `## Verification Checklist` (Lite path).
+   - Implementation checklist injection (Phases 1-8).
+3. **Gate 1 (Alignment)**: Provide the link and ask: *"Task graduated: `[slug](path)`. Spec/Checklist generated. Please review. Ready to proceed to Phase 1: Plan?"*
+4. **HARD STOP**: Do not proceed with technical planning until the user explicitly confirms the graduation.
+5. Move into Phase 1 planning only after confirmation.
 
 ---
 
