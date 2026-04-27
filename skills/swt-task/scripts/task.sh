@@ -130,10 +130,13 @@ if [ "$CMD" == "validate" ]; then
         exit 1
     fi
 
-    # 1. Check for unpopulated placeholders (Scenario A: Discipline)
-    if grep -qE "^- .*: .*\{\{Methodology|^- .*: .*\{\{Helper|^- .*: .*\{\{Hard gates" "$FILE"; then
-        echo "⚠️ PROTOCOL WARNING: Task contains unpopulated placeholders. It is not 'Born Complete'."
-        echo "   You MUST populate all sections before proceeding."
+    # 1. Check for unpopulated placeholders (Scenario C: Enforcement)
+    # Pattern: double braces starting with a letter
+    if grep -qE "\{\{[A-Za-z][^}]*\}\}" "$FILE"; then
+        echo "🛑 PROTOCOL VIOLATION: Task contains unpopulated placeholders: "
+        grep -nE "\{\{[A-Za-z][^}]*\}\}" "$FILE"
+        echo "   You are FORBIDDEN from proceeding until these are populated."
+        exit 1
     fi
 
     # 2. Get current phase

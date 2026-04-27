@@ -102,3 +102,10 @@ echo "Digest created: $FILENAME"
 if [ -n "$PARENTS" ]; then
     echo "Archived synthesized parents to $DIGEST_ROOT/archive/"
 fi
+
+# Post-Generation Validation (Scenario C)
+if grep -qE "\{\{[A-Za-z][^}]*\}\}" "$FILENAME"; then
+    echo "🛑 PROTOCOL WARNING: Generated digest contains unpopulated placeholders!"
+    grep -nE "\{\{[A-Za-z][^}]*\}\}" "$FILENAME"
+    echo "   You MUST fill these in manually or re-run the synthesis correctly."
+fi
