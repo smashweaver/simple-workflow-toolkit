@@ -22,6 +22,7 @@ Before drafting any commit message, the agent MUST output the following audit si
 > - [x] Task state validated (`skills/swt-task/scripts/task.sh validate <file>`)
 > - [x] Checked for red flags (no dots/slashes in bullets, no jargon)
 > - [x] Verified Phase 8 (Review & Refine) is closed
+> - [x] Verified **Repo Hygiene** (no leftover trash/temp files)
 
 > [!CAUTION]
 > **Zero Tolerance for Structural Noise**: Bullets MUST focus on outcomes. Any mention of file paths, extensions, or internal refactoring details is a protocol failure.

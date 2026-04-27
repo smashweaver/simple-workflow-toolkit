@@ -5,7 +5,7 @@ This document defines the core principles and behavioral protocols for AI coding
 ## 1. Core Principles
 
 1.  **Plan First**: Never start implementation without a detailed, peer-reviewed plan.
-2.  **Surgical Changes**: Touch only what you must. Avoid "cleaning up" adjacent code unless it's part of the task.
+2.  **Surgical Changes**: Touch only what you must. Avoid "cleaning up" adjacent code unless it's part of the task. **Mandatory Cleanup**: All temporary testing artifacts (temp tasks, scratch scripts, etc.) must be deleted before finalizing the task.
 3.  **Simplicity Over Specification**: No speculative features or premature abstractions.
 4.  **Verifiable Outcomes**: Every change must have a clear path to verification (tests or checklists).
 5.  **Gitignored Awareness**: Runtime directories (`.digests/`, `.tasks/`) are gitignored. Use `bash ls` + `read` for these — glob/search tools will return empty results.
