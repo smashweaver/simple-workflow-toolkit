@@ -33,3 +33,6 @@ Thumbs.db
 .gemini/
 .opencode/
 demo/
+
+# Graphify artifacts
+graphify-out/
