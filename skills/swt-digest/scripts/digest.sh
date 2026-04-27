@@ -47,13 +47,18 @@ CLOSED_TASKS=$(ls -1 .tasks/archive/*.md 2>/dev/null | grep "$(date +%Y%m%d)" ||
     elif [ -f "$CONTENT_FILE" ]; then
         cat "$CONTENT_FILE"
     else
+        echo "## Summary"
         echo "{{A 1-2 sentence summary of the session's primary focus.}}"
     fi
     echo ""
-    echo "## Key Outcomes & Architecture"
-    echo ""
-    echo "- {{Outcome Title}}: {{Brief explanation.}}"
-    echo ""
+    
+    # Only show these sections if we have manual content or it's a milestone
+    if [ -z "$SUMMARY_TEXT" ]; then
+        echo "## Key Outcomes & Architecture"
+        echo ""
+        echo "- {{Outcome Title}}: {{Brief explanation.}}"
+        echo ""
+    fi
     echo "## Active Tasks in \`.tasks/\`"
     echo ""
     for task in $ACTIVE_TASKS; do
@@ -66,14 +71,21 @@ CLOSED_TASKS=$(ls -1 .tasks/archive/*.md 2>/dev/null | grep "$(date +%Y%m%d)" ||
     echo ""
     for task in $CLOSED_TASKS; do
         SLUG=$(basename "$task" .md)
-        HASH=$(grep -oP '## Commit Reference\n\K\S+' "$task" | head -n 1 || echo "—")
-        echo "- **Closed [$SLUG]($task)**: Committed changes ($HASH)."
+        STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$task" | head -n 1)
+        if [ "$STATUS" == "abandoned" ]; then
+            echo "- **Abandoned [$SLUG]($task)**"
+        else
+            HASH=$(grep -A 1 "## Commit Reference" "$task" | grep -v "## Commit Reference" | grep -oE "[a-f0-9]{7,40}" | head -n 1 || echo "—")
+            echo "- **Closed [$SLUG]($task)**: Committed changes ($HASH)."
+        fi
     done
     echo ""
-    echo "## Immediate Next Steps"
-    echo ""
-    echo "1. {{Step 1}}: {{Actionable item}}"
-    echo ""
+    if [ -z "$SUMMARY_TEXT" ]; then
+        echo "## Immediate Next Steps"
+        echo ""
+        echo "1. {{Step 1}}: {{Actionable item}}"
+        echo ""
+    fi
     echo "## Synthesized Parent Digests"
     echo ""
     for parent in $PARENTS; do
