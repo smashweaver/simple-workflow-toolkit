@@ -126,7 +126,7 @@ Immediately after a successful commit:
 3. Execute the `/swt:task close` operation on the linked task file:
    - Change `**Status**` to `done`
    - Change `**Completed**` to today's date
-   - Prepend the commit hash and a brief description under `## Commit Reference`.
+   - Append the commit hash and description to the `## Commit Reference` section at the bottom of the task file
 
 ### Step 8 — Cleanup (agent-executed)
 After the commit and task updates are complete, delete both temp files:
