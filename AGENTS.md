@@ -51,6 +51,7 @@ Gather context, map dependencies, and propose a detailed step-by-step implementa
 
 ### Phase 2: Analyze
 Assess the impact on existing components, state management, performance, and API contracts.
+*   **Structural Awareness**: If `swt:graphify` is enabled, the agent MUST query the knowledge graph to identify "Affected Concepts" and "God Nodes" (central dependencies) that this change might impact.
 
 ### Phase 3: Risk Assessment
 Identify security, performance, or compatibility risks. Define mitigations for each.
@@ -84,6 +85,7 @@ Run automated tests or provide a manual verification checklist. Zero tolerance f
 
 ### Phase 8: Review & Refine
 Verify that the MVP meets the objective. Polish the implementation based on user feedback during Gate 4. Refactor only if necessary for SOLID principles.
+*   **Structural Validation**: If `swt:graphify` is enabled, run `/swt:graphify update` and review the "Structural Diff" in `graphify-out/graph.html` to ensure no unexpected coupling or "God Nodes" were introduced.
 
 ### Gate 5: The Finality Loop (Commit Sequence)
 *   **Trigger**: After Phase 8 is complete and the user confirms they are finished refining.
@@ -190,8 +192,4 @@ To prevent "runaway" agent behavior, all structural modifications are protected 
 3.  **Prompt**: Request explicit, verbal confirmation from the user.
 4.  **Wait**: Do NOT proceed until the user provides a direct "Go" or "Approved" in the chat history.
 
-## Graphify
-<!-- swt:graphify state -->
-- **Status**: enabled
-- **Engine**: safishamsi/graphify
 

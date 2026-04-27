@@ -53,7 +53,7 @@ Shared agreements that all sub-projects must honour. Update this section as cont
 
 ## 5. The 8-Phase Workflow
 
-See `skills/swt-flow/SKILL.md` for the full lifecycle. Always pin the tech stack in the relevant **sub-project** `AGENTS.md`, never in this parent file.
+See `skills/swt-flow/SKILL.md` for the full lifecycle. Always pin the tech stack in the relevant **sub-project** `AGENTS.md`, never in this parent file. Use `swt:graphify` for **Structural Awareness** in Phase 2 and **Structural Validation** in Phase 8 to prevent cross-project architectural drift.
 
 ## 6. Commit Discipline
 

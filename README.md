@@ -66,6 +66,16 @@ Unlike a traditional linter, this suite operates at the **agent behavior level**
 
 The `AGENTS.md` file contains the full internal development protocol, including the 8-phase workflow, 5 mandatory consent gates, and Locked Gate enforcement logic.
 
+## Structural Awareness (Recommended)
+
+SWT integrates with the **graphify** engine to provide a "Big Picture" view of your project. This prevents architectural drift and surfaces hidden risks.
+
+1.  **Initialize**: Run `/swt:graphify init` to map your project.
+2.  **Analyze (Phase 2)**: The agent queries the graph to see how your changes affect "God Nodes" (central dependencies).
+3.  **Review (Phase 8)**: Run `/swt:graphify update` to see a "Structural Diff" of your changes in `graphify-out/graph.html`.
+
+To use these features, ensure the engine is installed: `pip install graphifyy`.
+
 ## License
 
 MIT

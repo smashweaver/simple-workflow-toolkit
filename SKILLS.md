@@ -166,18 +166,18 @@ Creates structured session summaries so the next agent session picks up exactly 
 
 ### `/swt:graphify` — Project Graph Orchestrator
 
-A thin wrapper for the **graphify** engine that provides structural awareness during the development workflow. It helps the agent (and you) understand the "Big Picture" of a codebase beyond simple keyword searches.
-
-**Key commands**:
+The "Eyes" of the toolkit. A thin wrapper for the **graphify** engine that provides structural awareness during the development workflow. It helps the agent (and you) understand the architectural "Big Picture" and surfaces risk by identifying central "God Nodes" and hidden bridges between communities.
 
 | Command | Purpose |
 |---|---|
-| `/swt:graphify install` | Native bootstrap for Antigravity rules & workflows |
-| `/swt:graphify uninstall` | Full cleanup: removes rules, workflows, and artifacts |
+| `/swt:graphify verify` | Check for engine presence in system PATH |
 | `/swt:graphify on / off` | Explicitly enable/disable structural rituals |
 | `/swt:graphify status` | Check current state and artifact presence |
 | `/swt:graphify init` | Perform a full project build (deep scan) |
-| `/swt:graphify query` | Semantic search of the codebase |
+| `/swt:graphify query "<text>"` | Semantic search for Phase 2: Analyze |
+| `/swt:graphify update` | Incremental update for Phase 8: Review |
+| `/swt:graphify explain "<node>"` | Structural breakdown of a component |
+
 
 **When to use**: Enable it on complex projects where understanding hidden dependencies and architectural drift is critical.
 

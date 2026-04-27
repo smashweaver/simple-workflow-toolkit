@@ -27,13 +27,13 @@ See `skills/swt-flow/SKILL.md` for the full lifecycle.
 | Phase | Purpose |
 |---|---|
 | 1. Plan | Gather context, map dependencies, propose a step-by-step plan |
-| 2. Analyze | Assess impact on existing components and state |
+| 2. Analyze | Assess impact (and **Structural Awareness** via `swt:graphify`) |
 | 3. Risk Assessment | Identify risks with mitigations |
 | 4. Approval | Present the complete plan — do not proceed without explicit user approval |
 | 5. Implement | Surgical edits, one file at a time, with explanations |
 | 6. Document | Update docs, diagrams, generate commit messages |
 | 7. Test | Run tests or provide manual verification checklists |
-| 8. Iterate | Verify MVP meets objective and refactor for maintainability |
+| 8. Iterate | Verify MVP and **Structural Validation** via `swt:graphify` |
 
 ## 4. Project Stack
 
