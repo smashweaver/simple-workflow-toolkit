@@ -110,13 +110,18 @@ When triggered by **natural language**, you must **silently create a brainstorm 
 - **Ask probing questions** to help the user surface, drill down, and validate the idea.
 - **Play devil's advocate** — identify gaps, edge cases, and alternative approaches constructively.
 - **Update the task file** as the discussion evolves (use Edit to add notes under `## Notes`).
-- **When the user is ready to build**, perform the **graduation ritual**:
-  1. Change `**Status**` from `ideating` → `pending`
-  2. Change `**Type**` from `brainstorm` → appropriate type (`feature`, `bugfix`, `chore`, etc.)
-  3. Change `**Phase**` to `1`
-  4. Append the standard 8-phase `## Checklist` to the task file
-  5. **Gate 1 (Alignment)**: Provide the link and **HARD STOP**. Ask the user to fine-tune the updated task file.
-  6. Proceed directly into **Phase 1: Plan** ONLY after explicit confirmation.
+- **When the user is ready to build**, you MUST:
+  1. **MANDATORY**: Run `swt:task graduate <task_file>` — this script performs ALL of the following automatically:
+     - Changes `**Status**` from `ideating` → `pending`
+     - Changes `**Type**` from `brainstorm` → appropriate type (`feature`, `bugfix`, `chore`, etc.)
+     - Changes `**Phase**` to `1`
+     - Adds the initial **Ritual Log** (required for validation)
+     - Appends the standard 8-phase `## Checklist` (or `## Verification Checklist` for refactors)
+     - If Type is `feature`, scaffolds a `SPEC.md` and links it via `**Spec**` field
+  2. **Gate 1 (Alignment)**: After graduation, provide the link and **HARD STOP**. Ask the user to fine-tune the updated task file.
+  3. Proceed directly into **Phase 1: Plan** ONLY after explicit confirmation.
+
+> ⚠️ **NO EXCEPTIONS**: You are FORBIDDEN from manually editing Status/Type/Phase or adding checklists yourself. Always use `swt:task graduate` to perform the graduation. Skipping this command will cause `swt:task validate` to fail.
 
 > 💡 If the user decides the idea is **not worth pursuing**, change `**Status**` to `abandoned` and leave the file as an archived record.
 
@@ -378,6 +383,8 @@ Before any code updates, these items must be addressed. Adapt to the project's t
 2. You present the workflow phases and guide them through each step above.
 3. You act as an advisor — present plans, analysis, code snippets, and recommendations.
 4. The user approves or provides feedback before implementation proceeds.
-5. You track progress using TodoWrite and update `.tasks/` checklists.
+5. You track progress using `swt:task phase <N>` and mark progress in the `.tasks/` checklist.
 
 **Never skip phases.** If a task is truly trivial (typo fix, single-line change), note the exception and proceed with only the relevant subset of phases.
+
+> 🛑 **The Exclusive Gateway Rule**: You are FORBIDDEN from manually editing the `**Phase**` header in task files. Every phase transition MUST be performed via `swt:task phase <N> <file>`. This ensures ritual integrity and context synchronization.

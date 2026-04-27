@@ -149,7 +149,18 @@ if [ "$CMD" == "validate" ]; then
         fi
     fi
 
-    # 2. Check the checklist for that phase
+    # 2. Ritual Log Validation (Exclusive Gateway check)
+    # Check if the last ritual log matches the current phase
+    LAST_RITUAL=$(grep -oP '<!-- RITUAL: phase \K\d+' "$FILE" | tail -n 1 || echo "none")
+    
+    if [ "$LAST_RITUAL" != "$PHASE" ]; then
+        echo "🛑 PROTOCOL VIOLATION: Phase header ($PHASE) does not match Ritual Log ($LAST_RITUAL)."
+        echo "   Manual edits to the Phase header are FORBIDDEN."
+        echo "   You MUST use 'swt:task phase $PHASE' to transition correctly."
+        exit 1
+    fi
+
+    # 3. Check the checklist for that phase
     CHECK=$(grep -iP "\- \[[x/]\] Phase $PHASE" "$FILE" || true)
 
     if [ -z "$CHECK" ]; then
@@ -157,7 +168,7 @@ if [ "$CMD" == "validate" ]; then
         exit 1
     fi
 
-    echo "✅ Task state validated: Phase $PHASE is correctly marked."
+    echo "✅ Task state validated: Phase $PHASE is correctly synchronized with Ritual Log."
     exit 0
 fi
 
@@ -326,7 +337,7 @@ if [ "$CMD" == "graduate" ]; then
         cat <<EOF >> "$FILE"
 
 ## Checklist
-- [ ] Phase 1: Plan
+- [/] Phase 1: Plan
 - [ ] Phase 2: Analyze
 - [ ] Phase 3: Risk Assessment
 - [ ] Phase 4: Approval
@@ -336,6 +347,10 @@ if [ "$CMD" == "graduate" ]; then
 - [ ] Phase 8: Review & Refine
 EOF
     fi
+
+    # Add Ritual Log (initial)
+    DATE_STR=$(date +"%Y-%m-%d %H:%M:%S")
+    echo "<!-- RITUAL: phase 1 @ $DATE_STR -->" >> "$FILE"
 
     if [[ "$TYPE" == "feature" || "$TYPE" == "brainstorm" ]]; then
         mkdir -p .specs
@@ -367,6 +382,35 @@ EOF
         echo -e "\n## Verification Checklist\n- [ ] ..." >> "$FILE"
         echo "Graduated $FILE to Phase 1 (Lite path)."
     fi
+    exit 0
+fi
+
+if [ "$CMD" == "phase" ]; then
+    PHASE_NUM=$2
+    FILE=$3
+
+    if [ -z "$PHASE_NUM" ] || [ -z "$FILE" ]; then
+        echo "Usage: swt.sh phase <N> <task_file>"
+        exit 1
+    fi
+
+    if [ ! -f "$FILE" ]; then
+        echo "Error: File $FILE not found."
+        exit 1
+    fi
+
+    # 1. Update Phase header
+    sed -i "s/^\*\*Phase\*\*:\s*[0-8]/**Phase**: $PHASE_NUM/" "$FILE"
+
+    # 2. Update Checklist (mark current phase as in-progress [/])
+    # First, reset any other in-progress phases if appropriate (optional)
+    sed -i "s/- \[[ /]\] Phase $PHASE_NUM/- [\/] Phase $PHASE_NUM/" "$FILE"
+
+    # 3. Add Ritual Log
+    DATE_STR=$(date +"%Y-%m-%d %H:%M:%S")
+    echo "<!-- RITUAL: phase $PHASE_NUM @ $DATE_STR -->" >> "$FILE"
+
+    echo "Transitioned $FILE to Phase $PHASE_NUM. Ritual logged."
     exit 0
 fi
 
