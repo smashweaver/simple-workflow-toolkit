@@ -129,7 +129,13 @@ if [ "$CMD" == "validate" ]; then
         exit 1
     fi
 
-    # 1. Get current phase
+    # 1. Check for unpopulated placeholders (Scenario A: Discipline)
+    if grep -qE "^- .*: .*\{\{Methodology|^- .*: .*\{\{Helper|^- .*: .*\{\{Hard gates" "$FILE"; then
+        echo "⚠️ PROTOCOL WARNING: Task contains unpopulated placeholders. It is not 'Born Complete'."
+        echo "   You MUST populate all sections before proceeding."
+    fi
+
+    # 2. Get current phase
     PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\d+' "$FILE" | head -n 1)
 
     if [ -z "$PHASE" ]; then
@@ -160,7 +166,7 @@ if [ "$CMD" == "validate" ]; then
         exit 1
     fi
 
-    # 3. Check the checklist for that phase
+    # 4. Check the checklist for that phase
     CHECK=$(grep -iP "\- \[[x/]\] Phase $PHASE" "$FILE" || true)
 
     if [ -z "$CHECK" ]; then
@@ -276,7 +282,7 @@ if [ "$CMD" == "brainstorm" ]; then
     FILENAME="${TASK_ROOT}/${TIMESTAMP}_${SAFE_NAME}.md"
 
     cat <<EOF > "$FILENAME"
-# Task: $SAFE_NAME
+# Task: $ARG
 **Created**: $DATE_STR
 **Updated**: —
 **Completed**: —
