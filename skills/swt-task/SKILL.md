@@ -71,7 +71,7 @@ Before writing **any** task file to disk, the agent MUST:
 
 ## Uplink Protocol (MANDATORY)
 
-The "Uplink" is a mechanism to "throw" ideas or issues back to the core SWT project's backlog (`$SWT_HOME`) from any project.
+The "Uplink" is a mechanism to report SWT workflow friction from any project back to the core SWT backlog (`$SWT_HOME`). When a user hits a friction point with the toolkit itself — not their project — they can create a task in `$SWT_HOME/.tasks/` that includes session context about the issue.
 
 **When to trigger:**
 - User says "uplink this", "report this to swt", "swt needs a new skill", "this gate is annoying", etc.
@@ -84,6 +84,30 @@ The "Uplink" is a mechanism to "throw" ideas or issues back to the core SWT proj
 4. **Notify**: Confirm to the user: *"Insight uplinked to SWT core: `Topic`"*
 
 > 💡 The script automatically captures the current project path, active task, and phase to provide context for the SWT maintainers.
+
+### Developer Usage
+
+The `--uplink` flag can also be invoked directly by developers from any workspace:
+
+```bash
+bash skills/swt-task/scripts/task.sh brainstorm "<SWT issue>" --uplink
+```
+
+**Requirements:**
+- `$SWT_HOME` must point to the SWT toolkit project root
+- `$SWT_HOME/.tasks/` must exist
+
+**What gets captured** (written to the created task's `## Notes`):
+| Context Field | Description |
+|---|---|
+| `**Source Project**` | Current working directory where the friction occurred |
+| `**Source Task**` | Active task basename in the workspace being worked on |
+| `**Source Phase**` | Current phase of that active task |
+
+**Error behavior:**
+- If `$SWT_HOME` is not set: prints error and exits
+- If `$SWT_HOME/.tasks/` doesn't exist: prints error and exits
+- No fallback to local `.tasks/` — the command only works when SWT_HOME is configured
 
 ---
 

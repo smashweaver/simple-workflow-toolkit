@@ -64,3 +64,10 @@ All commits follow the **Diff-First, Draft-and-Approve** protocol:
 4. User fine-tunes; Agent iterates with probing questions.
 5. Apply commit on approval (`git commit -F commit.draft`).
 6. Cleanup temp files.
+
+## 7. Reporting SWT Issues
+
+If the user reports frustration or identifies a gap with the SWT toolkit itself during this session:
+- Offer to uplink the issue to SWT core: *"Want me to uplink this to the SWT toolkit backlog?"*
+- On confirmation: invoke `/swt:task` uplink with the friction point as the topic
+- The session context (workspace path, active task, phase) is automatically captured for SWT maintainers

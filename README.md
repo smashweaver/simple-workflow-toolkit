@@ -76,6 +76,16 @@ SWT integrates with the **graphify** engine to provide a "Big Picture" view of y
 
 To use these features, ensure the engine is installed: `pip install graphifyy`.
 
+## Feedback Loop: Uplink to SWT Core
+
+While using SWT in any project, report toolkit friction directly to the SWT core backlog. Say *"uplink this"* or *"report this to SWT"* to create a task in `$SWT_HOME/.tasks/` that captures what happened.
+
+- **Trigger**: User prompt — "uplink this", "report this to SWT", etc.
+- **Context captured**: Current project path, active task, and current phase
+- **Destination**: A brainstorm task in `$SWT_HOME/.tasks/` for SWT maintainers to review
+
+No manual navigation to the SWT repo needed — the friction point becomes actionable feedback.
+
 ## License
 
 MIT
