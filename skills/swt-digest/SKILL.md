@@ -144,17 +144,16 @@ Proactively suggest `/swt:digest` when:
 
 ---
 
-## Execution Layer
+## Execution Layer (MANDATORY)
 
-1. Get timestamp: `date +%Y%m%d%H%M%S`
-2. Create `.digests/` directory if it doesn't exist.
-3. **Scan for Context**:
-    - **Standard**: Scan last 5 digests: `ls -1 .digests/*_digest.md 2>/dev/null | tail -n 5`
-    - **Milestone**: Find boundary (`*_milestone.md`) in `.digests/` or `.digests/archive/`, then filter `*_digest.md` files in **both** locations by timestamp.
-4. Synthesize the "Chain of Truth" based on the selected mode.
-5. Write the file (`_digest.md` or `_milestone.md`).
-6. **Archive processed parents**: Move all files identified as synthesized parents into `.digests/archive/`.
-7. Confirm to user: *"Digest created: `.digests/YYYYMMDDHHMMSS_{digest|milestone}.md`. (Archived {{N}} parents). See you next time!"*
+You MUST use the automated script to generate digests. Never attempt to manually construct the timestamp or file structure.
+
+1. **Run the script**: `bash skills/swt-digest/scripts/digest.sh --summary "<Key Outcomes>"`
+2. **Optional Flags**:
+    - `--milestone`: Generate a project roll-up.
+    - `--content <file>`: Use a scratch file for complex, multi-line summaries.
+3. **Post-Creation**: The script automatically handles parent archival.
+4. **Confirm to user**: *"Digest created: `.digests/YYYYMMDDHHMMSS_{digest|milestone}.md`. (Archived parents). See you next time!"*
 
 ---
 
