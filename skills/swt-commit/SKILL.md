@@ -124,10 +124,8 @@ git commit -F commit.draft
 Immediately after a successful commit:
 1. Inspect the `commit.task` file for a `Closes: .tasks/...` directive.
 2. If found, retrieve the newly created commit hash using: `git rev-parse HEAD`
-3. Execute the `/swt:task close` operation on the linked task file:
-   - Change `**Status**` to `done`
-   - Change `**Completed**` to today's date
-   - Append the commit hash and description to the `## Commit Reference` section at the bottom of the task file
+3. Invoke the automated closure command: `bash skills/swt-task/scripts/task.sh close <task_file> <commit_hash>`.
+4. This command handles all header updates, checklist completion, and commit references.
 
 ### Step 8 — Cleanup (agent-executed)
 After the commit and task updates are complete, delete both temp files:

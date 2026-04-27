@@ -14,8 +14,9 @@ function show_help {
     echo "  swt.sh new \"Final Feature Name\"  - Create a new timestamped task file"
     echo "  swt.sh brainstorm \"Topic\"        - Create a Phase 0 ideation task"
     echo "  swt.sh graduate <task_file>      - Transition Phase 0 to Phase 1"
-    echo "  swt.sh list [--open|--archived]  - List tasks (filters: --open, --pending, --archived, etc.)"
-    echo "  swt.sh --tidy                    - Move done/abandoned tasks to .tasks/archive/"
+    echo "  swt.sh phase <N> <file>    - Transition task to Phase N"
+    echo "  swt.sh close <file> <hash> - Finalize task (status: done, checklist: complete)"
+    echo "  swt.sh --tidy              - Move done/abandoned tasks to .tasks/archive/"
 }
 
 if [ -z "$CMD" ]; then
@@ -388,6 +389,42 @@ EOF
         echo -e "\n## Verification Checklist\n- [ ] ..." >> "$FILE"
         echo "Graduated $FILE to Phase 1 (Lite path)."
     fi
+    exit 0
+fi
+
+if [ "$CMD" == "close" ]; then
+    FILE="$2"
+    HASH="$3"
+    if [ ! -f "$FILE" ]; then
+        echo "❌ Error: Task file not found: $FILE"
+        exit 1
+    fi
+    if [ -z "$HASH" ]; then
+        echo "❌ Error: Commit hash is required for closure."
+        exit 1
+    fi
+
+    DATE_LOG=$(date +"%Y-%m-%d %H:%M:%S")
+
+    # 1. Update Headers
+    sed -i "s/^\*\*Status\*\*:.*/\*\*Status\*\*: done/" "$FILE"
+    sed -i "s/^\*\*Completed\*\*:.*/\*\*Completed\*\*: $DATE_LOG/" "$FILE"
+    sed -i "s/^\*\*Updated\*\*:.*/\*\*Updated\*\*: $DATE_LOG/" "$FILE"
+
+    # 2. Complete Checklist
+    # Matches bulleted checklist items: - [ ] or - [/]
+    sed -i 's/^- \[[ /]\]/- [x]/g' "$FILE"
+
+    # 3. Add Commit Reference
+    if grep -q "## Commit Reference" "$FILE"; then
+        # Insert hash after the header
+        sed -i "/## Commit Reference/a $HASH" "$FILE"
+    else
+        echo -e "\n## Commit Reference\n$HASH" >> "$FILE"
+    fi
+
+    echo "✅ Task closed: $FILE (Commit: $HASH)"
+    echo "   Status: done | Checklist: fully completed"
     exit 0
 fi
 

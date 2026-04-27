@@ -229,11 +229,16 @@ Lists task files in the `.tasks/` directory, optionally filtered by status.
 
 ### `/swt:task close` — Mark done or abandoned
 
+Finalizes a task by updating metadata, checklists, and commit references. This command is the final act of a task ritual.
+
 **Steps:**
-1. Set `**Status**` to `done` or `abandoned`
-2. Set `**Completed**` to today's date
-3. Add `**Commit Reference**` if applicable
-4. Leave the file as an archived record — do not delete.
+1. Invoke `bash skills/swt-task/scripts/task.sh close <file> <commit_hash>`.
+2. The script automatically:
+   - Sets `**Status**` to `done`.
+   - Sets `**Completed**` to current timestamp.
+   - Marks ALL items in the `## Checklist` as `[x]`.
+   - Appends the commit hash to the `## Commit Reference`.
+3. Confirm the result to the user.
 
 ---
 
