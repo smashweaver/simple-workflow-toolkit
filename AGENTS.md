@@ -170,6 +170,9 @@ Each skill lives in its own directory under `skills/`. A skill's logic should be
 > [!RULE]
 > **The Scripts Subfolder Rule**: All skill-specific logic, automation, or runner scripts MUST reside in a `scripts/` sub-directory within the skill's folder (e.g., `skills/swt-task/scripts/task.sh`).
 
+> [!RULE]
+> **Dogfooding Path Rule**: When working in this repository, ALL skill file operations (Read, Edit, Write, Grep, Glob) MUST use the project tree (`skills/<skill>/`) — never `~/.claude/skills/` or other system-installed paths. This repo IS the source of truth; system paths contain symlinked or installed copies that may lag behind.
+
 ### 2. Scenario-Based Explorations
 When proposing a new project-wide rule or toolkit feature, agents MUST present the Scenario A/B/C framework. This ensures the user receives clear implementation guidance and can consciously choose the right balance between human discipline and scripted enforcement.
 
