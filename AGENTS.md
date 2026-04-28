@@ -142,6 +142,7 @@ To ensure architectural continuity and prevent context drift, every session MUST
 ### 1. Orientation (Mandatory)
 Before discussing any task or reviewing code, the agent MUST:
 1. **Invoke the `swt:status` skill** to orient itself. This aggregates the latest digest, active tasks, and recent specs in a single step.
+1.5. **Read `task.ctx`** (if present) — contains the active task filename for session continuity across agents and restarts. The `swt:status` output includes this context at the top.
 2. **Read the root `AGENTS.md`** to verify project scope, stack, and conventions.
 3. **Smart Search (Tasks)**: If a task reference or file is not found in the root `.tasks/` directory, check `.tasks/archive/` before assuming it is missing or deleted.
 4. **Ritual Adherence**: If the orientation or task discovery process identifies a skill that mandates a "re-read," execute it immediately. There is zero tolerance for protocol drift.

@@ -32,6 +32,27 @@ fi
 echo "Root: $ROOT_DIR"
 echo ""
 
+# 1.25 Active Task Context
+if [ -f "$ROOT_DIR/task.ctx" ]; then
+    CTX_FILE=$(cat "$ROOT_DIR/task.ctx")
+    if [ -f "$ROOT_DIR/$CTX_FILE" ]; then
+        CTX_STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$ROOT_DIR/$CTX_FILE" | head -n 1)
+        CTX_PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\S+' "$ROOT_DIR/$CTX_FILE" | head -n 1)
+        echo "--- Active Task Context ---"
+        echo "Task: $CTX_FILE"
+        echo "Status: $CTX_STATUS | Phase: $CTX_PHASE"
+        echo ""
+    else
+        echo "--- Active Task Context ---"
+        echo "STALE: $CTX_FILE not found. Clear with: swt.sh ctx clear"
+        echo ""
+    fi
+else
+    echo "--- Active Task Context ---"
+    echo "None (task.ctx not found)"
+    echo ""
+fi
+
 # 1.5 Graphify Status
 if [ -f "$ROOT_DIR/skills/swt-graphify/scripts/graphify.sh" ]; then
     bash "$ROOT_DIR/skills/swt-graphify/scripts/graphify.sh" status

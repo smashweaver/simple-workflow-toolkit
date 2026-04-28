@@ -16,6 +16,9 @@ function show_help {
     echo "  swt.sh graduate <task_file>      - Transition Phase 0 to Phase 1"
     echo "  swt.sh phase <N> <file>    - Transition task to Phase N"
     echo "  swt.sh close <file> <hash> - Finalize task (status: done, checklist: complete)"
+    echo "  swt.sh ctx set <file>      - Set active task context (writes task.ctx)"
+    echo "  swt.sh ctx clear           - Clear active task context (removes task.ctx)"
+    echo "  swt.sh ctx show            - Show current active task context"
     echo "  swt.sh --tidy              - Move done/abandoned tasks to .tasks/archive/"
 }
 
@@ -370,6 +373,11 @@ EOF
         SLUG=${SLUG%.md}
         SPEC_FILE=".specs/${TIMESTAMP}_${SLUG}.md"
         
+        # Extract content from task file
+        CORE=$(sed -n '/^## Core Concept/,/^## /p' "$FILE" | grep -v "^## " | grep -v '^$' | head -5)
+        ALT=$(sed -n '/^## Explored Alternatives/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -10)
+        NOTES=$(sed -n '/^## Notes/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -20)
+
         cat <<EOF > "$SPEC_FILE"
 # Spec: $SLUG
 **Version**: 0.1
@@ -377,13 +385,89 @@ EOF
 **Linked Task**: $FILE
 
 ## 1. Problem Statement
-(required)
 
-## 5. User Stories
-- [ ] US-001: ...
+$(echo "$CORE" | sed 's/^/* /')
+
+## 2. Goals
+
+- Route all work through the SWT task lifecycle (create → graduate → implement)
+- Persist active task context across sessions and agent switches
+- Guide users to create brainstorm tasks when new topics arise mid-session
+- Prevent coding outside of swt:flow phases
+
+## 3. Proposed Solution
+
+$(echo "$ALT" | sed 's/^/- /')
+
+Introduce \`task.ctx\` — a single-line file in the project root containing the active task filename. Back it with:
+- \`swt.sh ctx set/clear/show\` commands in task.sh
+- \`flow.sh\` — active engine with open/check/status commands
+- Updates to swt:status, swt:digest, swt:think, swt:flow, and AGENTS.md
+
+## 4. User Stories
+
+- [ ] US-001: As an agent, I can read \`task.ctx\` at session start and immediately know what task is active
+- [ ] US-002: As a user, when I raise a new issue mid-session, the agent asks if I want a brainstorm task created
+- [ ] US-003: As an agent, I refuse to code outside swt:flow phases — I guide the user to create a task first
+- [ ] US-004: As a user switching agents, the new agent picks up the same task context automatically
+- [ ] US-005: As an agent, when a task is closed, I automatically clear \`task.ctx\`
+
+## 5. Non-Functional Requirements
+
+- \`task.ctx\` must be gitignored (not committed to repo)
+- All context reads/writes must handle stale references (task file deleted/moved)
+- Scripts must work from subdirectories (workspace root detection via AGENTS.md/.git)
+
+## 6. Implementation Plan
+
+$(echo "$NOTES" | grep -oP '^\*\*\s*\K.*' | head -8 | sed 's/^/* /')
+
+## 7. Risks & Mitigations
+
+| Risk | Mitigation |
+|---|---|
+| \`task.ctx\` points to deleted task | Validate file existence; clear stale ctx automatically |
+| Stale context after manual edits | Only \`task.sh\` modifies \`task.ctx\`; document this rule |
+| Multiple agents write simultaneously | Single line file; filesystem write is atomic |
+
+## 8. Success Criteria
+
+- [ ] \`swt.sh ctx set <file>\` creates \`task.ctx\`; \`swt.sh ctx show\` displays it
+- [ ] \`flow.sh open\` reads \`task.ctx\` and displays task metadata
+- [ ] \`flow.sh check\` exits non-zero when no/invalid context exists
+- [ ] \`status.sh\` shows active task context at top of output
+- [ ] \`task.sh close\` auto-clears \`task.ctx\` when it points to closed task
+- [ ] \`task.ctx\` is gitignored and survives across sessions
+
+## 9. Out of Scope
+
+- Keyword-based task surfacing in conversation (too many false positives)
+- Auto-activation of related tasks without user confirmation
+- Complex conflict resolution for simultaneous agent writes
+
+## 10. Open Questions
+
+- Should \`task.ctx\` store additional metadata (phase, last updated) or stay single-line?
+- What happens when user has multiple projects — one \`task.ctx\` per project root (current answer: yes)
+
+## 11. References
+
+- Task file: \`$FILE\`
+- Skills: \`swt:flow\`, \`swt:task\`, \`swt:status\`, \`swt:think\`, \`swt:digest\`
+- AGENTS.md Section 7: Session Start & Restoration
 
 ## 12. MVP Definition
-- [ ] ...
+
+- [ ] \`task.ctx\` file tracks active task filename in project root
+- [ ] \`swt.sh ctx set/clear/show\` manages context lifecycle
+- [ ] \`flow.sh open/check/status\` provides active task engine
+- [ ] \`status.sh\` displays active context at top of output
+- [ ] \`swt:think\` documents Task-First Workflow rule
+- [ ] \`digest.sh\` includes active context in output
+- [ ] \`swt-flow/SKILL.md\` updated with task.ctx check
+- [ ] \`AGENTS.md\` Section 7 updated with task.ctx step
+- [ ] \`.gitignore\` includes \`task.ctx\`
+- [ ] User confirms MVP works as expected
 EOF
         # Add Spec link to task header (below Phase)
         sed -i "/^\*\*Phase\*\*:/a **Spec**: $SPEC_FILE" "$FILE"
@@ -427,7 +511,52 @@ if [ "$CMD" == "close" ]; then
     fi
 
     echo "✅ Task closed: $FILE (Commit: $HASH)"
+    # 4. Clear task.ctx if it points to this task
+    if [ -f "task.ctx" ]; then
+        CURRENT_CTX=
+        if [ "$CURRENT_CTX" = "$FILE" ]; then
+            rm -f task.ctx
+            echo "   Cleared task.ctx (was pointing to closed task)"
+        fi
+    fi
+
     echo "   Status: done | Checklist: fully completed"
+    exit 0
+fi
+
+if [ "$CMD" == "ctx" ]; then
+    CTX_CMD=$2
+    CTX_FILE=$3
+
+    case "$CTX_CMD" in
+        set)
+            if [ -z "$CTX_FILE" ]; then
+                echo "Usage: swt.sh ctx set <task_file>"
+                exit 1
+            fi
+            if [ ! -f "$CTX_FILE" ]; then
+                echo "Error: Task file $CTX_FILE not found."
+                exit 1
+            fi
+            echo "$CTX_FILE" > task.ctx
+            echo "Set active task context: $CTX_FILE"
+            ;;
+        clear)
+            rm -f task.ctx
+            echo "Cleared active task context."
+            ;;
+        show)
+            if [ -f "task.ctx" ]; then
+                echo "Active task context: $(cat task.ctx)"
+            else
+                echo "No active task context (task.ctx not found)."
+            fi
+            ;;
+        *)
+            echo "Usage: swt.sh ctx [set|clear|show] <task_file>"
+            exit 1
+            ;;
+    esac
     exit 0
 fi
 

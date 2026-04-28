@@ -5,6 +5,7 @@ commit.task
 
 # Task tracking (per-project, not committed)
 .tasks/
+task.ctx
 
 # Session digests
 .digests/

@@ -108,9 +108,6 @@ Sections marked `(if applicable)` can be omitted with a brief note explaining wh
 A clear, concise description of the problem being solved. Write it from the
 user's perspective. Avoid solution language here.
 
-> Example: "Users who manage multiple projects can't tell at a glance which
-> tasks are overdue without manually scanning every list."
-
 ## 2. Goals (required)
 
 What this spec achieves when implemented successfully. Use measurable outcomes
@@ -119,138 +116,82 @@ where possible.
 - Goal 1
 - Goal 2
 
-## 3. Non-Goals (required)
+## 3. Proposed Solution
 
-What this spec explicitly does NOT address. This is as important as Goals.
+Present Scenario A (Discipline), Scenario B (Automation), and
+Scenario C (Enforcement) trade-offs. Then state the selected approach.
 
-- Not doing X
-- Deferring Y to a future spec
+- **Scenario A**: ...
+- **Scenario B**: ...
+- **Scenario C**: ...
 
-## 4. Users & Stakeholders (required)
+Selected approach: ...
 
-| Role | Description | Primary? |
-|------|-------------|----------|
-| End User | … | Yes |
-| Admin | … | No |
-
-## 5. User Stories (required)
+## 4. User Stories (required)
 
 Format: `As a [role], I want [capability] so that [benefit].`
 
-Acceptance criteria follow each story. Be specific enough to write a test.
-
 **US-001**: As a [role], I want [X] so that [Y].
 - [ ] AC1: Given [condition], when [action], then [outcome].
-- [ ] AC2: …
 
-**US-002**: …
-
-## 6. Functional Requirements (required)
-
-Numbered requirements. Each must be independently testable.
-
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-001 | The system shall … | Must |
-| FR-002 | The system shall … | Should |
-| FR-003 | The system should … | Could |
-
-Priority scale: **Must** (MVP) / **Should** (important, not blocking) / **Could** (nice to have)
-
-## 7. Non-Functional Requirements (if applicable)
+## 5. Non-Functional Requirements (if applicable)
 
 | Category | Requirement |
 |----------|-------------|
-| Performance | … |
-| Security | … |
-| Accessibility | … |
-| Scalability | … |
-| Compliance | … |
+| Performance | ... |
+| Security | ... |
+| Accessibility | ... |
 
-## 8. Technical Constraints (if applicable)
+## 6. Implementation Plan
 
-Known technical boundaries that must not be violated:
+Numbered steps. Each should be clear enough to execute without ambiguity.
 
-- Must integrate with: …
-- Must use existing stack: …
-- Cannot break: …
-- External dependency: …
+1. Step 1
+2. Step 2
 
-## 9. Data Model (if applicable)
+## 7. Risks & Mitigations
 
-Key entities and their relationships. Use a simple list or diagram (mermaid preferred).
+| Type | Description | Mitigation |
+|------|-------------|------------|
+| Risk | ... | ... |
 
-```mermaid
-erDiagram
-  EntityA ||--o{ EntityB : "has"
-```
+## 8. Success Criteria (required)
 
-Or describe fields:
+- [ ] Criterion 1 (measurable outcome)
+- [ ] Criterion 2
 
-**Entity: {{Name}}**
-| Field | Type | Description |
-|-------|------|-------------|
-| id | UUID | Primary key |
-| … | … | … |
+## 9. Out of Scope (required)
 
-## 10. API / Interface Contracts (if applicable)
+Ideas that came up during spec writing but are intentionally deferred.
 
-If this spec defines or modifies APIs, list endpoints or interface signatures.
+- Item 1
+- Item 2
 
-```
-POST /api/resource
-Body: { field: type }
-Response: { id: uuid, … }
-```
+## 10. Open Questions (required if any)
 
-## 11. UI / UX Notes (if applicable)
+Unresolved decisions that will block or change implementation.
 
-High-level UX intent. Not a wireframe, but enough to align on behaviour.
+| # | Question | Owner | Resolution |
+|---|----------|-------|------------|
+| 1 | ... | ... | Pending |
 
-- Screen/flow description
-- Key interactions
-- Error states to handle
+## 11. References
+
+- Task file: `{{path}}`
+- Skills: `swt:flow`, `swt:task`, etc.
+- Documentation: relevant links
 
 ## 12. MVP Definition (required)
 
 The minimum shippable version of this feature. Everything else is post-MVP.
 
 **Included in MVP:**
-- [ ] …
+- [ ] ...
 
 **Deferred post-MVP:**
-- …
+- ...
 
-## 13. Open Questions (required if any)
-
-Unresolved decisions that will block or change implementation.
-
-| # | Question | Owner | Resolution |
-|---|----------|-------|------------|
-| 1 | … | … | Pending |
-
-## 14. Out of Scope / Future Work
-
-Ideas that came up during spec writing but are intentionally deferred.
-
-- …
-
-## 15. Risks & Assumptions (if applicable)
-
-| Type | Description | Mitigation |
-|------|-------------|------------|
-| Risk | … | … |
-| Assumption | We assume X is true | Validate with … |
-
-## 16. Revision History
-
-| Version | Date | Author | Notes |
-|---------|------|--------|-------|
-| 0.1 | {{YYYY-MM-DD}} | — | Initial draft |
 ```
-
----
-
 ## Output Rules
 
 1. **Always write to a file.** Never output the spec only in chat.

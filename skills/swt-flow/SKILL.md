@@ -63,6 +63,7 @@ At the start of **every session**, before reviewing tasks or planning anything:
    - `ls -t .digests/*.md | head -1` — latest digest (timestamped filename sorts newest first)
    - If root empty: `ls -t .digests/archive/*.md | head -1`
 2. **Read the root `AGENTS.md`** — understand workspace context, project name, purpose, and conventions.
+2.5. **Check `task.ctx`** — if `task.ctx` exists in the project root, read the referenced task file to restore active context. If the file is stale (not found), clear it with `swt.sh ctx clear` and ask the user what they'd like to work on.
 3. **Detect sub-projects** — scan for directories containing their own `AGENTS.md` or stack marker files (`package.json`, `pyproject.toml`, `go.mod`, etc.).
 4. **If multiple sub-projects are found**: Ask the user —
    > *"Which sub-project are we focusing on today? [list them]"*

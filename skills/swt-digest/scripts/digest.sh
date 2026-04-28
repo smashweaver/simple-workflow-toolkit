@@ -51,6 +51,19 @@ CLOSED_TASKS=$(ls -1 .tasks/archive/*.md 2>/dev/null | grep "$(date +%Y%m%d)" ||
         echo "{{A 1-2 sentence summary of the session's primary focus.}}"
     fi
     echo ""
+
+    # Active Task Context (task.ctx)
+    if [ -f "task.ctx" ]; then
+        CTX_FILE=$(cat task.ctx)
+        if [ -f "$CTX_FILE" ]; then
+            echo "**Active Context:** $CTX_FILE"
+            echo ""
+        else
+            echo "**Active Context:** STALE ($CTX_FILE not found)"
+            echo ""
+        fi
+    fi
+
     
     # Only show these sections if we have manual content or it's a milestone
     if [ -z "$SUMMARY_TEXT" ]; then
