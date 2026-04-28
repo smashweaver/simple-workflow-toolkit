@@ -36,17 +36,37 @@ if [ "$CMD" == "init" ]; then
     mkdir -p .tasks
     echo ".tasks/ initialized."
 
-    if [ -f .gitignore ]; then
-        if ! grep -q "^\.tasks/$" .gitignore && ! grep -q "^\.tasks$" .gitignore; then
+    init_gitignore_pattern() {
+        local pattern="$1"
+        if ! grep -q "^${pattern}$" .gitignore && ! grep -q "^${pattern%/}$" .gitignore; then
             echo "" >> .gitignore
-            echo ".tasks/" >> .gitignore
-            echo ".tasks/ added to .gitignore."
+            echo "$pattern" >> .gitignore
+            echo "$pattern added to .gitignore."
         else
-            echo ".tasks/ already in .gitignore."
+            echo "$pattern already in .gitignore."
         fi
+    }
+
+    if [ -f .gitignore ]; then
+        init_gitignore_pattern ".tasks/"
+        init_gitignore_pattern ".specs/"
+        init_gitignore_pattern ".digests/"
+        init_gitignore_pattern "task.ctx"
     else
-        echo ".tasks/" > .gitignore
-        echo "Created .gitignore and added .tasks/."
+        cat > .gitignore <<'EOF'
+# Task tracking (per-project, not committed)
+.tasks/
+
+# Specifications
+.specs/
+
+# Session digests
+.digests/
+
+# Task context (per-project, not committed)
+task.ctx
+EOF
+        echo "Created .gitignore with all SWT patterns."
     fi
     exit 0
 fi
@@ -366,6 +386,11 @@ EOF
     echo "<!-- RITUAL: phase 1 @ $DATE_STR -->" >> "$FILE"
 
     if [[ "$TYPE" == "feature" || "$TYPE" == "brainstorm" ]]; then
+        # Ensure .specs/ is in .gitignore
+        if [ -f .gitignore ] && ! grep -q "^\.specs/$" .gitignore && ! grep -q "^\.specs$" .gitignore; then
+            echo "" >> .gitignore
+            echo ".specs/" >> .gitignore
+        fi
         mkdir -p .specs
         TIMESTAMP=$(date +"%Y%m%d%H%M%S")
         BASENAME=$(basename "$FILE")
