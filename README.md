@@ -30,6 +30,7 @@ Once installed, invoke skills directly or describe your task to trigger them:
 
 - **Plan a feature**: `/swt:flow`
 - **Commit changes**: `/swt:commit`
+- **Set task focus**: `/swt:task focus <name>`
 - **Check task status**: Ask *"whats up?"* or *"where am I?"*
 - **End a session**: Say *"goodbye"* to trigger `/swt:digest`
 

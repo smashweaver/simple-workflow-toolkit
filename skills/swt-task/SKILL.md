@@ -208,6 +208,35 @@ Moves completed (`done`) or `abandoned` task files into the `.tasks/archive/` su
 
 ---
 
+### `/swt:task focus` — Set active task context
+
+Sets the active task context so the agent knows what to work on. Resolves the task file, sets `task.ctx`, opens the task (and companion spec if available) in the system's default browser, reads the task state, and presents it to the user.
+
+**When to trigger:**
+- User says "focus on X", "work on X", "switch to task X", "set focus to X"
+- User invokes `/swt:task focus <name>` directly
+
+**Steps:**
+1. **Resolve the task file** by name/slug (check `.tasks/`, `.tasks/archive/`, accept bare slug, filename, or path):
+   - Try `.tasks/*<name>*` (glob match on slug)
+   - Try `.tasks/archive/*<name>*`
+   - If multiple matches, present disambiguation list, **HARD STOP**
+   - If no match, error and suggest `/swt:task list --open`
+2. **Set context**: Run `RESOLVED=$(bash skills/swt-task/scripts/task.sh ctx set <resolved_file> | tail -1)` to capture the resolved path
+3. **Read the task file** and extract key fields: Status, Phase, Objective/Core Concept, next unchecked item, and `**Spec**:` field
+4. **Open in browser**:
+   - `xdg-open "$RESOLVED" &` (falls back to `firefox` then `google-chrome` then `chromium` if `xdg-open` not found)
+   - If the task has a `**Spec**: <spec_file>` field, also run `xdg-open <spec_file> &`
+5. **Present to user**:
+   > *"Focus set: `[slug](path)`*
+   > *- Status: `<Status>` | Phase: `<Phase>`*
+   > *- Next: `<next unchecked item or next step>`*
+   > *Task and spec opened in default browser."*
+   > *What would you like to do with this task?"*
+6. **HARD STOP**: Wait for user direction before proceeding with any task work.
+
+---
+
 ### `/swt:task list` — List tasks
 
 Lists task files in the `.tasks/` directory, optionally filtered by status.
@@ -336,6 +365,11 @@ Both paths go through the **Name Confirmation Gate** before any file is written.
 ## Cross-References
 
 - ⚠️ **The /swt:flow skill is the primary consumer of this skill.** All tasks created by `/swt:flow` must follow these rules.
+- **`/swt:task focus`** — Sets active task context. Integrates with:
+  - `/swt:status`: Status shows focused task; `focus` fulfills the "work on this one" signal after listing tasks.
+  - `/swt:flow`: `focus` sets context before Phase1 planning; `/swt:flow` should suggest `focus` when no `task.ctx` is set.
+  - `/swt:commit`: Commits must go through the skill (never direct `git commit`); staging via `git add .`; honor `commit.draft` refinement gate.
+  - `/swt:init`: Newly bootstrapped workspaces discover `focus` in their AGENTS.md.
 - **`/swt:spec`** — Calls `/swt:task new` after generating a `SPEC.md` to link an implementation task.
 - **`/swt:init`** — Suggests `/swt:task new` after workspace bootstrap completes.
 

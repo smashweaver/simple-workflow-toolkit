@@ -111,7 +111,7 @@ This repository provides the following skills. Agents must be aware of all of th
 |---|---|---|
 | **think** | `/swt:think` | Base behavioral guidelines for all AI agent reasoning. Inherited by `swt:code` and all generation skills (digest, task, spec, init, commit). |
 | **workflow** | `/swt:flow` | Enforces the 8-phase development lifecycle: plan, analyze, risk-assess, approve, implement, document, test, iterate. |
-| **task** | `/swt:task` | Owns the full task lifecycle: naming validation, creation, graduation, status updates, and filtered listing. |
+| **task** | `/swt:task` | Owns the full task lifecycle: naming validation, creation, graduation, status updates, filtered listing, and `focus <name>` context setting. |
 | **spec** | `/swt:spec` | Transforms ideas, brainstorms, or rough notes into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
 | **init** | `/swt:init` | Bootstraps workspace `AGENTS.md` for any new project consuming this toolkit. Runs once, before any tasks or specs are created. |
 | **link** | `/swt:link` | Universal skill linker for SWT. Symlinks skills into agent discovery paths for dogfooding or installation. |
@@ -131,10 +131,10 @@ All commits follow the **Diff-First, Draft-and-Approve** protocol. There is a st
 
 > 🛑 **Gate 5 Rule:** A commit is the absolute final act of a task. Never invoke `/swt:commit` until Phase 8 (Review & Refine) is fully verified and explicitly closed by the user.
 
-1. Stage changes.
+1. Stage changes with `git add .` (never per-file `git add <path>` — respects `.gitignore` and prevents ignored files from leaking into commits).
 2. Export `commit.diff`.
 3. Agent drafts to `commit.draft` and tracks tasks in `commit.task`.
-4. User fine-tunes; Agent iterates with probing questions.
+4. User fine-tunes `commit.draft`; Agent iterates with probing questions. **Agent must wait for user edits — no auto-approval.**
 5. Apply commit on approval (`git commit -F commit.draft`).
 6. Cleanup temp files (`commit.diff`, `commit.draft`, `commit.task`).
 
@@ -146,6 +146,9 @@ To ensure architectural continuity and prevent context drift, every session MUST
 Before discussing any task or reviewing code, the agent MUST:
 1. **Invoke the `swt:status` skill** to orient itself. This aggregates the latest digest, active tasks, and recent specs in a single step.
 1.5. **Read `task.ctx`** (if present) — contains the active task filename for session continuity across agents and restarts. The `swt:status` output includes this context at the top.
+    - If `task.ctx` exists and points to a valid task file, the agent MUST run `xdg-open <task_file> &` to open it in the system's default browser (falls back to `firefox` then `google-chrome` then `chromium` if `xdg-open` not found).
+    - If the task file has a `**Spec**:` field linking a companion spec, also run `xdg-open <spec_file> &`.
+    - This browser-opening behavior applies whenever the agent reads `task.ctx`: session start, `/swt:status`, `/swt:task focus`, and Phase0 ideation updates.
 2. **Read the root `AGENTS.md`** to verify project scope, stack, and conventions.
 3. **Smart Search (Tasks)**: If a task reference or file is not found in the root `.tasks/` directory, check `.tasks/archive/` before assuming it is missing or deleted.
 4. **Ritual Adherence**: If the orientation or task discovery process identifies a skill that mandates a "re-read," execute it immediately. There is zero tolerance for protocol drift.

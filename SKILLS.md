@@ -40,6 +40,8 @@ Based on their purposes and triggers:
 
 The skills are designed to work in sequence. Here is the typical lifecycle of a feature from idea to commit:
 
+Use `/swt:task focus <name>` to set the active task context before entering `/swt:flow`.
+
 ```mermaid
 flowchart TD
     A["/swt:task brainstorm\nPhase 0: Ideate"] --> B["/swt:task graduate\nPromote to Phase 1"]
@@ -98,6 +100,7 @@ Owns the full task lifecycle: creation, brainstorming, graduation, status tracki
 | `/swt:task new` | Create a standard implementation task (Phase 1) |
 | `/swt:task brainstorm` | Create a Phase 0 ideation task for exploratory thinking |
 | `/swt:task graduate` | Promote a brainstorm task to an implementation task |
+| `/swt:task focus <name>` | Set active task context by name, slug, or path |
 | `/swt:task list --open` | Show all active tasks |
 | `/swt:task update` | Mark a phase complete and advance to the next |
 | `/swt:task close` | Mark a task as done or abandoned |

@@ -41,11 +41,20 @@ Two temporary files are used, both gitignored:
 - **`commit.task`** — the agent-tracked task reference (Closes: .tasks/...)
 
 ### Step 1 — Stage your changes
-Selectively stage only the files and hunks relevant to this commit:
+Stage all changes with `git add .` (respects `.gitignore` and prevents ignored files from leaking into commits). Verify with `git status`:
 ```bash
-git add <file>          # stage a specific file
-git add -p              # interactively stage hunks
+git add .               # stage all changes respecting .gitignore
 git status              # verify what is staged
+```
+
+#### Unstage capability
+After staging, review the staged files:
+```bash
+git diff --cached --name-only  # list staged files
+```
+If the user wants to unstage specific files, run:
+```bash
+git reset HEAD <file>    # unstage a specific file
 ```
 
 ### Step 2 — Capture the staged diff
@@ -83,6 +92,8 @@ The `commit.draft` file format:
 
 ### Step 4 — Fine-tune (Contextual Iteration)
 The draft can be revised until it is perfect. The user may **edit `commit.draft` directly** in their editor, or **ask the agent to make specific changes**.
+
+> ⚠️ **The agent must wait for user edits to `commit.draft` — no auto-approval.** The user's edit of `commit.draft` is the approval gate, not an automated "looks good, proceeding" response.
 
 For every agent revision request, the agent will:
 

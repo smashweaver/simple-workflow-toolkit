@@ -579,6 +579,7 @@ if [ "$CMD" == "ctx" ]; then
             fi
             echo "$RESOLVED" > task.ctx
             echo "Set active task context: $RESOLVED"
+            echo "$RESOLVED"
             ;;
         clear)
             rm -f task.ctx
