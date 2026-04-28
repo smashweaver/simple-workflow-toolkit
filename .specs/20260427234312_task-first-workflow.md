@@ -38,12 +38,12 @@ Selected approach: **Hybrid B+C** — automation via scripts (B) with validation
 
 ## 4. User Stories
 
-- [ ] US-001: As an agent, I can read `task.ctx` at session start and immediately know what task is active
-- [ ] US-002: As a user, when I raise a new issue mid-session, the agent asks if I want a brainstorm task created
-- [ ] US-003: As an agent, I refuse to code outside swt:flow phases — I guide the user to create a task first
-- [ ] US-004: As a user switching agents (Claude → opencode), the new agent picks up the same task context automatically
-- [ ] US-005: As an agent, when a task is closed, I automatically clear `task.ctx`
-- [ ] US-006: As an agent, I cannot proceed to Phase 2+ without a fully populated SPEC
+- [x] US-001: As an agent, I can read `task.ctx` at session start and immediately know what task is active
+- [x] US-002: As a user, when I raise a new issue mid-session, the agent asks if I want a brainstorm task created
+- [x] US-003: As an agent, I refuse to code outside swt:flow phases — I guide the user to create a task first
+- [x] US-004: As a user switching agents (Claude → opencode), the new agent picks up the same task context automatically
+- [x] US-005: As an agent, when a task is closed, I automatically clear `task.ctx`
+- [x] US-006: As an agent, I cannot proceed to Phase 2+ without a fully populated SPEC
 
 ## 5. Non-Functional Requirements
 
@@ -77,15 +77,15 @@ Selected approach: **Hybrid B+C** — automation via scripts (B) with validation
 
 ## 8. Success Criteria
 
-- [ ] `swt.sh ctx set <file>` creates `task.ctx`; `swt.sh ctx show` displays it
-- [ ] `flow.sh open` reads `task.ctx` and displays task metadata
-- [ ] `flow.sh check` exits non-zero when no/invalid context exists
-- [ ] `status.sh` shows active task context at top of output
-- [ ] `task.sh close` auto-clears `task.ctx` when it points to closed task
-- [ ] `task.ctx` is gitignored and survives across sessions
-- [ ] SPEC is fully populated immediately after `task.sh graduate`
-- [ ] Phase 2+ blocked if SPEC is empty or placeholder-only
-- [ ] User confirms MVP works as expected
+- [x] `swt.sh ctx set <file>` creates `task.ctx`; `swt.sh ctx show` displays it
+- [x] `flow.sh open` reads `task.ctx` and displays task metadata
+- [x] `flow.sh check` exits non-zero when no/invalid context exists
+- [x] `status.sh` shows active task context at top of output
+- [x] `task.sh close` auto-clears `task.ctx` when it points to closed task
+- [x] `task.ctx` is gitignored and survives across sessions
+- [x] SPEC is fully populated immediately after `task.sh graduate`
+- [x] Phase 2+ blocked if SPEC is empty or placeholder-only
+- [x] User confirms MVP works as expected
 
 ## 9. Out of Scope
 
@@ -109,15 +109,15 @@ Selected approach: **Hybrid B+C** — automation via scripts (B) with validation
 
 ## 12. MVP Definition
 
-- [ ] `task.ctx` file tracks active task filename in project root
-- [ ] `swt.sh ctx set/clear/show` manages context lifecycle
-- [ ] `flow.sh open/check/status` provides active task engine
-- [ ] `status.sh` displays active context at top of output
-- [ ] `swt:think` documents Task-First Workflow rule
-- [ ] `digest.sh` includes active context in output
-- [ ] `swt-flow/SKILL.md` updated with task.ctx check
-- [ ] `AGENTS.md` Section 7 updated with task.ctx step
-- [ ] `.gitignore` includes `task.ctx`
-- [ ] `task.sh graduate` populates SPEC from task content
-- [ ] SPEC-First Rule documented in Phase 1 (swt:flow and AGENTS.md)
-- [ ] User confirms MVP works as expected
+- [x] `task.ctx` file tracks active task filename in project root
+- [x] `swt.sh ctx set/clear/show` manages context lifecycle
+- [x] `flow.sh open/check/status` provides active task engine
+- [x] `status.sh` displays active context at top of output
+- [x] `swt:think` documents Task-First Workflow rule
+- [x] `digest.sh` includes active context in output
+- [x] `swt-flow/SKILL.md` updated with task.ctx check
+- [x] `AGENTS.md` Section 7 updated with task.ctx step
+- [x] `.gitignore` includes `task.ctx`
+- [x] `task.sh graduate` populates SPEC from task content
+- [x] SPEC-First Rule documented in Phase 1 (swt:flow and AGENTS.md)
+- [x] User confirms MVP works as expected

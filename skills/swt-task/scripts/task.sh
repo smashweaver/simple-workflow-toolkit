@@ -513,8 +513,11 @@ if [ "$CMD" == "close" ]; then
     echo "✅ Task closed: $FILE (Commit: $HASH)"
     # 4. Clear task.ctx if it points to this task
     if [ -f "task.ctx" ]; then
-        CURRENT_CTX=
-        if [ "$CURRENT_CTX" = "$FILE" ]; then
+        CURRENT_CTX=$(cat task.ctx | tr -d '[:space:]')
+        # Resolve FILE to comparable form
+        RESOLVED_FILE=$(realpath --relative-to=. "$FILE" 2>/dev/null || echo "$FILE")
+        BASENAME=$(basename "$FILE")
+        if [ "$CURRENT_CTX" = "$RESOLVED_FILE" ] || [ "$CURRENT_CTX" = "$FILE" ] || [ "$CURRENT_CTX" = "$BASENAME" ] || [ "$CURRENT_CTX" = ".tasks/$BASENAME" ] || [ "$CURRENT_CTX" = ".tasks/archive/$BASENAME" ]; then
             rm -f task.ctx
             echo "   Cleared task.ctx (was pointing to closed task)"
         fi
@@ -534,12 +537,23 @@ if [ "$CMD" == "ctx" ]; then
                 echo "Usage: swt.sh ctx set <task_file>"
                 exit 1
             fi
-            if [ ! -f "$CTX_FILE" ]; then
-                echo "Error: Task file $CTX_FILE not found."
+            # Resolve: accept bare name, relative path, or full path
+            if [ -f "$CTX_FILE" ]; then
+                RESOLVED=$(realpath --relative-to=. "$CTX_FILE" 2>/dev/null || echo "$CTX_FILE")
+            elif [ -f ".tasks/${CTX_FILE}.md" ]; then
+                RESOLVED=".tasks/${CTX_FILE}.md"
+            elif [ -f ".tasks/${CTX_FILE}" ]; then
+                RESOLVED=".tasks/${CTX_FILE}"
+            elif [ -f ".tasks/archive/${CTX_FILE}.md" ]; then
+                RESOLVED=".tasks/archive/${CTX_FILE}.md"
+            elif [ -f ".tasks/archive/${CTX_FILE}" ]; then
+                RESOLVED=".tasks/archive/${CTX_FILE}"
+            else
+                echo "Error: Task file $CTX_FILE not found (looked in .tasks/, .tasks/archive/, and cwd)."
                 exit 1
             fi
-            echo "$CTX_FILE" > task.ctx
-            echo "Set active task context: $CTX_FILE"
+            echo "$RESOLVED" > task.ctx
+            echo "Set active task context: $RESOLVED"
             ;;
         clear)
             rm -f task.ctx
@@ -547,7 +561,8 @@ if [ "$CMD" == "ctx" ]; then
             ;;
         show)
             if [ -f "task.ctx" ]; then
-                echo "Active task context: $(cat task.ctx)"
+                CTX=$(cat task.ctx | tr -d '[:space:]')
+                echo "Active task context: $CTX"
             else
                 echo "No active task context (task.ctx not found)."
             fi

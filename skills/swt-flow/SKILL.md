@@ -131,6 +131,9 @@ When triggered by **natural language**, you must **silently create a brainstorm 
 > 🛑 **Gate 1: The Alignment Loop**
 > Immediately after creating a new task file via `swt.sh`, you MUST provide the link and **HARD STOP**. Allow the user to fine-tune the `Objective` and `Checklist` before any planning begins.
 
+> 📋 **SPEC-First Rule (MANDATORY)**
+> After Phase 0 graduation, the SPEC file must be fully populated BEFORE any Phase 2+ work begins. The SPEC is the source of truth for implementation. If the SPEC is empty or placeholder-only, you are FORBIDDEN from proceeding to Phase 2 (Analyze).
+
 Gather context before planning. For any proposed change:
 
 - **Explore the codebase** using Grep, Glob, and Read to understand current state

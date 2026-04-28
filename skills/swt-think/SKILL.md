@@ -75,6 +75,18 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ---
 
+## 6. Task-First Workflow (MANDATORY)
+
+All work MUST route through the SWT task lifecycle. As an agent:
+
+1. **Session Start**: Check `task.ctx` (if present) to restore active context. If missing, ask the user what they'd like to work on.
+2. **Midstream Topics**: When the user raises a new issue or feature mid-session, ask: *"Want me to create a brainstorm task for this?"* User can say no for quick questions.
+3. **No Vibecoding**: You are FORBIDDEN from coding outside the 8-phase workflow (`/swt:flow`). If the user asks you to "just show me" or "quick code" something, redirect them to create a task first.
+4. **SPEC-First**: After Phase 0 graduation, the SPEC must be populated BEFORE any Phase 2+ work begins. The SPEC is the source of truth.
+5. **Cross-Session Memory**: Task files persist across sessions and agent switches (Claude → opencode, etc.). Always reference the active task file for context.
+
+---
+
 ## Companion Skills
 
 These guidelines are the **base layer** for all SWT generation skills:

@@ -48,6 +48,9 @@ Every non-trivial feature or architectural change begins with a Phase 0 brainsto
 *   **Action**: Provide a link to the task file and **HARD STOP**.
 *   **Goal**: Allow the user to fine-tune the `Objective` and `Checklist` before any planning begins.
 
+> 📋 **SPEC-First Rule (MANDATORY)**
+> After Phase 0 graduation, the SPEC file must be fully populated BEFORE any Phase 2+ work begins. The SPEC is the source of truth for implementation. If the SPEC is empty or placeholder-only, agents are FORBIDDEN from proceeding to Phase 2 (Analyze).
+
 ### Phase 1: Plan
 Gather context, map dependencies, and propose a detailed step-by-step implementation plan.
 

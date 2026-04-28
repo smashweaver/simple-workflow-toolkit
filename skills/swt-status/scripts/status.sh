@@ -34,12 +34,27 @@ echo ""
 
 # 1.25 Active Task Context
 if [ -f "$ROOT_DIR/task.ctx" ]; then
-    CTX_FILE=$(cat "$ROOT_DIR/task.ctx")
+    CTX_FILE=$(cat "$ROOT_DIR/task.ctx" | tr -d '[:space:]')
+    # Resolve task file
     if [ -f "$ROOT_DIR/$CTX_FILE" ]; then
-        CTX_STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$ROOT_DIR/$CTX_FILE" | head -n 1)
-        CTX_PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\S+' "$ROOT_DIR/$CTX_FILE" | head -n 1)
+        RESOLVED="$ROOT_DIR/$CTX_FILE"
+    elif [ -f "$ROOT_DIR/.tasks/${CTX_FILE}.md" ]; then
+        RESOLVED="$ROOT_DIR/.tasks/${CTX_FILE}.md"
+    elif [ -f "$ROOT_DIR/.tasks/${CTX_FILE}" ]; then
+        RESOLVED="$ROOT_DIR/.tasks/${CTX_FILE}"
+    elif [ -f "$ROOT_DIR/.tasks/archive/${CTX_FILE}.md" ]; then
+        RESOLVED="$ROOT_DIR/.tasks/archive/${CTX_FILE}.md"
+    elif [ -f "$ROOT_DIR/.tasks/archive/${CTX_FILE}" ]; then
+        RESOLVED="$ROOT_DIR/.tasks/archive/${CTX_FILE}"
+    else
+        RESOLVED=""
+    fi
+
+    if [ -n "$RESOLVED" ] && [ -f "$RESOLVED" ]; then
+        CTX_STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
+        CTX_PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
         echo "--- Active Task Context ---"
-        echo "Task: $CTX_FILE"
+        echo "Task: $(basename "$RESOLVED")"
         echo "Status: $CTX_STATUS | Phase: $CTX_PHASE"
         echo ""
     else

@@ -31,9 +31,20 @@ if [ "$CMD" == "open" ]; then
         exit 0
     fi
 
-    TASK_FILE=$(cat "$ROOT_DIR/task.ctx")
+    TASK_FILE=$(cat "$ROOT_DIR/task.ctx" | tr -d '[:space:]')
 
-    if [ ! -f "$ROOT_DIR/$TASK_FILE" ]; then
+    # Resolve task file: try as-is, then .tasks/<name>.md, .tasks/<name>, .tasks/archive/<name>.md, .tasks/archive/<name>
+    if [ -f "$ROOT_DIR/$TASK_FILE" ]; then
+        RESOLVED="$ROOT_DIR/$TASK_FILE"
+    elif [ -f "$ROOT_DIR/.tasks/${TASK_FILE}.md" ]; then
+        RESOLVED="$ROOT_DIR/.tasks/${TASK_FILE}.md"
+    elif [ -f "$ROOT_DIR/.tasks/${TASK_FILE}" ]; then
+        RESOLVED="$ROOT_DIR/.tasks/${TASK_FILE}"
+    elif [ -f "$ROOT_DIR/.tasks/archive/${TASK_FILE}.md" ]; then
+        RESOLVED="$ROOT_DIR/.tasks/archive/${TASK_FILE}.md"
+    elif [ -f "$ROOT_DIR/.tasks/archive/${TASK_FILE}" ]; then
+        RESOLVED="$ROOT_DIR/.tasks/archive/${TASK_FILE}"
+    else
         echo "Stale task.ctx: $TASK_FILE not found."
         echo "Clearing stale context..."
         rm -f "$ROOT_DIR/task.ctx"
@@ -41,22 +52,22 @@ if [ "$CMD" == "open" ]; then
     fi
 
     echo "--- Active Task Context ---"
-    echo "Task: $TASK_FILE"
+    echo "Task: $(basename "$RESOLVED")"
     echo ""
 
     # Extract and display key metadata
-    STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$ROOT_DIR/$TASK_FILE" | head -n 1)
-    PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\S+' "$ROOT_DIR/$TASK_FILE" | head -n 1)
-    TYPE=$(grep -oP '\*\*Type\*\*:\s*\K\S+' "$ROOT_DIR/$TASK_FILE" | head -n 1)
-    PRIORITY=$(grep -oP '\*\*Priority\*\*:\s*\K\S+' "$ROOT_DIR/$TASK_FILE" | head -n 1)
+    STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
+    PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
+    TYPE=$(grep -oP '\*\*Type\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
+    PRIORITY=$(grep -oP '\*\*Priority\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
 
     echo "Status: $STATUS | Phase: $PHASE | Type: $TYPE | Priority: $PRIORITY"
     echo ""
 
     # Show Objective or Core Concept
-    OBJECTIVE=$(grep -A 2 "## Objective" "$ROOT_DIR/$TASK_FILE" | grep -v "## Objective" | sed '/^$/d' | head -n 1)
+    OBJECTIVE=$(grep -A 2 "## Objective" "$RESOLVED" | grep -v "## Objective" | sed '/^$/d' | head -n 1)
     if [ -z "$OBJECTIVE" ]; then
-        OBJECTIVE=$(grep -A 2 "## Core Concept" "$ROOT_DIR/$TASK_FILE" | grep -v "## Core Concept" | sed '/^$/d' | head -n 1)
+        OBJECTIVE=$(grep -A 2 "## Core Concept" "$RESOLVED" | grep -v "## Core Concept" | sed '/^$/d' | head -n 1)
     fi
     if [ -n "$OBJECTIVE" ]; then
         echo "Summary: $OBJECTIVE"
@@ -64,7 +75,7 @@ if [ "$CMD" == "open" ]; then
     fi
 
     # Show next unchecked item from checklist
-    NEXT=$(grep -m 1 "\[ \]" "$ROOT_DIR/$TASK_FILE" | sed 's/.*\[ \] //' || true)
+    NEXT=$(grep -m 1 "\[ \]" "$RESOLVED" | sed 's/.*\[ \] //' || true)
     if [ -n "$NEXT" ]; then
         echo "Next Step: $NEXT"
     fi
@@ -78,14 +89,25 @@ if [ "$CMD" == "check" ]; then
         exit 1
     fi
 
-    TASK_FILE=$(cat "$ROOT_DIR/task.ctx")
+    TASK_FILE=$(cat "$ROOT_DIR/task.ctx" | tr -d '[:space:]')
 
-    if [ ! -f "$ROOT_DIR/$TASK_FILE" ]; then
+    # Resolve task file
+    if [ -f "$ROOT_DIR/$TASK_FILE" ]; then
+        RESOLVED="$ROOT_DIR/$TASK_FILE"
+    elif [ -f "$ROOT_DIR/.tasks/${TASK_FILE}.md" ]; then
+        RESOLVED="$ROOT_DIR/.tasks/${TASK_FILE}.md"
+    elif [ -f "$ROOT_DIR/.tasks/${TASK_FILE}" ]; then
+        RESOLVED="$ROOT_DIR/.tasks/${TASK_FILE}"
+    elif [ -f "$ROOT_DIR/.tasks/archive/${TASK_FILE}.md" ]; then
+        RESOLVED="$ROOT_DIR/.tasks/archive/${TASK_FILE}.md"
+    elif [ -f "$ROOT_DIR/.tasks/archive/${TASK_FILE}" ]; then
+        RESOLVED="$ROOT_DIR/.tasks/archive/${TASK_FILE}"
+    else
         echo "Invalid task context: $TASK_FILE not found."
         exit 1
     fi
 
-    echo "Active context: $TASK_FILE"
+    echo "Active context: $(basename "$RESOLVED")"
     exit 0
 fi
 
@@ -95,15 +117,25 @@ if [ "$CMD" == "status" ]; then
     if [ ! -f "$ROOT_DIR/task.ctx" ]; then
         echo "Active Task: none"
     else
-        TASK_FILE=$(cat "$ROOT_DIR/task.ctx")
-        if [ ! -f "$ROOT_DIR/$TASK_FILE" ]; then
-            echo "Active Task: STALE ($TASK_FILE not found)"
+        TASK_FILE=$(cat "$ROOT_DIR/task.ctx" | tr -d '[:space:]')
+        if [ -f "$ROOT_DIR/$TASK_FILE" ]; then
+            RESOLVED="$ROOT_DIR/$TASK_FILE"
+        elif [ -f "$ROOT_DIR/.tasks/${TASK_FILE}.md" ]; then
+            RESOLVED="$ROOT_DIR/.tasks/${TASK_FILE}.md"
+        elif [ -f "$ROOT_DIR/.tasks/${TASK_FILE}" ]; then
+            RESOLVED="$ROOT_DIR/.tasks/${TASK_FILE}"
+        elif [ -f "$ROOT_DIR/.tasks/archive/${TASK_FILE}.md" ]; then
+            RESOLVED="$ROOT_DIR/.tasks/archive/${TASK_FILE}.md"
+        elif [ -f "$ROOT_DIR/.tasks/archive/${TASK_FILE}" ]; then
+            RESOLVED="$ROOT_DIR/.tasks/archive/${TASK_FILE}"
         else
-            PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\S+' "$ROOT_DIR/$TASK_FILE" | head -n 1)
-            STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$ROOT_DIR/$TASK_FILE" | head -n 1)
-            echo "Active Task: $TASK_FILE"
-            echo "Status: $STATUS | Phase: $PHASE"
+            echo "Active Task: STALE ($TASK_FILE not found)"
+            exit 0
         fi
+        PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
+        STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
+        echo "Active Task: $(basename "$RESOLVED")"
+        echo "Status: $STATUS | Phase: $PHASE"
     fi
     exit 0
 fi

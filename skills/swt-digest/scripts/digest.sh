@@ -5,6 +5,12 @@ MILESTONE=false
 CONTENT_FILE=""
 SUMMARY_TEXT=""
 
+# Determine workspace root (look for AGENTS.md or .git)
+ROOT_DIR=$(pwd)
+while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.git" ]]; do
+    ROOT_DIR=$(dirname "$ROOT_DIR")
+done
+
 # Parse arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -53,10 +59,24 @@ CLOSED_TASKS=$(ls -1 .tasks/archive/*.md 2>/dev/null | grep "$(date +%Y%m%d)" ||
     echo ""
 
     # Active Task Context (task.ctx)
-    if [ -f "task.ctx" ]; then
-        CTX_FILE=$(cat task.ctx)
-        if [ -f "$CTX_FILE" ]; then
-            echo "**Active Context:** $CTX_FILE"
+    if [ -f "$ROOT_DIR/task.ctx" ]; then
+        CTX_FILE=$(cat "$ROOT_DIR/task.ctx" | tr -d '[:space:]')
+        # Resolve task file
+        if [ -f "$ROOT_DIR/$CTX_FILE" ]; then
+            RESOLVED="$ROOT_DIR/$CTX_FILE"
+        elif [ -f "$ROOT_DIR/.tasks/${CTX_FILE}.md" ]; then
+            RESOLVED="$ROOT_DIR/.tasks/${CTX_FILE}.md"
+        elif [ -f "$ROOT_DIR/.tasks/${CTX_FILE}" ]; then
+            RESOLVED="$ROOT_DIR/.tasks/${CTX_FILE}"
+        elif [ -f "$ROOT_DIR/.tasks/archive/${CTX_FILE}.md" ]; then
+            RESOLVED="$ROOT_DIR/.tasks/archive/${CTX_FILE}.md"
+        elif [ -f "$ROOT_DIR/.tasks/archive/${CTX_FILE}" ]; then
+            RESOLVED="$ROOT_DIR/.tasks/archive/${CTX_FILE}"
+        else
+            RESOLVED=""
+        fi
+        if [ -n "$RESOLVED" ] && [ -f "$RESOLVED" ]; then
+            echo "**Active Context:** $(basename "$RESOLVED")"
             echo ""
         else
             echo "**Active Context:** STALE ($CTX_FILE not found)"
