@@ -125,6 +125,8 @@ bash skills/swt-task/scripts/task.sh brainstorm "<SWT issue>" --uplink
 
 ### `/swt:task new` — Standard task (Phase 1)
 
+**Audience**: agent-driven, user-approved
+
 Creates a new implementation task ready for Phase 1 planning.
 
 **When to trigger:**
@@ -144,6 +146,8 @@ Creates a new implementation task ready for Phase 1 planning.
 
 ### `/swt:task brainstorm` — Ideation task (Phase 0)
 
+**Audience**: user-invoked
+
 Creates a Phase 0 brainstorm task for exploratory thinking before a plan exists.
 
 **When to trigger:**
@@ -151,23 +155,48 @@ Creates a Phase 0 brainstorm task for exploratory thinking before a plan exists.
 - Exploratory conversation that doesn't yet have a defined plan
 - `/swt:flow` Phase 0 entry signals (see `/swt:flow` skill)
 
+**Context-Aware Behavior (DEFAULT):**
+The agent **infers the topic from session context** — the user never needs to provide a topic argument explicitly. The topic argument to `task.sh brainstorm` is **optional**, not required. The agent:
+1. Infers the topic from the current conversation context
+2. Proposes the name via **Name Confirmation Gate** ("Proposed task name: `topic-name` — confirm or rename?")
+3. Only then passes the topic to `scripts/task.sh brainstorm "<Topic>"`
+
 **Steps:**
-1. Propose the slug name (name the **topic/thing**, not the activity) → wait for confirmation
-2. Get timestamp
-3. Write `.tasks/YYYYMMDDHHMMSS_slug.md` using the **Brainstorm Template** below
-4. **Gate 1 (Alignment)**: Provide the link and ask: *"Brainstorm created: `[slug](path)`. Please review the Core Concept. Ready to begin?"*
-5. **HARD STOP**: Do not begin the ideation conversation until the user explicitly confirms the task file.
-6. Use `scripts/task.sh brainstorm "<Topic>"` if available.
+1. **Infer the topic** from session context (default) or accept explicit topic from user
+2. Propose the slug name (name the **topic/thing**, not the activity) → wait for confirmation
+3. Get timestamp
+4. Write `.tasks/YYYYMMDDHHMMSS_slug.md` using the **Brainstorm Template** below
+5. **Gate 1 (Alignment)**: Provide the link and ask: *"Brainstorm created: `[slug](path)`. Please review the Core Concept. Ready to begin?"*
+6. **HARD STOP**: Do not begin the ideation conversation until the user explicitly confirms the task file.
+
+> **Brainstorm Consistency Review (Ritual)**
+> During Phase 0 iteration, the agent MUST periodically perform a self-review pass on the brainstorm document:
+> - Check for stale unresolved questions (questions already answered but not updated)
+> - Verify counts match (e.g., "10 targeted enhancements" vs actual list count)
+> - Identify roadmap gaps (items in Impact Analysis not yet addressed)
+> - Detect internal contradictions (conflicting statements within the document)
+>
+> This is a **formalized step in the brainstorm loop**, not something that only happens when the user asks "did you miss anything?"
+> Trigger: After significant updates to the brainstorm document, or when the user signals readiness to graduate.
 
 ---
 
 ### `/swt:task graduate` — Phase 0 → Phase 1 promotion
+
+**Audience**: agent-driven, user-approved
 
 Promotes a brainstorm task to an implementation task when the user is ready to build.
 
 **When to trigger:**
 - User says "ready to build", "let's plan this", "graduate this"
 - End of a productive Phase 0 ideation session with clear direction
+
+> 🛑 **Phase 0 Graduation Gate (MANDATORY)**
+> Before invoking `swt.sh graduate`, the agent MUST:
+> 1. Perform a **HARD STOP** and ask the user: *"Are we ready to graduate to Phase 1?"*
+> 2. Wait for an explicit verbal **"Yes"** or **"Go"** from the user.
+> 3. Only then invoke `swt.sh graduate <task_file>`.
+> 4. After graduation, present the link and **HARD STOP** again (Gate 1: Alignment Loop).
 
 **Steps:**
 1. Invoke `scripts/task.sh graduate <task_file>`.
@@ -184,6 +213,8 @@ Promotes a brainstorm task to an implementation task when the user is ready to b
 
 ### `/swt:task update` — Mark progress
 
+**Audience**: agent-driven, user-approved
+
 Updates the task checklist and phase field as phases complete.
 
 **Steps:**
@@ -192,29 +223,39 @@ Updates the task checklist and phase field as phases complete.
 3. Update `**Phase**` to the next active phase
 4. If all phases are done, DO NOT close the task yet. Instruct the user to stage their files and invoke `/swt:commit`. The task will remain `pending` until the commit is applied.
 
+> 🛑 **Phase 8 Iterative Gate (MANDATORY)**
+> During Phase 8, the agent MUST NOT push the user toward `close`.
+> - Phase 8 is an **iterative loop** — the user may append fine-tuning items via `swt.sh update <file> --append "item text"`.
+> - The agent periodically asks *"Ready to close?"* but the **user always decides** when Phase 8 ends.
+> - No auto-termination of Phase 8 — the loop continues as long as the user wants to refine.
+
 ---
 
-### `/swt:task --tidy` — Directory cleanup
+### `/swt:task tidy` — Directory cleanup
+
+**Audience**: user-invoked
 
 Moves completed (`done`) or `abandoned` task files into the `.tasks/archive/` subfolder.
 
 **When to trigger:**
-- User explicitly says "/swt:task --tidy"
+- User explicitly says "/swt:task tidy"
 - At the end of a session if there are several closed tasks in the root.
 
 **Steps:**
-1. Invoke `scripts/task.sh --tidy`.
+1. Invoke `scripts/task.sh tidy`.
 2. Confirm the result to the user (e.g., "Tidied 5 tasks into archive/").
 
 ---
 
-### `/swt:task focus` — Set active task context
+### `/swt:task mount` — Mount active task context
 
-Sets the active task context so the agent knows what to work on. Resolves the task file, sets `task.ctx`, opens the task (and companion spec if available) in the system's default browser, reads the task state, and presents it to the user.
+**Audience**: user-invoked
+
+Mounts the active task context so the agent knows what to work on. Resolves the task file, sets `task.ctx`, opens the task (and companion spec if available) in the system's default browser, reads the task state, and presents it to the user.
 
 **When to trigger:**
-- User says "focus on X", "work on X", "switch to task X", "set focus to X"
-- User invokes `/swt:task focus <name>` directly
+- User says "mount X", "work on X", "switch to task X", "set mount to X"
+- User invokes `/swt:task mount <name>` directly
 
 **Steps:**
 1. **Resolve the task file** by name/slug (check `.tasks/`, `.tasks/archive/`, accept bare slug, filename, or path):
@@ -228,7 +269,7 @@ Sets the active task context so the agent knows what to work on. Resolves the ta
    - `xdg-open "$RESOLVED" &` (falls back to `firefox` then `google-chrome` then `chromium` if `xdg-open` not found)
    - If the task has a `**Spec**: <spec_file>` field, also run `xdg-open <spec_file> &`
 5. **Present to user**:
-   > *"Focus set: `[slug](path)`*
+   > *"Mount set: `[slug](path)`*
    > *- Status: `<Status>` | Phase: `<Phase>`*
    > *- Next: `<next unchecked item or next step>`*
    > *Task and spec opened in default browser."*
@@ -238,6 +279,8 @@ Sets the active task context so the agent knows what to work on. Resolves the ta
 ---
 
 ### `/swt:task list` — List tasks
+
+**Audience**: user-invoked
 
 Lists task files in the `.tasks/` directory, optionally filtered by status.
 
@@ -258,6 +301,8 @@ Lists task files in the `.tasks/` directory, optionally filtered by status.
 
 ### `/swt:task close` — Mark done or abandoned
 
+**Audience**: agent-driven, user-approved
+
 Finalizes a task by updating metadata, checklists, and commit references. This command is the final act of a task ritual.
 
 **Steps:**
@@ -268,6 +313,36 @@ Finalizes a task by updating metadata, checklists, and commit references. This c
    - Marks ALL items in the `## Checklist` as `[x]`.
    - Appends the commit hash to the `## Commit Reference`.
 3. Confirm the result to the user.
+
+---
+
+### `/swt:task abandon` — Abandon a task
+
+**Audience**: user-invoked
+
+A dedicated operation to abandon a task. Semantically distinct from `close` — no commit hash required, status set to `abandoned`, checklist left as-is (not checked off). Also clears `task.ctx` if the abandoned task was mounted.
+
+**When to trigger:**
+- User says "abandon this task", "give up on X", "drop task X"
+- User invokes `/swt:task abandon` directly
+
+**Steps:**
+1. **Resolve the task file** (same logic as `mount`): check `.tasks/`, `.tasks/archive/`, accept bare slug, filename, or path.
+   - If no argument provided, default to the currently mounted task (read `task.ctx`).
+   - If no task mounted and no argument, error and suggest `/swt:task list --open`.
+2. **Update via script**: Run `bash skills/swt-task/scripts/task.sh abandon <resolved_file>`.
+   - Script automatically sets `**Status**` to `abandoned`, sets `**Completed**` to timestamp.
+   - Checklist is left AS-IS (not checked off).
+   - `task.ctx` is cleared if it pointed to this task.
+3. **Confirm to user**: *"Task abandoned: `[slug](path)` (Status: abandoned, checklist unchanged)."*
+
+**Semantic distinction from `close`:**
+| Attribute | `abandon` | `close` |
+|---|---|---|
+| Status | `abandoned` | `done` |
+| Commit hash | Not required | Required |
+| Checklist | Left as-is | All items checked `[x]` |
+| `task.ctx` | Cleared if mounted | Cleared if mounted |
 
 ---
 
@@ -355,6 +430,45 @@ Both paths go through the **Name Confirmation Gate** before any file is written.
 ## Unresolved Questions
 {{What still needs to be answered before this graduates to a task?}}
 
+## Impact Analysis (Roadmap)
+
+#### Operations — What Changes:
+| # | Operation | Status | Detail |
+|---|---|---|---|
+| 1 |  | **Modify** |  |
+| 2 |  | **Modify** |  |
+| 3 |  | No change |  |
+| 4 |  | **Modify** |  |
+| 5 |  | **Rename** |  |
+| 6 |  | No change |  |
+| 7 |  | **Modify** |  |
+| 8 |  | **Rename** |  |
+| 9 |  | **New** |  |
+
+#### Audience Split:
+| Audience | Operations |
+|---|---|
+| **User-invoked** |  |
+| **Agent-driven, user-approved** |  |
+
+#### Rules & Gates — What Changes:
+| Rule | Status | Detail |
+|---|---|---|
+| Population Ritual (Born Complete) | No change | — |
+| Naming Rules | No change | — |
+| Name Confirmation Gate | No change | — |
+| Uplink Protocol | No change | — |
+| **Phase 0 Graduation Gate** | **New** | Agent MUST halt and ask for explicit verbal permission before running `swt.sh graduate` |
+| **Phase 8 Iterative Gate** | **New** | Formally allows the user to keep a task open in Phase 8 for fine-tuning |
+| **Brainstorm Consistency Review** | **New** | Formalizes agent's self-review pass during Phase 0 |
+
+#### Touch Points (Files):
+- `skills/swt-task/SKILL.md` —
+- `skills/swt-task/scripts/task.sh` —
+- `skills/swt-flow/SKILL.md` —
+- `skills/swt-status/scripts/status.sh` —
+- `AGENTS.md` —
+
 ## Notes
 
 ## Commit Reference
@@ -365,11 +479,11 @@ Both paths go through the **Name Confirmation Gate** before any file is written.
 ## Cross-References
 
 - ⚠️ **The /swt:flow skill is the primary consumer of this skill.** All tasks created by `/swt:flow` must follow these rules.
-- **`/swt:task focus`** — Sets active task context. Integrates with:
-  - `/swt:status`: Status shows focused task; `focus` fulfills the "work on this one" signal after listing tasks.
-  - `/swt:flow`: `focus` sets context before Phase1 planning; `/swt:flow` should suggest `focus` when no `task.ctx` is set.
+- **`/swt:task mount`** — Mounts active task context. Integrates with:
+  - `/swt:status`: Status shows mounted task; `mount` fulfills the "work on this one" signal after listing tasks.
+  - `/swt:flow`: `mount` sets context before Phase1 planning; `/swt:flow` should suggest `mount` when no `task.ctx` is set.
   - `/swt:commit`: Commits must go through the skill (never direct `git commit`); staging via `git add .`; honor `commit.draft` refinement gate.
-  - `/swt:init`: Newly bootstrapped workspaces discover `focus` in their AGENTS.md.
+  - `/swt:init`: Newly bootstrapped workspaces discover `mount` in their AGENTS.md.
 - **`/swt:spec`** — Calls `/swt:task new` after generating a `SPEC.md` to link an implementation task.
 - **`/swt:init`** — Suggests `/swt:task new` after workspace bootstrap completes.
 

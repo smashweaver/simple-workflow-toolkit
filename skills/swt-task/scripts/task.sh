@@ -19,7 +19,8 @@ function show_help {
     echo "  swt.sh ctx set <file>      - Set active task context (writes task.ctx)"
     echo "  swt.sh ctx clear           - Clear active task context (removes task.ctx)"
     echo "  swt.sh ctx show            - Show current active task context"
-    echo "  swt.sh --tidy              - Move done/abandoned tasks to .tasks/archive/"
+    echo "  swt.sh tidy                 - Move done/abandoned tasks to .tasks/archive/"
+    echo "  swt.sh abandon <file>      - Abandon task (status: abandoned, no commit hash)"
 }
 
 if [ -z "$CMD" ]; then
@@ -257,6 +258,13 @@ Provide a short description of what this task achieves.
 EOF
 
     echo "Created new task: $FILENAME"
+
+    # Smart mount: auto-mount only if no task is currently mounted
+    if [ ! -f "task.ctx" ]; then
+        echo "$FILENAME" > task.ctx
+        echo "   Auto-mounted as active task (task.ctx was empty)"
+    fi
+
     exit 0
 fi
 
@@ -339,6 +347,13 @@ $UPLINK_CONTEXT
 EOF
 
     echo "Created brainstorm task: $FILENAME"
+
+    # Smart mount: auto-mount only if no task is currently mounted
+    if [ ! -f "task.ctx" ]; then
+        echo "$FILENAME" > task.ctx
+        echo "   Auto-mounted as active task (task.ctx was empty)"
+    fi
+
     exit 0
 fi
 
@@ -552,6 +567,42 @@ if [ "$CMD" == "close" ]; then
     exit 0
 fi
 
+if [ "$CMD" == "abandon" ]; then
+    FILE="$2"
+    if [ -z "$FILE" ]; then
+        echo "Error: Must provide a task file to abandon."
+        exit 1
+    fi
+    if [ ! -f "$FILE" ]; then
+        echo "Error: Task file not found: $FILE"
+        exit 1
+    fi
+
+    DATE_LOG=$(date +"%Y-%m-%d %H:%M:%S")
+
+    # 1. Update Headers (status=abandoned, set Completed)
+    sed -i "s/^\*\*Status\*\*:.*/\*\*Status\*\*: abandoned/" "$FILE"
+    sed -i "s/^\*\*Completed\*\*:.*/\*\*Completed\*\*: $DATE_LOG/" "$FILE"
+    sed -i "s/^\*\*Updated\*\*:.*/\*\*Updated\*\*: $DATE_LOG/" "$FILE"
+
+    # 2. Leave Checklist AS-IS (do NOT check off items)
+
+    echo "Abandoned task: $FILE (Status: abandoned, Checklist unchanged)"
+
+    # 3. Clear task.ctx if it points to this task
+    if [ -f "task.ctx" ]; then
+        CURRENT_CTX=$(cat task.ctx | tr -d '[:space:]')
+        RESOLVED_FILE=$(realpath --relative-to=. "$FILE" 2>/dev/null || echo "$FILE")
+        BASENAME=$(basename "$FILE")
+        if [ "$CURRENT_CTX" = "$RESOLVED_FILE" ] || [ "$CURRENT_CTX" = "$FILE" ] || [ "$CURRENT_CTX" = "$BASENAME" ] || [ "$CURRENT_CTX" = ".tasks/$BASENAME" ] || [ "$CURRENT_CTX" = ".tasks/archive/$BASENAME" ]; then
+            rm -f task.ctx
+            echo "   Cleared task.ctx (was pointing to abandoned task)"
+        fi
+    fi
+
+    exit 0
+fi
+
 if [ "$CMD" == "ctx" ]; then
     CTX_CMD=$2
     CTX_FILE=$3
@@ -628,6 +679,43 @@ if [ "$CMD" == "phase" ]; then
 
     echo "Transitioned $FILE to Phase $PHASE_NUM. Ritual logged."
     exit 0
+fi
+
+if [ "$CMD" == "update" ]; then
+    FILE=$2
+    APPEND_FLAG=$3
+    APPEND_TEXT=$4
+
+    if [ -z "$FILE" ]; then
+        echo "Usage: swt.sh update <task_file> [--append \"item text\"]"
+        exit 1
+    fi
+
+    if [ ! -f "$FILE" ]; then
+        echo "Error: File $FILE not found."
+        exit 1
+    fi
+
+    if [ "$APPEND_FLAG" == "--append" ]; then
+        if [ -z "$APPEND_TEXT" ]; then
+            echo "Error: Must provide item text after --append"
+            exit 1
+        fi
+        # Append to checklist section
+        if grep -q "## Checklist" "$FILE"; then
+            # Find the line number of "## Checklist" and append after it (before next ## section)
+            sed -i "/^## Checklist$/a - [ ] $APPEND_TEXT" "$FILE"
+            echo "Appended to checklist: $APPEND_TEXT"
+        else
+            # No checklist section, create one
+            echo -e "\n## Checklist\n- [ ] $APPEND_TEXT" >> "$FILE"
+            echo "Created checklist and appended: $APPEND_TEXT"
+        fi
+        exit 0
+    else
+        echo "Usage: swt.sh update <task_file> [--append \"item text\"]"
+        exit 1
+    fi
 fi
 
 echo "Unknown command: $CMD"

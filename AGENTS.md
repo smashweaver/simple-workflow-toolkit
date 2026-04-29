@@ -43,6 +43,13 @@ Every non-trivial feature or architectural change begins with a Phase 0 brainsto
 
 **The Graduation Ritual**: To move from Phase 0 to Phase 1, the agent MUST invoke `swt.sh graduate <task_file>`. This command automates metadata updates and enforces artifact generation (`SPEC.md` for features, `Verification Checklist` for refactors).
 
+> 🛑 **Phase 0 Graduation Gate (MANDATORY)**
+> Before invoking `swt.sh graduate`, the agent MUST:
+> 1. Perform a **HARD STOP** and ask the user: *"Are we ready to graduate to Phase 1?"*
+> 2. Wait for an explicit verbal "Yes" or "Go" from the user.
+> 3. Only then invoke `swt.sh graduate <task_file>`.
+> 4. After graduation, present the link and **HARD STOP** again (Gate 1: Alignment Loop).
+
 ### Gate 1: The Alignment Loop (Phase 1 Entry)
 *   **Trigger**: Immediately after a task file is created or graduated.
 *   **Action**: Provide a link to the task file and **HARD STOP**.
@@ -88,8 +95,10 @@ Run automated tests or provide a manual verification checklist. Zero tolerance f
 *   **Action**: **HARD STOP**. Ask the user to review the working MVP.
 *   **Goal**: Allow the user to tweak UI/UX or edge cases before the code is finalized.
 
-### Phase 8: Review & Refine
+### Phase 8: Review & Refine (Iterative Loop)
 Verify that the MVP meets the objective. Polish the implementation based on user feedback during Gate 4. Refactor only if necessary for SOLID principles.
+*   **Iterative Development**: Phase 8 supports dynamic checklist items via `swt.sh update <file> --append "item text"`. The user may append fine-tuning items and "afterthoughts" without being forced into premature task closure.
+*   **Phase 8 Gate**: The agent must NOT push the user toward `close` during Phase 8. The loop continues as long as the user wants to refine. The agent periodically asks "Ready to close?" but the user always decides.
 *   **Structural Validation**: If `swt:graphify` is enabled, run `/swt:graphify update` and review the "Structural Diff" in `graphify-out/graph.html` to ensure no unexpected coupling or "God Nodes" were introduced.
 
 ### Gate 5: The Finality Loop (Commit Sequence)
@@ -111,7 +120,7 @@ This repository provides the following skills. Agents must be aware of all of th
 |---|---|---|
 | **think** | `/swt:think` | Base behavioral guidelines for all AI agent reasoning. Inherited by `swt:code` and all generation skills (digest, task, spec, init, commit). |
 | **workflow** | `/swt:flow` | Enforces the 8-phase development lifecycle: plan, analyze, risk-assess, approve, implement, document, test, iterate. |
-| **task** | `/swt:task` | Owns the full task lifecycle: naming validation, creation, graduation, status updates, filtered listing, and `focus <name>` context setting. |
+| **task** | `/swt:task` | Owns the full task lifecycle: naming validation, creation, graduation, status updates, filtered listing, and `mount <name>` context setting. |
 | **spec** | `/swt:spec` | Transforms ideas, brainstorms, or rough notes into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
 | **init** | `/swt:init` | Bootstraps workspace `AGENTS.md` for any new project consuming this toolkit. Runs once, before any tasks or specs are created. |
 | **link** | `/swt:link` | Universal skill linker for SWT. Symlinks skills into agent discovery paths for dogfooding or installation. |
@@ -148,7 +157,7 @@ Before discussing any task or reviewing code, the agent MUST:
 1.5. **Read `task.ctx`** (if present) — contains the active task filename for session continuity across agents and restarts. The `swt:status` output includes this context at the top.
     - If `task.ctx` exists and points to a valid task file, the agent MUST run `xdg-open <task_file> &` to open it in the system's default browser (falls back to `firefox` then `google-chrome` then `chromium` if `xdg-open` not found).
     - If the task file has a `**Spec**:` field linking a companion spec, also run `xdg-open <spec_file> &`.
-    - This browser-opening behavior applies whenever the agent reads `task.ctx`: session start, `/swt:status`, `/swt:task focus`, and Phase0 ideation updates.
+    - This browser-opening behavior applies whenever the agent reads `task.ctx`: session start, `/swt:status`, `/swt:task mount`, and Phase0 ideation updates.
 2. **Read the root `AGENTS.md`** to verify project scope, stack, and conventions.
 3. **Smart Search (Tasks)**: If a task reference or file is not found in the root `.tasks/` directory, check `.tasks/archive/` before assuming it is missing or deleted.
 4. **Ritual Adherence**: If the orientation or task discovery process identifies a skill that mandates a "re-read," execute it immediately. There is zero tolerance for protocol drift.
