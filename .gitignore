@@ -37,3 +37,8 @@ demo/
 
 # Graphify artifacts
 graphify-out/
+
+# Sample artifacts (do not commit)
+sample_implementation_plan.md
+sample_walkthrough.md
+sample_task.md

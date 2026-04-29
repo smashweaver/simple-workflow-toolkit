@@ -41,6 +41,8 @@ Every non-trivial feature or architectural change begins with a Phase 0 brainsto
 > [!NOTE]
 > For trivial changes, Scenarios B and C can be marked as "N/A" or "Not recommended for simplicity."
 
+*   **User Suggestion Tracking (MANDATORY)**: If the user proposes a solution, architecture idea, or configuration, you MUST explicitly log it under `## Explored Alternatives` along with its status (e.g., accepted, rejected, pending) and reasoning. Do not let user ideas scroll off the chat history unrecorded.
+
 **The Graduation Ritual**: To move from Phase 0 to Phase 1, the agent MUST invoke `swt.sh graduate <task_file>`. This command automates metadata updates and enforces artifact generation (`SPEC.md` for features, `Verification Checklist` for refactors).
 
 > 🛑 **Phase 0 Graduation Gate (MANDATORY)**

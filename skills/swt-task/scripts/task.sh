@@ -346,6 +346,7 @@ $ARG
 - **Scenario A (Discipline)**: {{Methodology/Rule change only}}
 - **Scenario B (Automation)**: {{Helper scripts/Templates}}
 - **Scenario C (Enforcement)**: {{Hard gates/Physical blocks}}
+- **User Suggestion**: {{Explicitly log user ideas here or mark N/A}}
 
 ## Unresolved Questions
 What still needs to be answered before this can become a task?

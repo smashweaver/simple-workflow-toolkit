@@ -32,6 +32,8 @@ To ensure the user maintains control, the workflow is punctuated by **5 Mandator
 ### Phase 0: Ideate (Brainstorming)
 Before graduating to Phase 1, the agent MUST present a Scenario-Based Trade-off Analysis. To move from Phase 0 to Phase 1, the agent MUST invoke `swt.sh graduate <task_file>`.
 
+*   **User Suggestion Tracking (MANDATORY)**: If the user proposes a solution, architecture idea, or configuration, you MUST explicitly log it under `## Explored Alternatives` along with its status (e.g., accepted, rejected, pending) and reasoning. Do not let user ideas scroll off the chat history unrecorded.
+
 > 🛑 **Phase 0 Graduation Gate (MANDATORY)**
 > Before invoking `swt.sh graduate`, the agent MUST:
 > 1. Perform a **HARD STOP** and ask the user: *"Are we ready to graduate to Phase 1?"*
