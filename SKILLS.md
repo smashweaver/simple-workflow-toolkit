@@ -40,7 +40,7 @@ Based on their purposes and triggers:
 
 The skills are designed to work in sequence. Here is the typical lifecycle of a feature from idea to commit:
 
-Use `/swt:task focus <name>` to set the active task context before entering `/swt:flow`.
+Use `/swt:task ctx set <file>` to set the active task context before entering `/swt:flow`.
 
 ```mermaid
 flowchart TD
@@ -100,11 +100,15 @@ Owns the full task lifecycle: creation, brainstorming, graduation, status tracki
 | `/swt:task new` | Create a standard implementation task (Phase 1) |
 | `/swt:task brainstorm` | Create a Phase 0 ideation task for exploratory thinking |
 | `/swt:task graduate` | Promote a brainstorm task to an implementation task |
-| `/swt:task focus <name>` | Set active task context by name, slug, or path |
+| `/swt:task phase <N> <file>` | Transition task to Phase N (exclusive gateway — never edit Phase header manually) |
+| `/swt:task ctx set <file>` | Set active task context (writes `task.ctx`) |
+| `/swt:task ctx clear` | Clear active task context (removes `task.ctx`) |
+| `/swt:task ctx show` | Show current active task context |
 | `/swt:task list --open` | Show all active tasks |
-| `/swt:task update` | Mark a phase complete and advance to the next |
-| `/swt:task close` | Mark a task as done or abandoned |
-| `/swt:task --tidy` | Archive completed tasks into `.tasks/archive/` |
+| `/swt:task update <file> --append "text"` | Append a checklist item to a task |
+| `/swt:task close <file> <hash>` | Finalize a task as done (status: done, checklist: complete) |
+| `/swt:task abandon <file>` | Abandon a task (status: abandoned, no commit hash) |
+| `/swt:task tidy` | Archive done/abandoned tasks into `.tasks/archive/` |
 
 ---
 

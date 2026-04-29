@@ -30,7 +30,7 @@ Once installed, invoke skills directly or describe your task to trigger them:
 
 - **Plan a feature**: `/swt:flow`
 - **Commit changes**: `/swt:commit`
-- **Set task focus**: `/swt:task focus <name>`
+- **Set task context**: `/swt:task ctx set <file>`
 - **Check task status**: Ask *"whats up?"* or *"where am I?"*
 - **End a session**: Say *"goodbye"* to trigger `/swt:digest`
 
@@ -44,12 +44,14 @@ swt/
 │   ├── swt-task/           # Task lifecycle: naming, creation, graduation, status
 │   │   └── scripts/
 │   │       └── task.sh     # Task Manager CLI
+│   ├── swt-status/         # Aggregates project state for session restoration
 │   ├── swt-init/           # Workspace bootstrap (scaffolds AGENTS.md)
 │   ├── swt-link/           # Universal skill linker (dogfooding/install)
 │   │   └── scripts/
 │   │       └── link.sh     # Skill linker backend
 │   ├── swt-spec/           # Idea-to-specification (SPEC.md / PRD generation)
 │   ├── swt-code/           # Behavioral guidelines (surgical changes, simplicity)
+│   ├── swt-graphify/       # Structural awareness and dependency mapping
 │   ├── swt-commit/         # Diff-first, draft-and-approve commit workflow
 │   ├── swt-digest/         # Automated session summaries for continuity
 │   └── swt-mermaid/        # Mermaid diagram syntax rules

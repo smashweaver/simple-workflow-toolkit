@@ -114,22 +114,11 @@ The suite is **Workspace-Aware**:
 
 ## 5. Skills Suite
 
-This repository provides the following skills. Agents must be aware of all of them — load the relevant `SKILL.md` before performing work in that domain.
+This repository provides a comprehensive suite of workflow skills. Agents must be aware of all of them.
 
-| Skill | Invocation | Purpose |
-|---|---|---|
-| **think** | `/swt:think` | Base behavioral guidelines for all AI agent reasoning. Inherited by `swt:code` and all generation skills (digest, task, spec, init, commit). |
-| **workflow** | `/swt:flow` | Enforces the 8-phase development lifecycle: plan, analyze, risk-assess, approve, implement, document, test, iterate. |
-| **task** | `/swt:task` | Owns the full task lifecycle: naming validation, creation, graduation, status updates, filtered listing, and `mount <name>` context setting. |
-| **spec** | `/swt:spec` | Transforms ideas, brainstorms, or rough notes into a structured `SPEC.md` (PRD). Bridges Phase 0 ideation to Phase 1 planning. |
-| **init** | `/swt:init` | Bootstraps workspace `AGENTS.md` for any new project consuming this toolkit. Runs once, before any tasks or specs are created. |
-| **link** | `/swt:link` | Universal skill linker for SWT. Symlinks skills into agent discovery paths for dogfooding or installation. |
-| **coding** | `/swt:code` | Behavioral guidelines for surgical, minimal, goal-driven code changes. Inherits from `swt:think`. |
-| **commit** | `/swt:commit` | Diff-first, draft-and-approve commit workflow. |
-| **digest** | `/swt:digest` | Automates session summaries with multi-digest recursive synthesis. |
-| **status** | `/swt:status` | Aggregates project state (digest, tasks, specs) for session restoration. |
-| **graphify** | `/swt:graphify` | Structural awareness and dependency mapping (Opt-in). |
-| **mermaid** | `/swt:mermaid` | Prevents parse errors and enforces correct syntax in Mermaid diagrams. |
+> 📚 **Skill Discovery Rule**: To prevent documentation drift, the full catalog of skills, their invocations, and their purposes are documented in **`SKILLS.md`**.
+> 
+> **You MUST read `SKILLS.md`** to discover available skills. Before performing work in a specific domain, load the relevant `skills/<name>/SKILL.md` for detailed instructions.
 
 ## 6. Commit Discipline
 
