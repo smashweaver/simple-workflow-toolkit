@@ -10,7 +10,7 @@ This document defines the core principles and behavioral protocols for AI coding
 4.  **Verifiable Outcomes**: Every change must have a clear path to verification (tests or checklists).
 5.  **Gitignored Awareness**: Runtime directories (`.digests/`, `.tasks/`) are gitignored. Use `bash ls` + `read` for these — glob/search tools will return empty results.
 6.  **Ritual Discipline**: "Mandatory" means mandatory. Never skip a re-read step, self-correction pass, or consent gate, even if you feel "familiar" with the context.
-7.  **Exclusive Gateway**: You are FORBIDDEN from manually editing the `Phase` header in task files. All phase transitions MUST be executed via `swt:task phase <N> <task_file>`. This ensures ritual integrity and synchronization.
+7.  **Exclusive Gateway**: You are FORBIDDEN from manually editing the `Phase` header in task files. All phase transitions MUST be executed via `swt:task phase <N> <task_file>`. The `validate` script reads the historical breadcrumb logs and physically blocks execution if the header was manually forged or phases were skipped.
 8.  **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `skills/swt-task/scripts/task.sh validate`.
 9.  **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation.
 
@@ -143,7 +143,7 @@ To ensure architectural continuity and prevent context drift, every session MUST
 ### 1. Orientation (Mandatory)
 Before discussing any task or reviewing code, the agent MUST:
 1. **Invoke the `swt:status` skill** to orient itself. This aggregates the latest digest, active tasks, and recent specs in a single step.
-1.5. **Read `task.ctx`** (if present) — contains the active task filename for session continuity across agents and restarts. The `swt:status` output includes this context at the top.
+1.5. **Read `task.ctx`** (if present) — contains the active task filename for session continuity across agents and restarts. The `swt:status` output includes this context at the top. *(Note: `task.ctx` survives task closures and abandonments. It is ONLY cleared by the `/swt:commit` cleanup sequence or manually by the user to ensure context isn't lost mid-workflow).*
     - If `task.ctx` exists and points to a valid task file, the agent MUST run `xdg-open <task_file> &` to open it in the system's default browser (falls back to `firefox` then `google-chrome` then `chromium` if `xdg-open` not found).
     - If the task file has a `**Spec**:` field linking a companion spec, also run `xdg-open <spec_file> &`.
     - This browser-opening behavior applies whenever the agent reads `task.ctx`: session start, `/swt:status`, `/swt:task mount`, and Phase0 ideation updates.

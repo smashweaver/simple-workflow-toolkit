@@ -110,7 +110,9 @@ When triggered by **natural language**, you must **silently create a brainstorm 
 - **Mode: Conversational.** Do not propose files to change, write code, or rush into technical planning.
 - **Ask probing questions** to help the user surface, drill down, and validate the idea.
 - **Play devil's advocate** — identify gaps, edge cases, and alternative approaches constructively.
-- **Update the task file** as the discussion evolves (use Edit to add notes under `## Notes`).
+- **Update the task file** as the discussion evolves:
+  - Add general findings under `## Notes`.
+  - **User Suggestion Tracking (MANDATORY)**: If the user proposes a solution, architecture idea, or configuration, you MUST explicitly log it under `## Explored Alternatives` along with its status (e.g., accepted, rejected, pending) and reasoning. Do not let user ideas scroll off the chat history unrecorded.
 - **When the user is ready to build**, you MUST:
   1. **MANDATORY**: Run `swt:task graduate <task_file>` — this script performs ALL of the following automatically:
      - Changes `**Status**` from `ideating` → `pending`

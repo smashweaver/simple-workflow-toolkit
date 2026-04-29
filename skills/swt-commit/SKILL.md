@@ -139,10 +139,15 @@ Immediately after a successful commit:
 4. This command handles all header updates, checklist completion, and commit references.
 
 ### Step 8 — Cleanup (agent-executed)
-After the commit and task updates are complete, delete both temp files:
-```bash
-rm commit.diff commit.draft commit.task
-```
+After the commit and task updates are complete, perform context cleanup:
+1. If a task was closed, clear the active context so the next session starts fresh:
+   ```bash
+   bash skills/swt-task/scripts/task.sh ctx clear
+   ```
+2. Delete the temporary commit files:
+   ```bash
+   rm -f commit.diff commit.draft commit.task
+   ```
 
 > **Tip:** Add both files to `.gitignore` so they are never accidentally staged:
 > ```bash

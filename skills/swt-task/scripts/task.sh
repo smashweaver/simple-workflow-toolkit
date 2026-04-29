@@ -183,7 +183,7 @@ if [ "$CMD" == "validate" ]; then
         fi
     fi
 
-    # 2. Ritual Log Validation (Exclusive Gateway check)
+    # 3. Ritual Log Validation (Exclusive Gateway check)
     # Check if the last ritual log matches the current phase
     LAST_RITUAL=$(grep -oP '<!-- RITUAL: phase \K\d+' "$FILE" | tail -n 1 || echo "none")
     
@@ -194,15 +194,26 @@ if [ "$CMD" == "validate" ]; then
         exit 1
     fi
 
-    # 4. Check the checklist for that phase
-    CHECK=$(grep -iP "\- \[[x/]\] Phase $PHASE" "$FILE" || true)
+    # 4. Anti-Circling Checklist Validation
+    # Ensure all previous phases are complete [x] and current phase is active [/] or [x]
+    for (( i=1; i<=$PHASE; i++ )); do
+        if [ "$i" -eq "$PHASE" ]; then
+            CHECK=$(grep -iP "^\s*\- \[[xX/]\] Phase $i" "$FILE" || true)
+            if [ -z "$CHECK" ]; then
+                echo "🛑 PROTOCOL VIOLATION: Phase $i is not marked as in-progress [/] or complete [x] in $FILE."
+                exit 1
+            fi
+        else
+            CHECK=$(grep -iP "^\s*\- \[[xX]\] Phase $i" "$FILE" || true)
+            if [ -z "$CHECK" ]; then
+                echo "🛑 PROTOCOL VIOLATION (Anti-Circling): Phase $PHASE is active, but Phase $i is not marked complete [x]."
+                echo "   You cannot skip phases or leave them incomplete. Ensure previous phases are [x]."
+                exit 1
+            fi
+        fi
+    done
 
-    if [ -z "$CHECK" ]; then
-        echo "🛑 PROTOCOL VIOLATION: Phase $PHASE is not marked as in-progress [/] or complete [x] in $FILE."
-        exit 1
-    fi
-
-    echo "✅ Task state validated: Phase $PHASE is correctly synchronized with Ritual Log."
+    echo "✅ Task state validated: Phase $PHASE is correctly synchronized with Ritual Log and Checklist History."
     exit 0
 fi
 
@@ -551,19 +562,8 @@ if [ "$CMD" == "close" ]; then
     fi
 
     echo "✅ Task closed: $FILE (Commit: $HASH)"
-    # 4. Clear task.ctx if it points to this task
-    if [ -f "task.ctx" ]; then
-        CURRENT_CTX=$(cat task.ctx | tr -d '[:space:]')
-        # Resolve FILE to comparable form
-        RESOLVED_FILE=$(realpath --relative-to=. "$FILE" 2>/dev/null || echo "$FILE")
-        BASENAME=$(basename "$FILE")
-        if [ "$CURRENT_CTX" = "$RESOLVED_FILE" ] || [ "$CURRENT_CTX" = "$FILE" ] || [ "$CURRENT_CTX" = "$BASENAME" ] || [ "$CURRENT_CTX" = ".tasks/$BASENAME" ] || [ "$CURRENT_CTX" = ".tasks/archive/$BASENAME" ]; then
-            rm -f task.ctx
-            echo "   Cleared task.ctx (was pointing to closed task)"
-        fi
-    fi
-
     echo "   Status: done | Checklist: fully completed"
+    echo "   (Note: task.ctx is preserved until manually cleared or a commit finalizes.)"
     exit 0
 fi
 
@@ -588,17 +588,7 @@ if [ "$CMD" == "abandon" ]; then
     # 2. Leave Checklist AS-IS (do NOT check off items)
 
     echo "Abandoned task: $FILE (Status: abandoned, Checklist unchanged)"
-
-    # 3. Clear task.ctx if it points to this task
-    if [ -f "task.ctx" ]; then
-        CURRENT_CTX=$(cat task.ctx | tr -d '[:space:]')
-        RESOLVED_FILE=$(realpath --relative-to=. "$FILE" 2>/dev/null || echo "$FILE")
-        BASENAME=$(basename "$FILE")
-        if [ "$CURRENT_CTX" = "$RESOLVED_FILE" ] || [ "$CURRENT_CTX" = "$FILE" ] || [ "$CURRENT_CTX" = "$BASENAME" ] || [ "$CURRENT_CTX" = ".tasks/$BASENAME" ] || [ "$CURRENT_CTX" = ".tasks/archive/$BASENAME" ]; then
-            rm -f task.ctx
-            echo "   Cleared task.ctx (was pointing to abandoned task)"
-        fi
-    fi
+    echo "   (Note: task.ctx is preserved until manually cleared.)"
 
     exit 0
 fi
@@ -673,9 +663,20 @@ if [ "$CMD" == "phase" ]; then
     # First, reset any other in-progress phases if appropriate (optional)
     sed -i "s/- \[[ /]\] Phase $PHASE_NUM/- [\/] Phase $PHASE_NUM/" "$FILE"
 
-    # 3. Add Ritual Log
+    # 3. Add Ritual Log immediately after the Checklist
     DATE_STR=$(date +"%Y-%m-%d %H:%M:%S")
-    echo "<!-- RITUAL: phase $PHASE_NUM @ $DATE_STR -->" >> "$FILE"
+    RITUAL_LOG="<!-- RITUAL: phase $PHASE_NUM @ $DATE_STR -->"
+    
+    awk -v rlog="$RITUAL_LOG" '
+        /^- \[[ x\/]\] Phase / || /^- \[[ x\/]\] .+/ || /^<!-- RITUAL: phase/ { last_check = NR }
+        { lines[NR] = $0 }
+        END {
+            if (!last_check) last_check = NR
+            for (i=1; i<=NR; i++) {
+                print lines[i]
+                if (i == last_check) print rlog
+            }
+        }' "$FILE" > "${FILE}.tmp" && mv "${FILE}.tmp" "$FILE"
 
     echo "Transitioned $FILE to Phase $PHASE_NUM. Ritual logged."
     exit 0

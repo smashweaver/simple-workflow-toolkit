@@ -40,7 +40,7 @@ Based on their purposes and triggers:
 
 The skills are designed to work in sequence. Here is the typical lifecycle of a feature from idea to commit:
 
-Use `/swt:task ctx set <file>` to set the active task context before entering `/swt:flow`.
+Use `/swt:task mount <file>` to set the active task context before entering `/swt:flow`.
 
 ```mermaid
 flowchart TD
@@ -101,7 +101,7 @@ Owns the full task lifecycle: creation, brainstorming, graduation, status tracki
 | `/swt:task brainstorm` | Create a Phase 0 ideation task for exploratory thinking |
 | `/swt:task graduate` | Promote a brainstorm task to an implementation task |
 | `/swt:task phase <N> <file>` | Transition task to Phase N (exclusive gateway — never edit Phase header manually) |
-| `/swt:task ctx set <file>` | Set active task context (writes `task.ctx`) |
+| `/swt:task mount <file>` | Set active task context (`task.ctx`) and open task/spec in browser |
 | `/swt:task ctx clear` | Clear active task context (removes `task.ctx`) |
 | `/swt:task ctx show` | Show current active task context |
 | `/swt:task list --open` | Show all active tasks |

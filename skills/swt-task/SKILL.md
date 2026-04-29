@@ -231,6 +231,23 @@ Updates the task checklist and phase field as phases complete.
 
 ---
 
+### `/swt:task validate` — State verification
+
+**Audience**: agent-driven
+
+Validates the internal state of a task file against protocol rules.
+
+**When to trigger:**
+- Automatically invoked by `/swt:status`.
+- Manually invoked if the agent suspects the task state is corrupted.
+
+**Checks performed:**
+- **Born Complete Rule**: Fails if `{{placeholder}}` text remains.
+- **Exclusive Gateway**: Fails if the `**Phase**` header was manually edited without a matching `<!-- RITUAL -->` log.
+- **Anti-Circling Gate**: Reads the entire breadcrumb history and checklist. Fails if previous phases were skipped or left incomplete, preventing agents from "circling" back or skipping mandatory planning phases.
+
+---
+
 ### `/swt:task tidy` — Directory cleanup
 
 **Audience**: user-invoked
@@ -299,7 +316,7 @@ Lists task files in the `.tasks/` directory, optionally filtered by status.
 
 ---
 
-### `/swt:task close` — Mark done or abandoned
+### `/swt:task close` — Mark done
 
 **Audience**: agent-driven, user-approved
 
@@ -312,7 +329,7 @@ Finalizes a task by updating metadata, checklists, and commit references. This c
    - Sets `**Completed**` to current timestamp.
    - Marks ALL items in the `## Checklist` as `[x]`.
    - Appends the commit hash to the `## Commit Reference`.
-3. Confirm the result to the user.
+3. Confirm the result to the user. *(Note: `task.ctx` is intentionally preserved after closure. It must only be cleared by the `/swt:commit` cleanup sequence.)*
 
 ---
 
@@ -333,7 +350,7 @@ A dedicated operation to abandon a task. Semantically distinct from `close` — 
 2. **Update via script**: Run `bash skills/swt-task/scripts/task.sh abandon <resolved_file>`.
    - Script automatically sets `**Status**` to `abandoned`, sets `**Completed**` to timestamp.
    - Checklist is left AS-IS (not checked off).
-   - `task.ctx` is cleared if it pointed to this task.
+   - `task.ctx` is preserved (not cleared) so the agent maintains context until explicitly directed otherwise.
 3. **Confirm to user**: *"Task abandoned: `[slug](path)` (Status: abandoned, checklist unchanged)."*
 
 **Semantic distinction from `close`:**
@@ -342,7 +359,7 @@ A dedicated operation to abandon a task. Semantically distinct from `close` — 
 | Status | `abandoned` | `done` |
 | Commit hash | Not required | Required |
 | Checklist | Left as-is | All items checked `[x]` |
-| `task.ctx` | Cleared if mounted | Cleared if mounted |
+| `task.ctx` | Preserved | Preserved |
 
 ---
 
