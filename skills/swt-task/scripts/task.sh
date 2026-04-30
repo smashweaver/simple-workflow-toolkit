@@ -72,6 +72,31 @@ function audit_artifacts {
     return 0
 }
 
+function sync_task_to_internal {
+    local internal_file=$1
+    if [ ! -f "task.md" ] || [ ! -f "$internal_file" ]; then return 0; fi
+    
+    echo "🔄 Ingesting checklist progress from task.md..."
+    # Extract the checklist items from task.md
+    grep "^- \[" task.md > .checklist.tmp
+    
+    if [ -s .checklist.tmp ]; then
+        # Use a temporary file to rebuild the internal task file
+        local head_part=$(sed -n '1,/^## Checklist/p' "$internal_file" | head -n -1)
+        local tail_part=$(sed -n '/^## Notes/,$p' "$internal_file")
+        
+        echo "$head_part" > .task_new.tmp
+        echo "## Checklist" >> .task_new.tmp
+        cat .checklist.tmp >> .task_new.tmp
+        echo "" >> .task_new.tmp
+        echo "$tail_part" >> .task_new.tmp
+        
+        mv .task_new.tmp "$internal_file"
+        echo "✅ Internal task checklist synchronized."
+    fi
+    rm -f .checklist.tmp
+}
+
 function sync_task_md {
     local file=$1
     if [ ! -f "$file" ]; then return 1; fi
@@ -351,6 +376,7 @@ if [ "$CMD" == "graduate" ]; then
     # Support standardized headers for CORE extraction
     CORE=$(sed -n '/^## \(What This Task Covers\|Objective\|Core Concept\)/,/^## /p' "$FILE" | grep -v "^## " | grep -v '^$' | head -10)
     ALT=$(sed -n '/^## Explored Alternatives/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
+    GOALS=$(sed -n '/^## Goals/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
     STORIES=$(sed -n '/^## User Stories/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
     CRITERIA=$(sed -n '/^## Success Criteria/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
     MVP=$(sed -n '/^## MVP Definition/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
@@ -378,6 +404,7 @@ d}" "$file"
         }
 
         inject_section "{{PROBLEM_STATEMENT}}" "$CORE" "$SPEC_FILE"
+        inject_section "{{GOALS}}" "$GOALS" "$SPEC_FILE"
         inject_section "{{PROPOSED_SOLUTION}}" "$ALT" "$SPEC_FILE"
         inject_section "{{USER_STORIES}}" "$STORIES" "$SPEC_FILE"
         inject_section "{{SUCCESS_CRITERIA}}" "$CRITERIA" "$SPEC_FILE"
@@ -421,6 +448,7 @@ if [ "$CMD" == "sync-downstream" ]; then
     # Extract current content
     CORE=$(sed -n '/^## \(What This Task Covers\|Objective\|Core Concept\)/,/^## /p' "$FILE" | grep -v "^## " | grep -v '^$' | head -10)
     ALT=$(sed -n '/^## Explored Alternatives/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
+    GOALS=$(sed -n '/^## Goals/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
     STORIES=$(sed -n '/^## User Stories/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
     CRITERIA=$(sed -n '/^## Success Criteria/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
     MVP=$(sed -n '/^## MVP Definition/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
@@ -448,6 +476,7 @@ d}" "$file"
         }
 
         inject_section "{{PROBLEM_STATEMENT}}" "$CORE" "$SPEC_FILE"
+        inject_section "{{GOALS}}" "$GOALS" "$SPEC_FILE"
         inject_section "{{PROPOSED_SOLUTION}}" "$ALT" "$SPEC_FILE"
         inject_section "{{USER_STORIES}}" "$STORIES" "$SPEC_FILE"
         inject_section "{{SUCCESS_CRITERIA}}" "$CRITERIA" "$SPEC_FILE"
@@ -474,7 +503,35 @@ if [ "$CMD" == "close" ]; then
         echo "Usage: swt.sh close <task_file> <commit_hash>"
         exit 1
     fi
+
+    # 0. Sync final human progress back to internal task file
+    sync_task_to_internal "$FILE"
+
+    # 1. Archive Implementation Plan into Spec
+    SPEC_FILE=$(grep -oP '^\*\*?Spec\*\*?:\s*\K\S+' "$FILE" | head -n 1)
+    if [ -f "$SPEC_FILE" ] && [ -f "implementation_plan.md" ]; then
+        echo "🔄 Archiving Implementation Plan into Spec..."
+        # Extract content excluding title
+        grep -v "^# Implementation Plan" "implementation_plan.md" > .plan_content.tmp
+        
+        # Use a temporary file to rebuild the Spec
+        sed -n '1,/^## Implementation Plan/p' "$SPEC_FILE" | head -n -1 > .spec_new.tmp
+        echo "## Implementation Plan" >> .spec_new.tmp
+        echo "" >> .spec_new.tmp
+        cat .plan_content.tmp >> .spec_new.tmp
+        
+        # Capture everything after the Implementation Plan section (if anything)
+        # Assuming Implementation Plan is the last or second to last section
+        # Actually, let's just append the rest
+        sed -n '/^## Risks & Mitigations/,$p' "$SPEC_FILE" >> .spec_new.tmp
+        
+        mv .spec_new.tmp "$SPEC_FILE"
+        rm .plan_content.tmp
+        echo "✅ Plan archived into $SPEC_FILE"
+    fi
+
     DATE_STR=$(date +"%Y-%m-%d %H:%M:%S")
+    sed -i "s|^\*\*?Completed\*\*?:\s*—|**Completed**: $DATE_STR|" "$FILE"
     sed -i "s/^\*\*Status\*\*:.*/**Status**: done/" "$FILE"
     sed -i "s/^\*\*Completed\*\*:.*/**Completed**: $DATE_STR/" "$FILE"
     sed -i "s/- \[[ /]\] Phase 8/- [x] Phase 8/" "$FILE"
@@ -600,13 +657,15 @@ fi
 if [ "$CMD" == "validate" ]; then
     FILE=$2
     if [ -z "$FILE" ]; then
-        echo "Usage: swt.sh validate <task_file>"
+        FILE=$(cat "$ROOT_DIR/task.ctx" 2>/dev/null)
+    fi
+    if [ -z "$FILE" ] || [ ! -f "$FILE" ]; then
+        echo "❌ No active task context. Use 'swt:task mount <file>'."
         exit 1
     fi
-    if [ ! -f "$FILE" ]; then
-        echo "Error: File $FILE not found."
-        exit 1
-    fi
+
+    # 0. Sync human progress back to internal task file
+    sync_task_to_internal "$FILE"
 
     # Extract Phase and Status
     PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$FILE" | head -n 1)

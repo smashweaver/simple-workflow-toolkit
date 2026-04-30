@@ -28,7 +28,11 @@
 - [Another ritual or guardrail]
 
 ## Objective
-{{ARG}}
+[High-level goal of the task]
+
+## Goals
+- [ ] Goal 1: Primary objective
+- [ ] Goal 2: Primary objective
 
 ## User Stories
 - [ ] US-001: As a user, I can...

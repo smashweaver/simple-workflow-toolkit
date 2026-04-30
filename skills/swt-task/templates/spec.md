@@ -9,8 +9,7 @@
 
 ## 2. Goals
 
-- [Goal 1: Brief description of a primary objective]
-- [Goal 2: Brief description of a primary objective]
+{{GOALS}}
 
 ## 3. Proposed Solution
 
