@@ -115,7 +115,7 @@ function sync_task_to_internal {
     if [ -s .checklist.tmp ]; then
         # Use a temporary file to rebuild the internal task file
         local head_part=$(sed -n '1,/^## Checklist/p' "$internal_file" | head -n -1)
-        local tail_part=$(sed -n '/^## Notes/,$p' "$internal_file")
+        local tail_part=$(awk '/^## Checklist/{p=1;next} p { if (!started && $0 ~ /^- \[/) next; started=1; print }' "$internal_file")
         
         echo "$head_part" > .task_new.tmp
         echo "## Checklist" >> .task_new.tmp
@@ -519,7 +519,7 @@ d}" "$file"
 
     # 2. Re-sync Implementation Plan
     echo "🔄 Re-syncing Implementation Plan..."
-    scaffold_artifact "implementation_plan" "$FILE" "--force"
+    scaffold_artifact "implementation_plan" "$FILE"
     
     # 3. Re-sync task.md
     sync_task_md "$FILE"
