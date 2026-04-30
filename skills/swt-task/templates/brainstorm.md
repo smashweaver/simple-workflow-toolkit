@@ -30,11 +30,24 @@
 ## Objective
 {{ARG}}
 
+## User Stories
+- [ ] US-001: As a user, I can...
+- [ ] US-002: As an agent, I can...
+
 ## Explored Alternatives
 - **Scenario A (Discipline)**: {{Methodology/Rule change only}}
 - **Scenario B (Automation)**: {{Helper scripts/Templates}}
 - **Scenario C (Enforcement)**: {{Hard gates/Physical blocks}}
 - **User Suggestion**: {{Explicitly log user ideas here or mark N/A}}
+
+## Success Criteria
+- [ ] [Criterion 1]
+- [ ] [Criterion 2]
+
+## MVP Definition
+- [ ] [Core feature A implemented and verified]
+- [ ] [Core feature B implemented and verified]
+- [ ] User confirms MVP works as expected
 
 ## Unresolved Questions
 What still needs to be answered before this can become a task?

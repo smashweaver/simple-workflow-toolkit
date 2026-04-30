@@ -18,8 +18,7 @@
 
 ## 4. User Stories
 
-- [ ] US-001: As a user, I can...
-- [ ] US-002: As an agent, I can...
+{{USER_STORIES}}
 
 ## 5. Non-Functional Requirements
 
@@ -39,8 +38,7 @@
 
 ## 8. Success Criteria
 
-- [ ] Criterion 1
-- [ ] Criterion 2
+{{SUCCESS_CRITERIA}}
 
 ## 9. Out of Scope
 
@@ -57,6 +55,4 @@
 
 ## 12. MVP Definition
 
-- [ ] Core feature A implemented and verified
-- [ ] Core feature B implemented and verified
-- [ ] User confirms MVP works as expected
+{{MVP}}
