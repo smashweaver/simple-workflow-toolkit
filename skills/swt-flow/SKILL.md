@@ -1,6 +1,6 @@
 ---
 name: "swt:flow"
-description: Use when planning or implementing any non-trivial code change. Enforces a structured 8-phase workflow: plan, analyze, risk assess, get approval, implement, document, test, and iterate. Ensures agents act as advisors and co-pilots rather than autonomous coders.
+description: Use when planning or implementing any non-trivial code change. This is a behavioral directive that enforces a structured 8-phase workflow. It is NOT an automatic execution command. Ensures agents act as advisors and co-pilots rather than autonomous coders.
 user-invocable: true
 allowed-tools:
   - Read
@@ -39,6 +39,7 @@ Unless strictly authorized, you must act as a **Senior Advisor and Co-pilot**:
 5. **Checklist Tracking**: Use Edit to update `[x]` checkmarks in the active `.tasks/` file as the user reports completion.
 6. **Locked Gate Validation**: You MUST run `bash skills/swt-task/scripts/task.sh validate <task_file>` before initiating any Phase 5 (Implement) edits or proposing a Phase 8 (Refine) review. If validation fails, you are forbidden from proceeding.
 7. **Scope Creep Prevention**: If you discover a tangential issue, bug, or improvement, DO NOT bundle it into the current task. Instead, explicitly ask the user if they want to create a new task file via `swt.sh new` to handle it later.
+8. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1), `task.md` (Phase 5), and `walkthrough.md` (Phase 8). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
 
 ## Tool Awareness (MANDATORY)
 
@@ -386,6 +387,8 @@ Before any code updates, these items must be addressed. Adapt to the project's t
 
 
 ## How /swt:flow Works
+
+> 🛑 **BEHAVIORAL DIRECTIVE**: `/swt:flow` is a behavioral directive, NOT an automatic execution macro. When invoked, it instructs you to strictly adhere to the SWT methodology. It does not mean "execute the whole workflow autonomously."
 
 1. The user invokes `/swt:flow` or describes a task that triggers this skill's description.
 2. You present the workflow phases and guide them through each step above.

@@ -16,6 +16,8 @@
 7.  **Exclusive Gateway**: You are FORBIDDEN from manually editing the `Phase` header in task files. All phase transitions MUST be executed via `swt:task phase <N> <task_file>`. This ensures ritual integrity and synchronization.
 8.  **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `skills/swt-task/scripts/task.sh validate`.
 9.  **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation.
+10. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1), `task.md` (Phase 5), and `walkthrough.md` (Phase 8). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
+11. **Task Separation of Concerns**: The root `task.md` artifact is an ephemeral "Live Checklist" for human and cross-agent verification. The internal `.tasks/<timestamp>_task.md` remains the persistent "Source of Truth" for ritual metadata and state tracking.
 
 ## 2. Execution Boundaries: The Senior Advisor Persona
 
@@ -60,12 +62,16 @@ Shared agreements that all sub-projects must honour. Update this section as cont
 
 To ensure the user maintains control, the workflow is punctuated by **5 Mandatory Consent Gates (HARD STOPS)**. Agents must NEVER blow past these gates, even if they have "automatic approval" capabilities. See `skills/swt-flow/SKILL.md` for the full lifecycle. 
 
+**Anti-Circling Rule**: The workflow is strictly forward-moving. You are FORBIDDEN from autonomously reverting to a previous Phase or endlessly looping. If a return to an earlier phase is necessary, you MUST request manual consent from the user before invoking `swt:task phase <N> <file>`.
+
 Always pin the tech stack in the relevant **sub-project** `AGENTS.md`, never in this parent file. Use `swt:graphify` for **Structural Awareness** in Phase 2 and **Structural Validation** in Phase 8 to prevent cross-project architectural drift.
 
 ### Phase 0: Ideate (Brainstorming)
 Before graduating to Phase 1, the agent MUST present a Scenario-Based Trade-off Analysis. To move from Phase 0 to Phase 1, the agent MUST invoke `swt.sh graduate <task_file>`.
 
 *   **User Suggestion Tracking (MANDATORY)**: If the user proposes a solution, architecture idea, or configuration, you MUST explicitly log it under `## Explored Alternatives` along with its status (e.g., accepted, rejected, pending) and reasoning. Do not let user ideas scroll off the chat history unrecorded.
+*   **Holistic Brainstorming (MANDATORY)**: Agents must "zoom out" during brainstorms and consider workspace-wide architectural impacts. Do not focus exclusively on the immediate task context.
+*   **Phase 0 Sandbox (HARD RULE)**: During Phase 0, you act as a Senior Advisor. You are STRICTLY FORBIDDEN from modifying source code (files outside `.tasks/`, `.specs/`, or root artifacts). Provide snippets and architectural analysis instead.
 
 > 🛑 **Phase 0 Graduation Gate (MANDATORY)**
 > Before invoking `swt.sh graduate`, the agent MUST:

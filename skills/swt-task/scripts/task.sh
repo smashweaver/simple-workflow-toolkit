@@ -53,6 +53,9 @@ if [ "$CMD" == "init" ]; then
         init_gitignore_pattern ".specs/"
         init_gitignore_pattern ".digests/"
         init_gitignore_pattern "task.ctx"
+        init_gitignore_pattern "implementation_plan.md"
+        init_gitignore_pattern "walkthrough.md"
+        init_gitignore_pattern "task.md"
     else
         cat > .gitignore <<'EOF'
 # Task tracking (per-project, not committed)
@@ -66,6 +69,11 @@ if [ "$CMD" == "init" ]; then
 
 # Task context (per-project, not committed)
 task.ctx
+
+# Planning Mode root artifacts
+implementation_plan.md
+walkthrough.md
+task.md
 EOF
         echo "Created .gitignore with all SWT patterns."
     fi
@@ -329,6 +337,16 @@ if [ "$CMD" == "brainstorm" ]; then
 
     cat <<EOF > "$FILENAME"
 # Task: $ARG
+
+> **Covers**: [High-level summary of what this brainstorm entails]
+
+1. **[Core Area 1]**
+   - [Detail or requirement]
+2. **[Core Area 2]**
+   - [Detail or requirement]
+
+> **This task document structure is the template for future brainstorming tasks.** Use the numbered list above as the summary section.
+
 **Created**: $DATE_STR
 **Updated**: —
 **Completed**: —
