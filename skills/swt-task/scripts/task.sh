@@ -537,8 +537,9 @@ EOF
         SPEC_FILE=".specs/${TIMESTAMP}_${SLUG}.md"
         
         # Extract content from task file
-        CORE=$(sed -n '/^## Core Concept/,/^## /p' "$FILE" | grep -v "^## " | grep -v '^$' | head -5)
-        ALT=$(sed -n '/^## Explored Alternatives/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -10)
+        # Support both Objective and Core Concept for CORE extraction
+        CORE=$(sed -n '/^## \(Objective\|Core Concept\)/,/^## /p' "$FILE" | grep -v "^## " | grep -v '^$' | head -10)
+        ALT=$(sed -n '/^## Explored Alternatives/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
         NOTES=$(sed -n '/^## Notes/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -20)
 
         template_path="$ROOT_DIR/skills/swt-task/templates/spec.md"
