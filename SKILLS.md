@@ -14,7 +14,7 @@ Based on their purposes and triggers:
 
 ### Workflow & Task Management
 - **swt:flow**: Enforces 8-phase development lifecycle.
-- **swt:task**: Manages task lifecycle (creation, graduation, status).
+- **swt:task** — Owns the lifecycle of task files. Enforces naming rules, provides templates, handles Phase 0 graduation, and automates root artifact cleanup (`implementation_plan.md`, `task.md`) upon closure.
 - **swt:status**: Aggregates project state for session restoration.
 
 ### Implementation & Coding

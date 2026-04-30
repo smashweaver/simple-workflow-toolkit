@@ -33,7 +33,8 @@ Before drafting any commit message, the agent MUST output the following audit si
 
 > 🛑 **Gate 5 Rule (The Finality Loop)**: A commit is the absolute final act of a task. You MUST NOT proceed with `/swt:commit` until Phase 8 (Review & Refine) is fully verified and explicitly closed by the user. If the user asks for a commit prematurely, remind them to complete Phase 8 first.
 
-This skill follows a **diff-first, draft-and-approve** commit process. The user stages only the relevant changes, exports the diff, and lets the agent draft and store a commit message — then approves before the agent executes the commit and cleans up.
+**Draft-and-Approve Workflow**: All commits must go through a formal draft phase for human review.
+- **Automated Cleanup**: Root planning artifacts are automatically removed by `swt.sh close`, while the commit skill cleans up its own temporary files (`commit.diff`, `commit.draft`).
 
 Two temporary files are used, both gitignored:
 - **`commit.diff`** — the staged diff exported from git

@@ -571,6 +571,7 @@ if [ "$CMD" == "close" ]; then
     # Move to archive
     mkdir -p .tasks/archive
     mv "$FILE" .tasks/archive/
+    rm -f implementation_plan.md task.md
     echo "✅ Task closed: $FILE (Commit: $HASH)"
     exit 0
 fi
@@ -625,6 +626,7 @@ if [ "$CMD" == "abandon" ]; then
     
     mkdir -p .tasks/archive
     mv "$FILE" .tasks/archive/
+    rm -f implementation_plan.md task.md
     echo "Task abandoned: $FILE"
     exit 0
 fi

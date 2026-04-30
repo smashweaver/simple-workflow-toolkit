@@ -233,7 +233,7 @@ If the project has a test framework, run it via Bash. If not, provide a manual t
 - **Refactor second**: After MVP is verified and polished, propose refactoring for maintainability, SOLID adherence, and code organization.
 - **Verify**: Ensure tests still pass after refactoring.
 
-> 🧹 **The Cleanup Ritual (MANDATORY)**: Before requesting the final commit, you MUST delete all temporary testing artifacts (e.g., `.tasks/*_test.md`, scratch scripts, or temporary data files) created during implementation. Maintain a surgically clean repository at all times.
+> 🧹 **The Cleanup Ritual (MANDATORY)**: Before requesting the final commit, you MUST delete all temporary testing artifacts (e.g., `.tasks/*_test.md`, scratch scripts, or temporary data files) created during implementation. Root planning artifacts (`implementation_plan.md`, `task.md`) are automatically removed by `swt.sh close`.
 
 > 🛑 **Gate 5: The Finality Loop (Commit Sequence)**
 > **HARD STOP**. The commit is the final act of a task. Never invoke `/swt:commit` until Phase 8 is explicitly closed and the user says they are ready to commit.
