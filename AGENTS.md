@@ -26,6 +26,7 @@ Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot
 *   **Locked Gate Protocol**: When a structural junction is reached, the agent must halt and state: *"I am at a Locked Gate. This change is structural. Do I have your approval to proceed?"*
 *   **Task-Centric Flow**: All work maps to an active task file in `.tasks/`.
 *   **Checklist Discipline**: Every phase requires explicit approval before moving to the next.
+*   **Draft-and-Approve Commits**: NEVER execute a commit without first presenting `commit.draft` and obtaining verbal approval.
 
 ## 3. The 8-Phase Workflow & Consent Gates
 
@@ -114,13 +115,22 @@ Verify that the MVP meets the objective. Polish the implementation based on user
 *   **Action**: Initiate the `/swt:commit` workflow.
 *   **Goal**: The commit is the final act. Never rush to commit before Gate 4 is cleared.
 
-## 4. Workspaces & Projects
+## 4. The Light Bulb Iteration Loop
+
+If the Task objectives change after Phase 1 (e.g., a "Light Bulb Moment" during implementation), the agent MUST loop back to synchronize downstream artifacts:
+
+1.  **Update Task**: Log the new ideas in the task file.
+2.  **Sync Downstream**: Run `swt:task sync-downstream <file>` to propagate changes to the Spec and Implementation Plan.
+3.  **Gate 2 Reset**: Treat the new Plan as unapproved. You MUST perform a **HARD STOP** and obtain user approval for the updated architecture before resuming implementation.
+4.  **Stale Enforcement**: The `validate` command will physically block execution if the Task is newer than the Spec or the Spec is newer than the Plan.
+
+## 5. Workspaces & Projects
 
 The suite is **Workspace-Aware**:
 - **Parent AGENTS.md**: Defines shared context for the entire cluster.
 - **Sub-Project AGENTS.md**: Defines the specific technology stack and "pinned" info for a sub-folder.
 
-## 5. Skills Suite
+## 6. Skills Suite
 
 This repository provides a comprehensive suite of workflow skills. Agents must be aware of all of them.
 
@@ -128,10 +138,10 @@ This repository provides a comprehensive suite of workflow skills. Agents must b
 > 
 > **You MUST read `SKILLS.md`** to discover available skills. Before performing work in a specific domain, load the relevant `skills/<name>/SKILL.md` for detailed instructions.
 
-## 6. Commit Discipline
+## 7. Commit Discipline
 
 > 🚫 **Forbidden:** Agents are STRICTLY FORBIDDEN from using standard `git commit -m` commands directly. All commits must go through the Draft-and-Approve protocol below.
-> 💡 **Enforce Default:** Whenever prompted for a git commit or help with a git commit message, agents MUST default to invoking the `/swt:commit` skill.
+> 💡 **Enforce Default:** Whenever prompted for a git commit or help with a git commit message, agents MUST default to invoking the `/swt:commit` skill. Presenting a "naked" `git commit -m` command in the chat without the Draft-and-Approve ritual is a **PROTOCOL VIOLATION**.
 
 All commits follow the **Diff-First, Draft-and-Approve** protocol. There is a strict separation of concerns: `commit.draft` is ONLY for the human-readable, impact-focused commit message, while `commit.task` is ONLY for automation metadata (e.g., `Closes: .tasks/...`). Do not mix them.
 
@@ -144,7 +154,7 @@ All commits follow the **Diff-First, Draft-and-Approve** protocol. There is a st
 5. Apply commit on approval (`git commit -F commit.draft`).
 6. Cleanup temp files (`commit.diff`, `commit.draft`, `commit.task`).
 
-## 7. Session Start & Restoration
+## 8. Session Start & Restoration
 
 To ensure architectural continuity and prevent context drift, every session MUST begin with a rigorous orientation protocol.
 
@@ -177,7 +187,7 @@ To prevent ritual bypasses, the toolkit enforces the presence of root artifacts 
 > **Phantom Artifacts**: If a required artifact is found in a hidden directory (e.g., `.gemini/`, `.agents/`, `.claude/`) but is missing from the root, `validate` will fail. You MUST move artifacts to the project root to pass verification.
 
 
-## 8. Developing the Toolkit
+## 9. Developing the Toolkit
 
 When contributing to this repository, agents must adhere to the following internal standards:
 
@@ -205,7 +215,7 @@ Update the root `README.md` and `AGENTS.md` if a new skill is added or a core me
 ### 5. Symlink Maintenance
 After committing updates to this repository, run `swt:link --clear --global` to refresh symlinks across all agent discovery paths (`.agents/`, `.claude/`). This ensures the live skill changes are immediately available for dogfooding.
 
-## 9. Structural Changes & Manual Consent (HITL)
+## 10. Structural Changes & Manual Consent (HITL)
 
 To prevent "runaway" agent behavior, all structural modifications are protected by a **Manual Consent Gate**.
 

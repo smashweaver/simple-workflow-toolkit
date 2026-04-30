@@ -22,6 +22,8 @@ function show_help {
     echo "  swt.sh sync <file>        - Sync root task.md from internal task file"
     echo "  swt.sh scaffold <type> <file> [--force] - Generate Plan or Walkthrough"
     echo "  swt.sh phase <N> <file>    - Transition task to Phase N"
+    echo "  swt.sh validate <file>     - Verify ritual integrity and artifact state"
+    echo "  swt.sh sync-downstream <file> - Sync Spec/Plan after objective changes"
     echo "  swt.sh close <file> <hash> - Finalize task (status: done, checklist: complete)"
     echo "  swt.sh ctx set <file>      - Set active task context (writes task.ctx)"
     echo "  swt.sh ctx clear           - Clear active task context (removes task.ctx)"
@@ -398,6 +400,73 @@ d}" "$file"
     exit 0
 fi
 
+if [ "$CMD" == "sync-downstream" ]; then
+    FILE=$2
+    if [ -z "$FILE" ]; then
+        echo "Usage: swt.sh sync-downstream <task_file>"
+        exit 1
+    fi
+    
+    # 1. Re-run metadata extraction and Spec update
+    echo "🔄 Re-syncing Spec from Task..."
+    # Reuse graduate logic for metadata injection
+    SLUG=$(basename "$FILE" .md | sed 's/^[0-9]*_//')
+    SPEC_FILE=$(grep -oP '^\*\*?Spec\*\*?:\s*\K\S+' "$FILE" | head -n 1)
+    
+    if [ -z "$SPEC_FILE" ] || [ ! -f "$SPEC_FILE" ]; then
+        echo "❌ Spec not found for $FILE. Run 'graduate' first."
+        exit 1
+    fi
+
+    # Extract current content
+    CORE=$(sed -n '/^## \(What This Task Covers\|Objective\|Core Concept\)/,/^## /p' "$FILE" | grep -v "^## " | grep -v '^$' | head -10)
+    ALT=$(sed -n '/^## Explored Alternatives/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
+    STORIES=$(sed -n '/^## User Stories/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
+    CRITERIA=$(sed -n '/^## Success Criteria/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
+    MVP=$(sed -n '/^## MVP Definition/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
+    NOTES=$(sed -n '/^## Notes/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -20)
+
+    # Re-inject into existing Spec (patching the slots)
+    # Since we can't easily "patch" multiline without a fresh scaffold, 
+    # we'll re-scaffold from template but preserving the Spec filename.
+    template_path="$ROOT_DIR/skills/swt-task/templates/spec.md"
+    if [ -f "$template_path" ]; then
+        cp "$template_path" "$SPEC_FILE"
+        sed -i "s|{{Task Slug}}|$SLUG|g" "$SPEC_FILE"
+        sed -i "s|{{Task File}}|$FILE|g" "$SPEC_FILE"
+        
+        inject_section() {
+            local tag=$1; local content=$2; local file=$3
+            if [ -n "$content" ]; then
+                echo "$content" > .content.tmp
+                sed -i "/$tag/{r .content.tmp
+d}" "$file"
+                rm .content.tmp
+            else
+                sed -i "s|$tag|*|g" "$file"
+            fi
+        }
+
+        inject_section "{{PROBLEM_STATEMENT}}" "$CORE" "$SPEC_FILE"
+        inject_section "{{PROPOSED_SOLUTION}}" "$ALT" "$SPEC_FILE"
+        inject_section "{{USER_STORIES}}" "$STORIES" "$SPEC_FILE"
+        inject_section "{{SUCCESS_CRITERIA}}" "$CRITERIA" "$SPEC_FILE"
+        inject_section "{{MVP}}" "$MVP" "$SPEC_FILE"
+        inject_section "{{NOTES}}" "$NOTES" "$SPEC_FILE"
+        echo "✅ Spec updated: $SPEC_FILE"
+    fi
+
+    # 2. Re-sync Implementation Plan
+    echo "🔄 Re-syncing Implementation Plan..."
+    scaffold_artifact "implementation_plan" "$FILE" "--force"
+    
+    # 3. Re-sync task.md
+    sync_task_md "$FILE"
+    
+    echo "✨ Downstream artifacts synchronized. Review and Approval (Gate 2) reset."
+    exit 0
+fi
+
 if [ "$CMD" == "close" ]; then
     FILE=$2
     HASH=$3
@@ -570,7 +639,31 @@ if [ "$CMD" == "validate" ]; then
         echo "   RESTRICTION: Source code edits are FORBIDDEN. Graduation required for implementation."
     fi
 
-    # 4. Artifact Audit
+    # 4. Stale Artifact Detection (Dependency Chain)
+    if [ "$PHASE" -gt 0 ]; then
+        # Find companion spec
+        spec=$(grep -oP '^\*\*?Spec\*\*?:\s*\K\S+' "$FILE" | head -n 1)
+        if [ -n "$spec" ] && [ -f "$spec" ]; then
+            task_time=$(stat -c %Y "$FILE")
+            spec_time=$(stat -c %Y "$spec")
+            if [ "$task_time" -gt "$spec_time" ]; then
+                echo "🛑 STALE SPEC DETECTED: Task objectives are newer than the Spec."
+                echo "   Loop back to re-sync: swt.sh sync-downstream $FILE"
+                exit 1
+            fi
+            
+            if [ -f "implementation_plan.md" ]; then
+                plan_time=$(stat -c %Y "implementation_plan.md")
+                if [ "$spec_time" -gt "$plan_time" ]; then
+                    echo "🛑 STALE PLAN DETECTED: Spec is newer than the Implementation Plan."
+                    echo "   Loop back to re-sync: swt.sh sync-downstream $FILE"
+                    exit 1
+                fi
+            fi
+        fi
+    fi
+
+    # 5. Artifact Audit
     if ! audit_artifacts "$PHASE"; then
         exit 1
     fi
