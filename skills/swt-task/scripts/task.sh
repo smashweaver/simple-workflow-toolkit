@@ -32,20 +32,37 @@ function show_help {
 
 function audit_artifacts {
     local phase=$1
+
+    # Phantom Artifact Check
+    check_phantom() {
+        local name=$1
+        # Search common hidden jailbreak locations (relative to root)
+        local phantom=$(find . -maxdepth 3 \( -path "./.gemini*" -o -path "./.agents*" -o -path "./.claude*" \) -name "$name" 2>/dev/null | head -n 1)
+        if [ -n "$phantom" ] && [ ! -f "$name" ]; then
+            echo "🛑 PHANTOM ARTIFACT DETECTED: $name found in $phantom but missing from project root."
+            echo "   Move it to the root immediately to pass verification."
+            return 1
+        fi
+        return 0
+    }
+
     if [ "$phase" -ge 1 ] && [ "$phase" -lt 8 ]; then
         if [ ! -f "implementation_plan.md" ]; then
+            check_phantom "implementation_plan.md"
             echo "🛑 PROTOCOL VIOLATION: Phase $phase requires implementation_plan.md at the project root."
             return 1
         fi
     fi
     if [ "$phase" -ge 5 ]; then
         if [ ! -f "task.md" ]; then
+            check_phantom "task.md"
             echo "🛑 PROTOCOL VIOLATION: Phase $phase requires task.md at the project root."
             return 1
         fi
     fi
     if [ "$phase" -ge 8 ]; then
         if [ ! -f "walkthrough.md" ]; then
+            check_phantom "walkthrough.md"
             echo "🛑 PROTOCOL VIOLATION: Phase $phase requires walkthrough.md at the project root."
             return 1
         fi
@@ -508,6 +525,57 @@ if [ "$CMD" == "phase" ]; then
 
     echo "Transitioned $FILE to Phase $PHASE_NUM. Ritual logged."
     sync_task_md "$FILE"
+    exit 0
+fi
+
+if [ "$CMD" == "validate" ]; then
+    FILE=$2
+    if [ -z "$FILE" ]; then
+        echo "Usage: swt.sh validate <task_file>"
+        exit 1
+    fi
+    if [ ! -f "$FILE" ]; then
+        echo "Error: File $FILE not found."
+        exit 1
+    fi
+
+    # Extract Phase and Status
+    PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$FILE" | head -n 1)
+    PHASE=${PHASE:-0}
+    STATUS=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$FILE" | head -n 1)
+    STATUS=${STATUS:-ideating}
+
+    # 1. Historical Breadcrumb Validation (Anti-Circling)
+    # Ensure no ritual logs exist for phases higher than current header phase
+    MAX_RITUAL=$(grep -oP '<!-- RITUAL: phase \K\d+' "$FILE" | sort -rn | head -n 1)
+    MAX_RITUAL=${MAX_RITUAL:--1}
+    
+    if [ "$MAX_RITUAL" -gt "$PHASE" ]; then
+        echo "🛑 AGENT CIRCLING DETECTED: Header says Phase $PHASE, but ritual logs exist for Phase $MAX_RITUAL."
+        exit 1
+    fi
+
+    # 2. Phase Forgery Detection (Exclusive Gateway)
+    # Header phase must match the latest ritual log (except for phase 0/1 transition edge cases)
+    if [ "$PHASE" -gt 0 ] && [ "$MAX_RITUAL" -lt "$PHASE" ]; then
+        echo "🛑 MANUAL PHASE FORGERY DETECTED: Header says Phase $PHASE, but the latest ritual log is Phase $MAX_RITUAL."
+        echo "   Use 'swt:task phase $PHASE <file>' to transition correctly."
+        exit 1
+    fi
+
+    # 3. Sandbox Status
+    if [ "$PHASE" -eq 0 ]; then
+        echo "🛡️  SANDBOX ACTIVE: Task is in Phase 0 (Ideating)."
+        echo "   AGENT PERSONA: Senior Advisor / Co-pilot."
+        echo "   RESTRICTION: Source code edits are FORBIDDEN. Graduation required for implementation."
+    fi
+
+    # 4. Artifact Audit
+    if ! audit_artifacts "$PHASE"; then
+        exit 1
+    fi
+
+    echo "✅ Phase $PHASE validated (Status: $STATUS)."
     exit 0
 fi
 

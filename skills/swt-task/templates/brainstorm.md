@@ -52,6 +52,16 @@
 ## Unresolved Questions
 What still needs to be answered before this can become a task?
 
+## Checklist
+- [ ] Phase 1: Plan
+- [ ] Phase 2: Analyze
+- [ ] Phase 3: Risk Assessment
+- [ ] Phase 4: Approval
+- [ ] Phase 5: Implement
+- [ ] Phase 6: Document
+- [ ] Phase 7: Test
+- [ ] Phase 8: Review & Refine
+
 ## Artifact Phase Mapping
 | Artifact | Generated | Phase | Gate |
 |---|---|---|---|
