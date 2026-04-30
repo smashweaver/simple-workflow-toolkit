@@ -109,6 +109,7 @@ Owns the full task lifecycle: creation, brainstorming, graduation, status tracki
 | `/swt:task close <file> <hash>` | Finalize a task as done (status: done, checklist: complete) |
 | `/swt:task abandon <file>` | Abandon a task (status: abandoned, no commit hash) |
 | `/swt:task tidy` | Archive done/abandoned tasks into `.tasks/archive/` |
+| `/swt:task test <file> [--fail]` | Run tests via `swt.json` harness and log ritual breadcrumb |
 
 ---
 

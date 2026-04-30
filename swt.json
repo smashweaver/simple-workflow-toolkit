@@ -1,0 +1,5 @@
+{
+  "test_command": "bash scripts/verify_verification_engine.sh",
+  "test_dir": "scripts/",
+  "tdd_enforced": false
+}

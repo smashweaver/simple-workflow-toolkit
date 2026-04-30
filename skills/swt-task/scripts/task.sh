@@ -31,6 +31,7 @@ function show_help {
     echo "  swt.sh ctx show            - Show current active task context"
     echo "  swt.sh tidy                 - Move done/abandoned tasks to .tasks/archive/"
     echo "  swt.sh abandon <file>      - Abandon task (status: abandoned, no commit hash)"
+    echo "  swt.sh test <file> [--fail] - Run tests via swt.json harness and log ritual"
 }
 
 function audit_artifacts {
@@ -167,6 +168,52 @@ function scaffold_artifact {
     local title=$(grep -m 1 "^# Task:" "$task_file" | sed 's/# Task: //')
     sed "s/{{Task Name}}/$title/g" "$template_path" > "$target_path"
     echo "✨ Scaffolded $target_path from template."
+}
+
+function run_tests {
+    local file=$1
+    local mode=$2
+    if [ ! -f "$file" ]; then echo "❌ Error: Task file not found: $file"; exit 1; fi
+    if [ ! -f "swt.json" ]; then
+        echo "🛑 NO HARNESS DETECTED: swt.json is missing."
+        echo "   Please create a harness first: swt.sh scaffold swt.json $file"
+        exit 1
+    fi
+
+    # Extract command from swt.json
+    local test_cmd=$(grep -oP '"test_command":\s*"\K[^"]+' swt.json || true)
+    if [ -z "$test_cmd" ] || [ "$test_cmd" == "null" ]; then
+        echo "⚠️ No test command defined in swt.json. Manual verification required."
+        exit 0
+    fi
+
+    echo "🚀 Running tests: $test_cmd"
+    mkdir -p .tests
+    local timestamp=$(date +%Y%m%d%H%M%S)
+    local log_file=".tests/${timestamp}.log"
+    
+    set +e
+    eval "$test_cmd" 2>&1 | tee "$log_file"
+    local exit_code=${PIPESTATUS[0]}
+    set -e
+
+    local status="fail"
+    [ $exit_code -eq 0 ] && status="pass"
+
+    # Add Ritual Log to task file
+    local date_str=$(date +"%Y-%m-%d %H:%M:%S")
+    echo "<!-- RITUAL: test $status @ $date_str ($log_file) -->" >> "$file"
+    
+    if [ "$status" == "pass" ]; then
+        echo "✅ Tests passed! Ritual logged in $(basename "$file")"
+    else
+        echo "❌ Tests failed. Log captured in $log_file"
+        if [ "$mode" == "--fail" ]; then
+            echo "✅ Verified failure logged as requested."
+        else
+            exit 1
+        fi
+    fi
 }
 
 if [ -z "$CMD" ]; then
@@ -357,6 +404,17 @@ if [ "$CMD" == "sync" ]; then
     exit 0
 fi
 
+if [ "$CMD" == "test" ]; then
+    FILE=$2
+    MODE=$3
+    if [ -z "$FILE" ]; then
+        echo "Usage: swt.sh test <file> [--fail]"
+        exit 1
+    fi
+    run_tests "$FILE" "$MODE"
+    exit 0
+fi
+
 if [ "$CMD" == "scaffold" ]; then
     TYPE=$2
     FILE=$3
@@ -437,6 +495,7 @@ d}" "$file"
         inject_section "{{NOTES}}" "$NOTES" "$SPEC_FILE"
 
         echo "Graduated $FILE to Phase 1. Spec created from template: $SPEC_FILE"
+        xdg-open "$SPEC_FILE" &
         
         # Scaffold implementation plan
         scaffold_artifact "implementation_plan" "$FILE"
@@ -518,6 +577,7 @@ d}" "$file"
     sync_task_md "$FILE"
     
     echo "✨ Downstream artifacts synchronized. Review and Approval (Gate 2) reset."
+    xdg-open "$SPEC_FILE" &
     exit 0
 fi
 
@@ -747,7 +807,49 @@ if [ "$CMD" == "validate" ]; then
         fi
     fi
 
-    # 5. Artifact Audit
+    # 5. Verification Audit (Test Forgery & TDD)
+    if [ "$PHASE" -gt 0 ]; then
+        # Check if TDD is enabled (Global or Task)
+        tdd_global=$(grep -q "## Ritual: TDD" "$ROOT_DIR/AGENTS.md" && echo "true" || echo "false")
+        tdd_task=$(grep -q "\*\*TDD\*\*:\s*enabled" "$FILE" && echo "true" || echo "false")
+        tdd_enforced="false"
+        [ "$tdd_global" == "true" ] || [ "$tdd_task" == "true" ] && tdd_enforced="true"
+
+        # Find latest test logs
+        latest_pass=$(grep "<!-- RITUAL: test pass" "$FILE" | tail -n 1)
+        latest_fail=$(grep "<!-- RITUAL: test fail" "$FILE" | tail -n 1)
+
+        # TDD Gate (Phase 5+)
+        if [ "$tdd_enforced" == "true" ] && [ "$PHASE" -ge 5 ]; then
+            if [ -z "$latest_fail" ]; then
+                echo "🛑 TDD VIOLATION: No verified failure log found. Write a failing test first."
+                echo "   Run: swt.sh test $FILE --fail"
+                exit 1
+            fi
+        fi
+
+        # Test Forgery / Staleness (Phase 8)
+        if [ "$PHASE" -eq 8 ] && [ -n "$latest_pass" ]; then
+            # Extract log path from ritual: <!-- RITUAL: test pass @ ... (.tests/...) -->
+            log_path=$(echo "$latest_pass" | grep -oP '\(\K.tests/[^)]+')
+            if [ ! -f "$log_path" ]; then
+                echo "🛑 TEST FORGERY DETECTED: Ritual log exists, but physical log file $log_path is missing."
+                exit 1
+            fi
+
+            # Check staleness: Latest code edit must be older than the test log
+            last_code_edit=$(find "$ROOT_DIR" -maxdepth 2 -not -path '*/.*' -not -path '*/node_modules*' -not -path '*/demo*' -not -path "$ROOT_DIR/task.md" -not -path "$ROOT_DIR/implementation_plan.md" -printf '%T@ %p\n' | sort -rn | head -n 1 | cut -d' ' -f1 | cut -d. -f1)
+            last_test_time=$(stat -c %Y "$log_path")
+
+            if [ "$last_code_edit" -gt "$last_test_time" ]; then
+                echo "🛑 STALE VERIFICATION: Code has changed since the last verified test pass."
+                echo "   Re-run tests: swt.sh test $FILE"
+                exit 1
+            fi
+        fi
+    fi
+
+    # 6. Artifact Audit
     if ! audit_artifacts "$PHASE"; then
         exit 1
     fi

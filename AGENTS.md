@@ -182,6 +182,7 @@ To prevent ritual bypasses, the toolkit enforces the presence of root artifacts 
 
 - **Phase 1-7**: Requires `implementation_plan.md` at project root (auto-scaffolded by `graduate`).
 - **Phase 5-8**: Requires `task.md` at project root (auto-synced from task checklist).
+- **Verification Proof**: Phase 8 (Review) requires a successful `Test Ritual Log` that is newer than the latest code change. Agents are physically blocked from proceeding to Review without proof of verification.
 
 > [!CAUTION]
 > **Phantom Artifacts**: If a required artifact is found in a hidden directory (e.g., `.gemini/`, `.agents/`, `.claude/`) but is missing from the root, `validate` will fail. You MUST move artifacts to the project root to pass verification.
@@ -230,5 +231,23 @@ To prevent "runaway" agent behavior, all structural modifications are protected 
 2.  **Verify**: Ensure a Phase 0 brainstorm (Scenario Analysis) has occurred.
 3.  **Prompt**: Request explicit, verbal confirmation from the user.
 4.  **Wait**: Do NOT proceed until the user provides a direct "Go" or "Approved" in the chat history.
+
+## 11. Verifiable Outcomes (Anti-Forgery)
+
+To prevent "Verification Forgery," all toolkit outcomes must be proven via physical evidence.
+
+1. **Test Ritual Logs**: Every successful verification MUST be logged in the task file via `swt:task test <file>`. This command captures raw output to `.tests/` and appends a ritual breadcrumb.
+2. **Staleness Gate**: The toolkit physically blocks the transition to Phase 8 (Review) if the latest code modification is newer than the latest recorded test pass.
+3. **Evidence Requirement**: Agents are FORBIDDEN from stating "Tests passed" without providing a link to the corresponding log file in `.tests/`.
+
+## 12. TDD Protocol (Opt-In)
+
+The toolkit supports a mandatory "Test-First" workflow for high-stakes projects.
+
+1. **Opt-In Mechanisms**:
+   - **Global**: Add `## Ritual: TDD` to `AGENTS.md`.
+   - **Tactical**: Add `**TDD**: enabled` to the task file header.
+2. **Enforcement**: When enabled, Phase 5 (Implement) is blocked until a `test fail` ritual is recorded. The agent MUST prove the test fails before applying implementation code.
+3. **Harness**: The `swt.json` file provides the platform-agnostic commands necessary for the agent to run these checks.
 
 

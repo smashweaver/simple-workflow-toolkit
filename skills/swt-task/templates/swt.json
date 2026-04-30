@@ -1,0 +1,5 @@
+{
+  "test_command": "{{TEST_COMMAND}}",
+  "test_dir": "{{TEST_DIR}}",
+  "tdd_enforced": {{TDD_ENFORCED}}
+}
