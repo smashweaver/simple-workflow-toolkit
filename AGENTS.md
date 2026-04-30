@@ -167,10 +167,11 @@ When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"
 4. **HARD STOP**: Inform the user and wait for explicit confirmation before starting any implementation or planning work.
 
 ### 3. Ephemeral Artifact Enforcement (Scenario C)
-To prevent ritual bypasses, the toolkit enforces the presence of root artifacts during key phases. `task.sh validate` and `task.sh phase` will block execution if these files are missing:
-- **Phase 1-7**: Requires `implementation_plan.md` at project root.
-- **Phase 5-8**: Requires `task.md` at project root.
-- **Phase 8**: Requires `walkthrough.md` at project root.
+To prevent ritual bypasses, the toolkit enforces the presence of root artifacts during key phases. `task.sh validate` and `task.sh phase` will block execution if these files are missing. All artifacts are scaffolded from standard templates in `skills/swt-task/templates/`:
+
+- **Phase 1-7**: Requires `implementation_plan.md` at project root (auto-scaffolded by `graduate`).
+- **Phase 5-8**: Requires `task.md` at project root (auto-synced from task checklist).
+- **Phase 8**: Requires `walkthrough.md` at project root (auto-scaffolded by `phase 8`).
 
 
 ## 8. Developing the Toolkit

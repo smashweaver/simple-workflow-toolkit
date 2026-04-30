@@ -231,6 +231,21 @@ Updates the task checklist and phase field as phases complete.
 
 ---
 
+### `/swt:task scaffold` — Generate root artifacts
+
+**Audience**: agent-driven, automated
+
+Generates `implementation_plan.md` or `walkthrough.md` from standard templates in `skills/swt-task/templates/`.
+
+**When to trigger:**
+- Automatically invoked by `graduate` (Phase 1) and `phase 8`.
+- Manually invoked if an artifact needs to be recreated.
+
+**Flags:**
+- `--force`: Overwrite existing artifact.
+
+---
+
 ### `/swt:task sync` — Synchronize root task.md
 
 **Audience**: agent-driven, automated
@@ -440,6 +455,14 @@ Both paths go through the **Name Confirmation Gate** before any file is written.
 
 ## Commit Reference
 ```
+
+### Ritual Templates
+
+Templates for mandatory artifacts reside in `skills/swt-task/templates/`. These are the source of truth for all agents.
+
+- **`implementation_plan.md`**: Phase 1 architectural and implementation roadmap.
+- **`task.md`**: Phase 5 live checklist (synchronized from task file).
+- **`walkthrough.md`**: Phase 8 verification and summary report.
 
 ### Brainstorm / Ideation Template
 

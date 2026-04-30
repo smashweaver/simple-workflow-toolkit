@@ -8,13 +8,19 @@ set -e
 CMD=$1
 ARG=$2
 
+# Determine workspace root (look for AGENTS.md or .git)
+ROOT_DIR=$(pwd)
+while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.git" ]]; do
+    ROOT_DIR=$(dirname "$ROOT_DIR")
+done
+
 function show_help {
     echo "Usage:"
     echo "  swt.sh init              - Initialize .tasks/ directory and update .gitignore"
     echo "  swt.sh new \"Final Feature Name\"  - Create a new timestamped task file"
     echo "  swt.sh brainstorm \"Topic\"        - Create a Phase 0 ideation task"
-    echo "  swt.sh graduate <file>    - Graduate Phase 0 to Phase 1 (creates SPEC.md)"
     echo "  swt.sh sync <file>        - Sync root task.md from internal task file"
+    echo "  swt.sh scaffold <type> <file> [--force] - Generate Plan or Walkthrough"
     echo "  swt.sh phase <N> <file>    - Transition task to Phase N"
     echo "  swt.sh close <file> <hash> - Finalize task (status: done, checklist: complete)"
     echo "  swt.sh ctx set <file>      - Set active task context (writes task.ctx)"
@@ -52,13 +58,46 @@ function sync_task_md {
     if [ ! -f "$file" ]; then return 1; fi
     
     local title=$(grep -m 1 "^# Task:" "$file" | sed 's/# Task: //')
-    {
-        echo "# Task Checklist: $title"
-        echo ""
-        # Extract the checklist block until the next ## heading or EOF
-        sed -n '/## Checklist/,/##/p' "$file" | grep -v "##" | sed '/^$/d'
-    } > task.md
+    local template_path="$ROOT_DIR/skills/swt-task/templates/task.md"
+    local items=$(sed -n '/## Checklist/,/##/p' "$file" | grep -v "##" | sed '/^$/d')
+
+    if [ -f "$template_path" ]; then
+        sed "s/{{Task Name}}/$title/g" "$template_path" > task.md
+        echo "$items" > .items.tmp
+        sed -i "/{{CHECKLIST_ITEMS}}/{r .items.tmp
+d}" task.md
+        rm .items.tmp
+    else
+        {
+            echo "# Task Checklist: $title"
+            echo ""
+            echo "$items"
+        } > task.md
+    fi
     echo "✅ task.md synced from $(basename "$file")"
+}
+
+function scaffold_artifact {
+    local type=$1
+    local task_file=$2
+    local force=$3
+    
+    local template_path="$ROOT_DIR/skills/swt-task/templates/${type}.md"
+    local target_path="${type}.md"
+    
+    if [ ! -f "$template_path" ]; then
+        echo "❌ Error: Template not found for type: $type"
+        return 1
+    fi
+    
+    if [ -f "$target_path" ] && [ "$force" != "--force" ]; then
+        echo "⚠️ $target_path already exists. Skipping scaffold. (Use --force to overwrite)"
+        return 0
+    fi
+    
+    local title=$(grep -m 1 "^# Task:" "$task_file" | sed 's/# Task: //')
+    sed "s/{{Task Name}}/$title/g" "$template_path" > "$target_path"
+    echo "✨ Scaffolded $target_path from template."
 }
 
 if [ -z "$CMD" ]; then
@@ -120,6 +159,11 @@ fi
 
 if [ "$CMD" == "sync" ]; then
     sync_task_md "$2"
+    exit 0
+fi
+
+if [ "$CMD" == "scaffold" ]; then
+    scaffold_artifact "$2" "$3" "$4"
     exit 0
 fi
 
@@ -570,6 +614,10 @@ EOF
         echo -e "\n## Verification Checklist\n- [ ] ..." >> "$FILE"
         echo "Graduated $FILE to Phase 1 (Lite path)."
     fi
+    scaffold_artifact "implementation_plan" "$FILE"
+    if ! audit_artifacts 1; then
+        exit 1
+    fi
     sync_task_md "$FILE"
     exit 0
 fi
@@ -721,6 +769,10 @@ if [ "$CMD" == "phase" ]; then
                 if (i == last_check) print rlog
             }
         }' "$FILE" > "${FILE}.tmp" && mv "${FILE}.tmp" "$FILE"
+
+    if [ "$PHASE_NUM" -eq 8 ]; then
+        scaffold_artifact "walkthrough" "$FILE"
+    fi
 
     # 4. Ephemeral Artifact Audit (Scenario C: Enforcement)
     if ! audit_artifacts "$PHASE_NUM"; then
