@@ -39,7 +39,7 @@ Unless strictly authorized, you must act as a **Senior Advisor and Co-pilot**:
 5. **Checklist Tracking**: Use Edit to update `[x]` checkmarks in the active `.tasks/` file as the user reports completion.
 6. **Locked Gate Validation**: You MUST run `bash skills/swt-task/scripts/task.sh validate <task_file>` before initiating any Phase 5 (Implement) edits or proposing a Phase 8 (Refine) review. If validation fails, you are forbidden from proceeding.
 7. **Scope Creep Prevention**: If you discover a tangential issue, bug, or improvement, DO NOT bundle it into the current task. Instead, explicitly ask the user if they want to create a new task file via `swt.sh new` to handle it later.
-8. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1), `task.md` (Phase 5), and `walkthrough.md` (Phase 8). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
+8. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1) and `task.md` (Phase 5). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
 
 ## Tool Awareness (MANDATORY)
 

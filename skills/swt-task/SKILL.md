@@ -235,7 +235,7 @@ Updates the task checklist and phase field as phases complete.
 
 **Audience**: agent-driven, automated
 
-Generates `implementation_plan.md` or `walkthrough.md` from standard templates in `skills/swt-task/templates/`.
+Generates `implementation_plan.md` from standard templates in `skills/swt-task/templates/`.
 
 **When to trigger:**
 - Automatically invoked by `graduate` (Phase 1) and `phase 8`.
@@ -462,7 +462,6 @@ Templates for mandatory artifacts reside in `skills/swt-task/templates/`. These 
 
 - **`implementation_plan.md`**: Phase 1 architectural and implementation roadmap.
 - **`task.md`**: Phase 5 live checklist (synchronized from task file).
-- **`walkthrough.md`**: Phase 8 verification and summary report.
 - **`spec.md`**: Phase 1 technical specification (generated during graduation).
 
 ## Brainstorm / Ideation Template
@@ -501,9 +500,8 @@ All brainstorming tasks created via `swt:task brainstorm` follow a high-fidelity
 ## Artifact Phase Mapping
 | Artifact | Generated | Phase | Gate |
 |---|---|---|---|
-| implementation_plan.md | Phase 1 | Plan | HARD STOP |
-| task.md | Phase 5 | Implement | Checkpoint |
-| walkthrough.md | Phase 8 | Review | HARD STOP |
+| `implementation_plan.md` | Phase 1 | Plan | HARD STOP |
+| `task.md` | Phase 5 | Implement | Checkpoint |
 ```
 
 > **This task document structure is the template for future brainstorming tasks.** Use `## What This Task Covers` as the summary section.

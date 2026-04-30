@@ -13,7 +13,7 @@ This document defines the core principles and behavioral protocols for AI coding
 13. **Exclusive Gateway**: You are FORBIDDEN from manually editing the `Phase` header in task files. All phase transitions MUST be executed via `swt:task phase <N> <task_file>`. The `validate` script reads the historical breadcrumb logs and physically blocks execution if the header was manually forged (e.g. Header Phase != Latest Ritual Log) or phases were skipped.
 14. **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `skills/swt-task/scripts/task.sh validate`. Validation includes checks for Phase Forgery and Phantom Artifacts.
 9.  **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation.
-10. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1), `task.md` (Phase 5), and `walkthrough.md` (Phase 8). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
+10. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1) and `task.md` (Phase 5). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
 11. **Task Separation of Concerns**: The root `task.md` artifact is an ephemeral "Live Checklist" for human and cross-agent verification. The internal `.tasks/<timestamp>_task.md` remains the persistent "Source of Truth" for ritual metadata and state tracking.
 
 ## 2. Execution Boundaries: The Senior Advisor Persona
@@ -181,7 +181,6 @@ To prevent ritual bypasses, the toolkit enforces the presence of root artifacts 
 
 - **Phase 1-7**: Requires `implementation_plan.md` at project root (auto-scaffolded by `graduate`).
 - **Phase 5-8**: Requires `task.md` at project root (auto-synced from task checklist).
-- **Phase 8**: Requires `walkthrough.md` at project root (auto-scaffolded by `phase 8`).
 
 > [!CAUTION]
 > **Phantom Artifacts**: If a required artifact is found in a hidden directory (e.g., `.gemini/`, `.agents/`, `.claude/`) but is missing from the root, `validate` will fail. You MUST move artifacts to the project root to pass verification.

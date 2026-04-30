@@ -71,7 +71,6 @@ What still needs to be answered before this can become a task?
 |---|---|---|---|
 | `implementation_plan.md` | Phase 1 | Plan | HARD STOP |
 | `task.md` | Phase 5 | Implement | Checkpoint |
-| `walkthrough.md` | Phase 8 | Review | HARD STOP |
 
 ## Jailbreak Patterns Observed
 | # | Agent | Phase | Violation | Detail |

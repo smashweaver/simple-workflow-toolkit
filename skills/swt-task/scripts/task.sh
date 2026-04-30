@@ -20,7 +20,7 @@ function show_help {
     echo "  swt.sh new \"Final Feature Name\"  - Create a new timestamped task file"
     echo "  swt.sh brainstorm \"Topic\"        - Create a Phase 0 ideation task"
     echo "  swt.sh sync <file>        - Sync root task.md from internal task file"
-    echo "  swt.sh scaffold <type> <file> [--force] - Generate Plan or Walkthrough"
+    echo "  swt.sh scaffold <type> <file> [--force] - Generate Plan artifact"
     echo "  swt.sh phase <N> <file>    - Transition task to Phase N"
     echo "  swt.sh validate <file>     - Verify ritual integrity and artifact state"
     echo "  swt.sh list [--open|--done] - List tasks in the project"
@@ -60,13 +60,6 @@ function audit_artifacts {
         if [ ! -f "task.md" ]; then
             check_phantom "task.md"
             echo "🛑 PROTOCOL VIOLATION: Phase $phase requires task.md at the project root."
-            return 1
-        fi
-    fi
-    if [ "$phase" -ge 8 ]; then
-        if [ ! -f "walkthrough.md" ]; then
-            check_phantom "walkthrough.md"
-            echo "🛑 PROTOCOL VIOLATION: Phase $phase requires walkthrough.md at the project root."
             return 1
         fi
     fi
@@ -191,7 +184,7 @@ if [ "$CMD" == "init" ]; then
     fi
     
     # Add SWT ignores if they don't exist
-    for ignore in ".digests/" ".tasks/*.tmp" "task.ctx" "implementation_plan.md" "task.md" "walkthrough.md" "commit.diff" "commit.draft" "commit.task"; do
+    for ignore in ".digests/" ".tasks/*.tmp" "task.ctx" "implementation_plan.md" "task.md" "commit.diff" "commit.draft" "commit.task"; do
         if ! grep -q "^$ignore" .gitignore; then
             echo "$ignore" >> .gitignore
         fi
@@ -672,9 +665,7 @@ if [ "$CMD" == "phase" ]; then
             }
         }' "$FILE" > "${FILE}.tmp" && mv "${FILE}.tmp" "$FILE"
 
-    if [ "$PHASE_NUM" -eq 8 ]; then
-        scaffold_artifact "walkthrough" "$FILE"
-    fi
+
 
     # 4. Ephemeral Artifact Audit (Scenario C: Enforcement)
     if ! audit_artifacts "$PHASE_NUM"; then
