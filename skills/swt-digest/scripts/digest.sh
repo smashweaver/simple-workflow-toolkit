@@ -27,85 +27,93 @@ DATE_STR=$(date +%Y-%m-%d)
 DIGEST_ROOT=".digests"
 mkdir -p "$DIGEST_ROOT/archive"
 
+# Select template
 if [ "$MILESTONE" = true ]; then
     FILENAME="$DIGEST_ROOT/${TIMESTAMP}_milestone.md"
-    TEMPLATE="Project Milestone"
+    TEMPLATE_PATH="$ROOT_DIR/skills/swt-digest/templates/milestone.md"
 else
     FILENAME="$DIGEST_ROOT/${TIMESTAMP}_digest.md"
-    TEMPLATE="Session Summary"
+    TEMPLATE_PATH="$ROOT_DIR/skills/swt-digest/templates/session.md"
 fi
 
-# Gather Parents
+if [ ! -f "$TEMPLATE_PATH" ]; then
+    echo "❌ Error: Template not found: $TEMPLATE_PATH"
+    exit 1
+fi
+
+# Gather Data
 PARENTS=$(ls -1 "$DIGEST_ROOT"/*_digest.md 2>/dev/null | tail -n 5)
-
-# Gather Active Tasks
 ACTIVE_TASKS=$(ls -1 .tasks/*.md 2>/dev/null | xargs grep -l -E '^\*\*?Status\*\*?:\s*(pending|ideating|in-progress)' 2>/dev/null || true)
-
-# Gather Recently Closed Tasks
 CLOSED_TASKS=$(ls -1 .tasks/archive/*.md 2>/dev/null | grep "$(date +%Y%m%d)" || true)
 
 # Build Digest
-{
-    echo "# SWT $TEMPLATE — $DATE_STR"
-    echo ""
-    if [ -n "$SUMMARY_TEXT" ]; then
-        echo "$SUMMARY_TEXT"
-    elif [ -f "$CONTENT_FILE" ]; then
-        cat "$CONTENT_FILE"
-    else
-        echo "## Summary"
-        echo "{{A 1-2 sentence summary of the session's primary focus.}}"
-    fi
-    echo ""
+cp "$TEMPLATE_PATH" "$FILENAME"
 
-    # Active Task Context (task.ctx)
-    if [ -f "$ROOT_DIR/task.ctx" ]; then
-        CTX_FILE=$(cat "$ROOT_DIR/task.ctx" | tr -d '[:space:]')
-        # Resolve task file
-        if [ -f "$ROOT_DIR/$CTX_FILE" ]; then
-            RESOLVED="$ROOT_DIR/$CTX_FILE"
-        elif [ -f "$ROOT_DIR/.tasks/${CTX_FILE}.md" ]; then
-            RESOLVED="$ROOT_DIR/.tasks/${CTX_FILE}.md"
-        elif [ -f "$ROOT_DIR/.tasks/${CTX_FILE}" ]; then
-            RESOLVED="$ROOT_DIR/.tasks/${CTX_FILE}"
-        elif [ -f "$ROOT_DIR/.tasks/archive/${CTX_FILE}.md" ]; then
-            RESOLVED="$ROOT_DIR/.tasks/archive/${CTX_FILE}.md"
-        elif [ -f "$ROOT_DIR/.tasks/archive/${CTX_FILE}" ]; then
-            RESOLVED="$ROOT_DIR/.tasks/archive/${CTX_FILE}"
-        else
-            RESOLVED=""
-        fi
-        if [ -n "$RESOLVED" ] && [ -f "$RESOLVED" ]; then
-            echo "**Active Context:** $(basename "$RESOLVED")"
-            echo ""
-        else
-            echo "**Active Context:** STALE ($CTX_FILE not found)"
-            echo ""
-        fi
-    fi
+# 1. Date
+sed -i "s/{{DATE}}/$DATE_STR/g" "$FILENAME"
 
+# 2. Summary
+if [ -n "$SUMMARY_TEXT" ]; then
+    echo "$SUMMARY_TEXT" > .sum.tmp
+elif [ -f "$CONTENT_FILE" ]; then
+    cat "$CONTENT_FILE" > .sum.tmp
+else
+    echo -e "## Summary\n\n{{A 1-2 sentence summary of the session's primary focus.}}" > .sum.tmp
+fi
+sed -i "/{{SUMMARY}}/{r .sum.tmp
+d}" "$FILENAME"
+
+# 3. Context
+if [ -f "$ROOT_DIR/task.ctx" ]; then
+    CTX_FILE=$(cat "$ROOT_DIR/task.ctx" | tr -d '[:space:]')
+    if [ -f "$ROOT_DIR/$CTX_FILE" ]; then RESOLVED="$ROOT_DIR/$CTX_FILE"
+    elif [ -f "$ROOT_DIR/.tasks/${CTX_FILE}.md" ]; then RESOLVED="$ROOT_DIR/.tasks/${CTX_FILE}.md"
+    elif [ -f "$ROOT_DIR/.tasks/${CTX_FILE}" ]; then RESOLVED="$ROOT_DIR/.tasks/${CTX_FILE}"
+    elif [ -f "$ROOT_DIR/.tasks/archive/${CTX_FILE}.md" ]; then RESOLVED="$ROOT_DIR/.tasks/archive/${CTX_FILE}.md"
+    elif [ -f "$ROOT_DIR/.tasks/archive/${CTX_FILE}" ]; then RESOLVED="$ROOT_DIR/.tasks/archive/${CTX_FILE}"
+    else RESOLVED=""; fi
     
-    # Only show these sections if we have manual content or it's a milestone
-    if [ -z "$SUMMARY_TEXT" ]; then
-        echo "## Key Outcomes & Architecture"
-        echo ""
-        echo "- {{Outcome Title}}: {{Brief explanation.}}"
-        echo ""
+    if [ -n "$RESOLVED" ] && [ -f "$RESOLVED" ]; then
+        echo -e "**Active Context:** $(basename "$RESOLVED")\n" > .ctx.tmp
+    else
+        echo -e "**Active Context:** STALE ($CTX_FILE not found)\n" > .ctx.tmp
     fi
-    echo "## Active Tasks in \`.tasks/\`"
-    echo ""
+else
+    echo "" > .ctx.tmp
+fi
+sed -i "/{{CONTEXT}}/{r .ctx.tmp
+d}" "$FILENAME"
+
+# 4. Optional Sections (Outcomes & Next Steps)
+# Only show if NO manual content provided
+if [ -z "$SUMMARY_TEXT" ] && [ -z "$CONTENT_FILE" ]; then
+    echo -e "## Key Outcomes & Architecture\n\n- {{Outcome Title}}: {{Brief explanation.}}\n" > .out.tmp
+    echo -e "## Immediate Next Steps\n\n1. {{Step 1}}: {{Actionable item}}\n" > .next.tmp
+else
+    echo "" > .out.tmp
+    echo "" > .next.tmp
+fi
+sed -i "/{{KEY_OUTCOMES}}/{r .out.tmp
+d}" "$FILENAME"
+sed -i "/{{NEXT_STEPS}}/{r .next.tmp
+d}" "$FILENAME"
+
+# 5. Active Tasks
+{
     for task in $ACTIVE_TASKS; do
         SLUG=$(basename "$task" .md)
         PRIO=$(grep -oP '^\*\*?Priority\*\*?:\s*\K\S+' "$task" | head -n 1 || echo "medium")
         echo "- **[$SLUG]($task)**: ($PRIO) Active"
     done
-    echo ""
-    echo "## Changes & Cleanup"
-    echo ""
+} > .active.tmp
+sed -i "/{{ACTIVE_TASKS}}/{r .active.tmp
+d}" "$FILENAME"
+
+# 6. Closed Tasks
+{
     for task in $CLOSED_TASKS; do
         SLUG=$(basename "$task" .md)
         STATUS=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$task" | head -n 1)
-        PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$task" | head -n 1)
         if [ "$STATUS" == "abandoned" ]; then
             echo "- **Abandoned [$SLUG]($task)**"
         else
@@ -113,19 +121,20 @@ CLOSED_TASKS=$(ls -1 .tasks/archive/*.md 2>/dev/null | grep "$(date +%Y%m%d)" ||
             echo "- **Closed [$SLUG]($task)**: Committed changes ($HASH)."
         fi
     done
-    echo ""
-    if [ -z "$SUMMARY_TEXT" ]; then
-        echo "## Immediate Next Steps"
-        echo ""
-        echo "1. {{Step 1}}: {{Actionable item}}"
-        echo ""
-    fi
-    echo "## Synthesized Parent Digests"
-    echo ""
+} > .closed.tmp
+sed -i "/{{CLOSED_TASKS}}/{r .closed.tmp
+d}" "$FILENAME"
+
+# 7. Parents
+{
     for parent in $PARENTS; do
         echo "- $parent"
     done
-} > "$FILENAME"
+} > .parents.tmp
+sed -i "/{{PARENTS}}/{r .parents.tmp
+d}" "$FILENAME"
+
+rm -f .sum.tmp .ctx.tmp .out.tmp .next.tmp .active.tmp .closed.tmp .parents.tmp
 
 # Archive Parents
 for parent in $PARENTS; do
@@ -133,9 +142,6 @@ for parent in $PARENTS; do
 done
 
 echo "Digest created: $FILENAME"
-if [ -n "$PARENTS" ]; then
-    echo "Archived synthesized parents to $DIGEST_ROOT/archive/"
-fi
 
 # Post-Generation Validation (Scenario C)
 if grep -qE "\{\{[A-Za-z][^}]*\}\}" "$FILENAME"; then
