@@ -437,19 +437,44 @@ if [ "$CMD" == "brainstorm" ]; then
 **Priority**: medium          <!-- low | medium | high | critical -->
 **Type**: brainstorm          <!-- feature | bugfix | refactor | chore | docs -->
 **Stack**: shared             <!-- frontend | backend | shared -->
+    template_path="$ROOT_DIR/skills/swt-task/templates/brainstorm.md"
+    if [ -f "$template_path" ]; then
+        cp "$template_path" "$FILENAME"
+        sed -i "s/{{Task Title}}/$ARG/g" "$FILENAME"
+        sed -i "s/{{DATE}}/$DATE_STR/g" "$FILENAME"
+        sed -i "s/{{ARG}}/$ARG/g" "$FILENAME"
+        # Handle UPLINK_CONTEXT which might contain newlines
+        if [ -n "$UPLINK_CONTEXT" ]; then
+            echo "$UPLINK_CONTEXT" > .uplink.tmp
+            sed -i "/{{UPLINK_CONTEXT}}/{r .uplink.tmp
+d}" "$FILENAME"
+            rm .uplink.tmp
+        else
+            sed -i "s/{{UPLINK_CONTEXT}}//g" "$FILENAME"
+        fi
+    else
+        cat <<EOF > "$FILENAME"
+# Task: $ARG
+
+**Created**: $DATE_STR
+**Updated**: —
+**Completed**: —
+**Status**: ideating
+**Priority**: medium          <!-- low | medium | high | critical -->
+**Type**: brainstorm          <!-- feature | bugfix | refactor | chore | docs -->
+**Stack**: shared             <!-- frontend | backend | shared -->
 **Phase**: 0                  <!-- current active phase (0–8) -->
 **Blocked By**: —             <!-- task filename or n/a -->
 
 > **Covers**: [High-level summary of what this brainstorm entails]
 
+## What This Task Covers
 1. **[Core Area 1]**
    - [Detail or requirement]
 2. **[Core Area 2]**
    - [Detail or requirement]
 
-> **This task document structure is the template for future brainstorming tasks.** Use the numbered list above as the summary section.
-
-## Core Concept
+## Objective
 $ARG
 
 ## Explored Alternatives
@@ -458,15 +483,13 @@ $ARG
 - **Scenario C (Enforcement)**: {{Hard gates/Physical blocks}}
 - **User Suggestion**: {{Explicitly log user ideas here or mark N/A}}
 
-## Unresolved Questions
-What still needs to be answered before this can become a task?
-
 ## Notes
 $UPLINK_CONTEXT
 
 ## Commit Reference
 
 EOF
+    fi
 
     echo "Created brainstorm task: $FILENAME"
     sync_task_md "$FILENAME"
@@ -537,8 +560,8 @@ EOF
         SPEC_FILE=".specs/${TIMESTAMP}_${SLUG}.md"
         
         # Extract content from task file
-        # Support both Objective and Core Concept for CORE extraction
-        CORE=$(sed -n '/^## \(Objective\|Core Concept\)/,/^## /p' "$FILE" | grep -v "^## " | grep -v '^$' | head -10)
+        # Support standardized headers for CORE extraction
+        CORE=$(sed -n '/^## \(What This Task Covers\|Objective\|Core Concept\)/,/^## /p' "$FILE" | grep -v "^## " | grep -v '^$' | head -10)
         ALT=$(sed -n '/^## Explored Alternatives/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
         NOTES=$(sed -n '/^## Notes/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -20)
 

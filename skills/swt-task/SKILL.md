@@ -465,37 +465,48 @@ Templates for mandatory artifacts reside in `skills/swt-task/templates/`. These 
 - **`walkthrough.md`**: Phase 8 verification and summary report.
 - **`spec.md`**: Phase 1 technical specification (generated during graduation).
 
-### Brainstorm / Ideation Template
+## Brainstorm / Ideation Template
+
+All brainstorming tasks created via `swt:task brainstorm` follow a high-fidelity structure designed to serve as a verification contract between agents:
 
 ```markdown
-# Task: {{Topic or Idea Name}}
+# Task: [Task Title]
 **Created**: {{YYYY-MM-DD HH:MM:SS}}
 **Updated**: —
 **Completed**: —
-**Status**: ideating          <!-- ideating | pending | in-progress | done | abandoned -->
-**Priority**: medium          <!-- low | medium | high | critical -->
-**Type**: brainstorm          <!-- brainstorm | feature | bugfix | refactor | chore | docs -->
-**Stack**: shared             <!-- frontend | backend | shared -->
-**Phase**: 0                  <!-- 0 = ideating, 1–8 = implementation phases -->
-**Blocked By**: —             <!-- task filename or n/a -->
+**Status**: ideating
+**Priority**: medium
+**Type**: brainstorm
+**Stack**: shared
+**Phase**: 0
+**Blocked By**: —
 
-> **Covers**: [High-level summary of what this brainstorm entails]
+> **Covers**: [Summary line]
 
-1. **[Core Area 1]**
-   - [Detail or requirement]
-2. **[Core Area 2]**
-   - [Detail or requirement]
+## What This Task Covers
+1. [Area 1]
+2. [Area 2]
 
-> **This task document structure is the template for future brainstorming tasks.** Use the numbered list above as the summary section.
+## Guidance (Read Before Spec/Implementation/Walkthrough)
+[Strategic intent and specific verification rituals.]
 
-## Core Concept
-{{What is the core problem or idea being explored?}}
+## Objective
+[Problem statement and desired outcome.]
 
 ## Explored Alternatives
-- **Scenario A (Discipline)**: {{Methodology/Rule change only}}
-- **Scenario B (Automation)**: {{Helper scripts/Templates}}
-- **Scenario C (Enforcement)**: {{Hard gates/Physical blocks}}
-- **User Suggestion**: {{Explicitly log user ideas here or mark N/A}}
+- Scenario A (Discipline)
+- Scenario B (Automation)
+- Scenario C (Enforcement)
+
+## Artifact Phase Mapping
+| Artifact | Generated | Phase | Gate |
+|---|---|---|---|
+| implementation_plan.md | Phase 1 | Plan | HARD STOP |
+| task.md | Phase 5 | Implement | Checkpoint |
+| walkthrough.md | Phase 8 | Review | HARD STOP |
+```
+
+> **This task document structure is the template for future brainstorming tasks.** Use `## What This Task Covers` as the summary section.
 
 ## Unresolved Questions
 {{What still needs to be answered before this graduates to a task?}}
