@@ -9,12 +9,20 @@ description: >
 user-invocable: true
 allowed-tools:
   - Read
-  - Write
-  - Edit
   - Bash
+  - Write
   - Glob
   - Grep
 ---
+
+# swt:task
+
+Manages the lifecycle of tasks in the `.tasks/` directory.
+
+## Behavioral Rules (MANDATORY)
+
+- **Orientation Ritual**: Whenever a task is mounted (via `mount` or `focus`), the agent MUST run `xdg-open <task_file> &` (and its companion spec) to ensure a high-visibility orientation.
+- **Manual Milestone Ritual**: The task manager handles task lifecycle but does NOT automatically trigger session digests. Digests are manual milestone rituals.
 
 ### 2. The Population Ritual (MANDATORY)
 

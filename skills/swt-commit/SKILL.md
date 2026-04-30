@@ -150,6 +150,8 @@ After the commit and task updates are complete, perform context cleanup:
    rm -f commit.diff commit.draft commit.task
    ```
 
+> 🧹 **The Cleanup Ritual (MANDATORY)**: After commit and task closure, ensure the project root is clean. Note that `/swt:digest` is now a manual milestone ritual and is NOT automatically triggered by the commit sequence.
+
 > **Tip:** Add both files to `.gitignore` so they are never accidentally staged:
 > ```bash
 > echo -e "commit.diff\ncommit.draft\ncommit.task" >> .gitignore

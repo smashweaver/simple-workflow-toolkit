@@ -174,7 +174,8 @@ When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"
 1. **Invoke the `swt:status` skill** to aggregate latest digest, tasks, and specs.
 2. **Execute Task Validation**: The status skill automatically runs `task.sh validate` for all active tasks.
 3. **Summarize status** based on the aggregated report.
-4. **HARD STOP**: Inform the user and wait for explicit confirmation before starting any implementation or planning work.
+4. **Manual Milestone Ritual**: The `swt:status` skill provides a state summary but does NOT automatically trigger a new digest. Digests are manual rituals reserved for logical session ends or major milestones.
+5. **HARD STOP**: Inform the user and wait for explicit confirmation before starting any implementation or planning work.
 
 ### 3. Ephemeral Artifact Enforcement (Scenario C)
 To prevent ritual bypasses, the toolkit enforces the presence of root artifacts during key phases. `task.sh validate` and `task.sh phase` will block execution if these files are missing from the project root. All artifacts are scaffolded from standard templates in `skills/swt-task/templates/`:
