@@ -541,7 +541,31 @@ EOF
         ALT=$(sed -n '/^## Explored Alternatives/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -10)
         NOTES=$(sed -n '/^## Notes/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -20)
 
-        cat <<EOF > "$SPEC_FILE"
+        template_path="$ROOT_DIR/skills/swt-task/templates/spec.md"
+        if [ -f "$template_path" ]; then
+            cp "$template_path" "$SPEC_FILE"
+            sed -i "s/{{Task Slug}}/$SLUG/g" "$SPEC_FILE"
+            sed -i "s|{{Task File}}|$FILE|g" "$SPEC_FILE"
+            
+            # Inject Problem Statement
+            echo "$CORE" | sed 's/^/* /' > .core.tmp
+            sed -i "/{{PROBLEM_STATEMENT}}/{r .core.tmp
+d}" "$SPEC_FILE"
+            
+            # Inject Solution
+            echo "$ALT" | sed 's/^/- /' > .alt.tmp
+            sed -i "/{{PROPOSED_SOLUTION}}/{r .alt.tmp
+d}" "$SPEC_FILE"
+            
+            # Inject Notes
+            echo "$NOTES" | grep -oP '^\*\*\s*\K.*' | head -8 | sed 's/^/* /' > .notes.tmp
+            sed -i "/{{NOTES}}/{r .notes.tmp
+d}" "$SPEC_FILE"
+            
+            rm -f .core.tmp .alt.tmp .notes.tmp
+            echo "Graduated $FILE to Phase 1. Spec created from template: $SPEC_FILE"
+        else
+            cat <<EOF > "$SPEC_FILE"
 # Spec: $SLUG
 **Version**: 0.1
 **Status**: draft
@@ -607,9 +631,10 @@ $(echo "$NOTES" | grep -oP '^\*\*\s*\K.*' | head -8 | sed 's/^/* /')
 - [ ] Core feature B implemented and verified
 - [ ] User confirms MVP works as expected
 EOF
+            echo "Graduated $FILE to Phase 1. Spec created: $SPEC_FILE"
+        fi
         # Add Spec link to task header (below Phase)
         sed -i "/^\*\*Phase\*\*:/a **Spec**: $SPEC_FILE" "$FILE"
-        echo "Graduated $FILE to Phase 1. Spec created: $SPEC_FILE"
     else
         echo -e "\n## Verification Checklist\n- [ ] ..." >> "$FILE"
         echo "Graduated $FILE to Phase 1 (Lite path)."

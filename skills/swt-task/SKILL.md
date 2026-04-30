@@ -463,6 +463,7 @@ Templates for mandatory artifacts reside in `skills/swt-task/templates/`. These 
 - **`implementation_plan.md`**: Phase 1 architectural and implementation roadmap.
 - **`task.md`**: Phase 5 live checklist (synchronized from task file).
 - **`walkthrough.md`**: Phase 8 verification and summary report.
+- **`spec.md`**: Phase 1 technical specification (generated during graduation).
 
 ### Brainstorm / Ideation Template
 
