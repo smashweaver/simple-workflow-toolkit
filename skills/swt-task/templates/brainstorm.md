@@ -80,4 +80,6 @@ What still needs to be answered before this can become a task?
 ## Notes
 {{UPLINK_CONTEXT}}
 
+## Ritual Logs
+
 ## Commit Reference

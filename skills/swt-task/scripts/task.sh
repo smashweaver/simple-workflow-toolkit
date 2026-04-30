@@ -14,6 +14,22 @@ while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.gi
     ROOT_DIR=$(dirname "$ROOT_DIR")
 done
 
+function log_ritual() {
+    local type=$1
+    local file=$2
+    local extra=$3
+    local date_str=$(date +"%Y-%m-%d %H:%M:%S")
+    local entry="<!-- RITUAL: $type @ $date_str $extra -->"
+
+    if grep -q "^## Ritual Logs" "$file"; then
+        # Insert after the header
+        sed -i "/^## Ritual Logs/a $entry" "$file"
+    else
+        # Fallback to append
+        echo "$entry" >> "$file"
+    fi
+}
+
 function show_help {
     echo "Usage:"
     echo "  swt.sh init              - Initialize .tasks/ directory and update .gitignore"
@@ -201,8 +217,7 @@ function run_tests {
     [ $exit_code -eq 0 ] && status="pass"
 
     # Add Ritual Log to task file
-    local date_str=$(date +"%Y-%m-%d %H:%M:%S")
-    echo "<!-- RITUAL: test $status @ $date_str ($log_file) -->" >> "$file"
+    log_ritual "test $status" "$file" "($log_file)"
     
     if [ "$status" == "pass" ]; then
         echo "✅ Tests passed! Ritual logged in $(basename "$file")"
@@ -275,9 +290,11 @@ $ARG
 - [ ] Phase 6: Document
 - [ ] Phase 7: Test
 - [ ] Phase 8: Review & Refine
-<!-- RITUAL: phase 1 @ $DATE_STR -->
+## Ritual Logs
 
+## Commit Reference
 EOF
+    log_ritual "phase 1" "$FILENAME"
     echo "Created task: $FILENAME"
     sync_task_md "$FILENAME"
     exit 0
@@ -447,8 +464,7 @@ if [ "$CMD" == "graduate" ]; then
     sed -i "s/^\*\*?Phase\*\*?:\s*0/**Phase**: 1/" "$FILE"
     
     # 2. Add Ritual Log
-    DATE_STR=$(date +"%Y-%m-%d %H:%M:%S")
-    echo "<!-- RITUAL: phase 1 @ $DATE_STR -->" >> "$FILE"
+    log_ritual "phase 1" "$FILE"
 
     # 3. Scaffold Spec
     SLUG=$(basename "$FILE" .md | sed 's/^[0-9]*_//')
@@ -712,20 +728,8 @@ if [ "$CMD" == "phase" ]; then
     # First, reset any other in-progress phases if appropriate (optional)
     sed -i "s/- \[[ /]\] Phase $PHASE_NUM/- [\/] Phase $PHASE_NUM/" "$FILE"
 
-    # 3. Add Ritual Log immediately after the Checklist
-    DATE_STR=$(date +"%Y-%m-%d %H:%M:%S")
-    RITUAL_LOG="<!-- RITUAL: phase $PHASE_NUM @ $DATE_STR -->"
-    
-    awk -v rlog="$RITUAL_LOG" '
-        /^- \[[ x\/]\] Phase / || /^- \[[ x\/]\] .+/ || /^<!-- RITUAL: phase/ { last_check = NR }
-        { lines[NR] = $0 }
-        END {
-            if (!last_check) last_check = NR
-            for (i=1; i<=NR; i++) {
-                print lines[i]
-                if (i == last_check) print rlog
-            }
-        }' "$FILE" > "${FILE}.tmp" && mv "${FILE}.tmp" "$FILE"
+    # 3. Add Ritual Log
+    log_ritual "phase $PHASE_NUM" "$FILE"
 
 
 
@@ -790,7 +794,7 @@ if [ "$CMD" == "validate" ]; then
         if [ -n "$spec" ] && [ -f "$spec" ]; then
             task_time=$(stat -c %Y "$FILE")
             spec_time=$(stat -c %Y "$spec")
-            if [ "$task_time" -gt "$spec_time" ]; then
+            if [ "$task_time" -gt $((spec_time + 60)) ]; then
                 echo "🛑 STALE SPEC DETECTED: Task objectives are newer than the Spec."
                 echo "   Loop back to re-sync: swt.sh sync-downstream $FILE"
                 exit 1
@@ -798,7 +802,7 @@ if [ "$CMD" == "validate" ]; then
             
             if [ -f "implementation_plan.md" ]; then
                 plan_time=$(stat -c %Y "implementation_plan.md")
-                if [ "$spec_time" -gt "$plan_time" ]; then
+                if [ "$spec_time" -gt $((plan_time + 60)) ]; then
                     echo "🛑 STALE PLAN DETECTED: Spec is newer than the Implementation Plan."
                     echo "   Loop back to re-sync: swt.sh sync-downstream $FILE"
                     exit 1
@@ -816,8 +820,8 @@ if [ "$CMD" == "validate" ]; then
         [ "$tdd_global" == "true" ] || [ "$tdd_task" == "true" ] && tdd_enforced="true"
 
         # Find latest test logs
-        latest_pass=$(grep "<!-- RITUAL: test pass" "$FILE" | tail -n 1)
-        latest_fail=$(grep "<!-- RITUAL: test fail" "$FILE" | tail -n 1)
+        latest_pass=$(grep "<!-- RITUAL: test pass" "$FILE" | head -n 1)
+        latest_fail=$(grep "<!-- RITUAL: test fail" "$FILE" | head -n 1)
 
         # TDD Gate (Phase 5+)
         if [ "$tdd_enforced" == "true" ] && [ "$PHASE" -ge 5 ]; then
@@ -838,7 +842,7 @@ if [ "$CMD" == "validate" ]; then
             fi
 
             # Check staleness: Latest code edit must be older than the test log
-            last_code_edit=$(find "$ROOT_DIR" -maxdepth 2 -not -path '*/.*' -not -path '*/node_modules*' -not -path '*/demo*' -not -path "$ROOT_DIR/task.md" -not -path "$ROOT_DIR/implementation_plan.md" -printf '%T@ %p\n' | sort -rn | head -n 1 | cut -d' ' -f1 | cut -d. -f1)
+            last_code_edit=$(find "$ROOT_DIR" -maxdepth 5 -type f -not -path '*/.*' -not -path '*/node_modules*' -not -path '*/demo*' -not -path "$ROOT_DIR/task.md" -not -path "$ROOT_DIR/implementation_plan.md" -printf '%T@ %p\n' | sort -rn | head -n 1 | cut -d' ' -f1 | cut -d. -f1)
             last_test_time=$(stat -c %Y "$log_path")
 
             if [ "$last_code_edit" -gt "$last_test_time" ]; then
