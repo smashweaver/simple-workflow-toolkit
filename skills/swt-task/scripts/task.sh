@@ -23,6 +23,7 @@ function show_help {
     echo "  swt.sh scaffold <type> <file> [--force] - Generate Plan or Walkthrough"
     echo "  swt.sh phase <N> <file>    - Transition task to Phase N"
     echo "  swt.sh validate <file>     - Verify ritual integrity and artifact state"
+    echo "  swt.sh list [--open|--done] - List tasks in the project"
     echo "  swt.sh sync-downstream <file> - Sync Spec/Plan after objective changes"
     echo "  swt.sh close <file> <hash> - Finalize task (status: done, checklist: complete)"
     echo "  swt.sh ctx set <file>      - Set active task context (writes task.ctx)"
@@ -70,6 +71,37 @@ function audit_artifacts {
         fi
     fi
     return 0
+}
+
+function list_tasks {
+    local filter=$1
+    echo -e "Timestamp\tPhase\tStatus\tObjective"
+    echo -e "---------\t-----\t------\t---------"
+    
+    for f in .tasks/*.md; do
+        [ -e "$f" ] || continue
+        local ts=$(basename "$f" | cut -d'_' -f1)
+        local phase=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$f" | head -n 1)
+        local status=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$f" | head -n 1)
+        local objective=$(grep -oP '^## Objective\s*\n\K.*' "$f" | head -n 1)
+        # Fallback for objective if the newline grep fails or Core Concept is used
+        if [ -z "$objective" ]; then
+            objective=$(sed -n '/^## \(Objective\|Core Concept\)/,/^## /p' "$f" | grep -v '^## ' | grep -v '^$' | head -n 1)
+        fi
+        # Truncate objective for display
+        objective=$(echo "$objective" | cut -c1-60 | sed 's/[[:space:]]*$//')
+        [ ${#objective} -ge 60 ] && objective="${objective}..."
+
+        if [ "$filter" == "--open" ]; then
+            if [[ "$status" == "done" ]] || [[ "$status" == "abandoned" ]]; then continue; fi
+        elif [ "$filter" == "--done" ]; then
+            if [[ "$status" != "done" ]]; then continue; fi
+        elif [ "$filter" == "--abandoned" ]; then
+            if [[ "$status" != "abandoned" ]]; then continue; fi
+        fi
+        
+        printf "%s\t%s\t%s\t%s\n" "$ts" "$phase" "$status" "$objective"
+    done
 }
 
 function sync_task_to_internal {
@@ -766,6 +798,11 @@ if [ "$CMD" == "update" ]; then
         echo "Usage: swt.sh update <task_file> [--append \"item text\"]"
         exit 1
     fi
+fi
+
+if [ "$CMD" == "list" ]; then
+    list_tasks "$2"
+    exit 0
 fi
 
 echo "Unknown command: $CMD"
