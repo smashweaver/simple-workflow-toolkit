@@ -231,6 +231,25 @@ Updates the task checklist and phase field as phases complete.
 
 ---
 
+### `/swt:task sync` — Synchronize root task.md
+
+**Audience**: agent-driven, automated
+
+Synchronizes the root `task.md` (Live Checklist) from the internal task file's `## Checklist` section.
+
+**When to trigger:**
+- Automatically invoked by `new`, `brainstorm`, `graduate`, and `phase`.
+- Manually invoked if the root `task.md` gets out of sync or is accidentally deleted.
+
+**Steps:**
+1. Read the internal task file.
+2. Extract the `## Checklist` section.
+3. Overwrite the root `task.md` with the extracted checklist.
+4. Confirm synchronization to the user.
+
+
+---
+
 ### `/swt:task validate` — State verification
 
 **Audience**: agent-driven
@@ -434,7 +453,16 @@ Both paths go through the **Name Confirmation Gate** before any file is written.
 **Type**: brainstorm          <!-- brainstorm | feature | bugfix | refactor | chore | docs -->
 **Stack**: shared             <!-- frontend | backend | shared -->
 **Phase**: 0                  <!-- 0 = ideating, 1–8 = implementation phases -->
-**Blocked By**: —
+**Blocked By**: —             <!-- task filename or n/a -->
+
+> **Covers**: [High-level summary of what this brainstorm entails]
+
+1. **[Core Area 1]**
+   - [Detail or requirement]
+2. **[Core Area 2]**
+   - [Detail or requirement]
+
+> **This task document structure is the template for future brainstorming tasks.** Use the numbered list above as the summary section.
 
 ## Core Concept
 {{What is the core problem or idea being explored?}}
@@ -443,6 +471,7 @@ Both paths go through the **Name Confirmation Gate** before any file is written.
 - **Scenario A (Discipline)**: {{Methodology/Rule change only}}
 - **Scenario B (Automation)**: {{Helper scripts/Templates}}
 - **Scenario C (Enforcement)**: {{Hard gates/Physical blocks}}
+- **User Suggestion**: {{Explicitly log user ideas here or mark N/A}}
 
 ## Unresolved Questions
 {{What still needs to be answered before this graduates to a task?}}

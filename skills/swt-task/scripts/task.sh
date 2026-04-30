@@ -13,7 +13,8 @@ function show_help {
     echo "  swt.sh init              - Initialize .tasks/ directory and update .gitignore"
     echo "  swt.sh new \"Final Feature Name\"  - Create a new timestamped task file"
     echo "  swt.sh brainstorm \"Topic\"        - Create a Phase 0 ideation task"
-    echo "  swt.sh graduate <task_file>      - Transition Phase 0 to Phase 1"
+    echo "  swt.sh graduate <file>    - Graduate Phase 0 to Phase 1 (creates SPEC.md)"
+    echo "  swt.sh sync <file>        - Sync root task.md from internal task file"
     echo "  swt.sh phase <N> <file>    - Transition task to Phase N"
     echo "  swt.sh close <file> <hash> - Finalize task (status: done, checklist: complete)"
     echo "  swt.sh ctx set <file>      - Set active task context (writes task.ctx)"
@@ -21,6 +22,43 @@ function show_help {
     echo "  swt.sh ctx show            - Show current active task context"
     echo "  swt.sh tidy                 - Move done/abandoned tasks to .tasks/archive/"
     echo "  swt.sh abandon <file>      - Abandon task (status: abandoned, no commit hash)"
+}
+
+function audit_artifacts {
+    local phase=$1
+    if [ "$phase" -ge 1 ] && [ "$phase" -lt 8 ]; then
+        if [ ! -f "implementation_plan.md" ]; then
+            echo "🛑 PROTOCOL VIOLATION: Phase $phase requires implementation_plan.md at the project root."
+            return 1
+        fi
+    fi
+    if [ "$phase" -ge 5 ]; then
+        if [ ! -f "task.md" ]; then
+            echo "🛑 PROTOCOL VIOLATION: Phase $phase requires task.md at the project root."
+            return 1
+        fi
+    fi
+    if [ "$phase" -ge 8 ]; then
+        if [ ! -f "walkthrough.md" ]; then
+            echo "🛑 PROTOCOL VIOLATION: Phase $phase requires walkthrough.md at the project root."
+            return 1
+        fi
+    fi
+    return 0
+}
+
+function sync_task_md {
+    local file=$1
+    if [ ! -f "$file" ]; then return 1; fi
+    
+    local title=$(grep -m 1 "^# Task:" "$file" | sed 's/# Task: //')
+    {
+        echo "# Task Checklist: $title"
+        echo ""
+        # Extract the checklist block until the next ## heading or EOF
+        sed -n '/## Checklist/,/##/p' "$file" | grep -v "##" | sed '/^$/d'
+    } > task.md
+    echo "✅ task.md synced from $(basename "$file")"
 }
 
 if [ -z "$CMD" ]; then
@@ -80,6 +118,11 @@ EOF
     exit 0
 fi
 
+if [ "$CMD" == "sync" ]; then
+    sync_task_md "$2"
+    exit 0
+fi
+
 if [ "$CMD" == "list" ]; then
     if [ ! -d ".tasks" ]; then
         echo "No .tasks/ directory found. Run 'swt.sh init' first."
@@ -108,7 +151,7 @@ if [ "$CMD" == "list" ]; then
     echo "Tasks found ($([ -n "$FILTER" ] && echo "$FILTER" || echo "all")):"
     for f in $files; do
         # Extract status (handles cases with comments or trailing spaces)
-        STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$f" | head -n 1)
+        STATUS=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$f" | head -n 1)
         
         SHOW=true
         if [ "$FILTER" == "open" ]; then
@@ -139,7 +182,7 @@ if [ "$CMD" == "tidy" ]; then
     count=0
     files=$(ls .tasks/*.md 2>/dev/null || true)
     for f in $files; do
-        STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$f" | head -n 1)
+        STATUS=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$f" | head -n 1)
         if [[ "$STATUS" == "done" || "$STATUS" == "abandoned" ]]; then
             mv "$f" .tasks/archive/
             echo "Archived: $f"
@@ -172,7 +215,7 @@ if [ "$CMD" == "validate" ]; then
     fi
 
     # 2. Get current phase
-    PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\d+' "$FILE" | head -n 1)
+    PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$FILE" | head -n 1)
 
     if [ -z "$PHASE" ]; then
         echo "Error: Could not determine current Phase from $FILE."
@@ -181,7 +224,7 @@ if [ "$CMD" == "validate" ]; then
 
     # Phase 0 (Ideating) doesn't always have a checklist
     if [ "$PHASE" -eq 0 ]; then
-        STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$FILE" | head -n 1)
+        STATUS=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$FILE" | head -n 1)
         if [ "$STATUS" == "ideating" ]; then
             echo "✅ Phase 0 validated (Status: ideating)."
             exit 0
@@ -220,6 +263,11 @@ if [ "$CMD" == "validate" ]; then
             fi
         fi
     done
+
+    # 5. Ephemeral Artifact Audit
+    if ! audit_artifacts "$PHASE"; then
+        exit 1
+    fi
 
     echo "✅ Task state validated: Phase $PHASE is correctly synchronized with Ritual Log and Checklist History."
     exit 0
@@ -277,6 +325,7 @@ Provide a short description of what this task achieves.
 EOF
 
     echo "Created new task: $FILENAME"
+    sync_task_md "$FILENAME"
 
     # Smart mount: auto-mount only if no task is currently mounted
     if [ ! -f "task.ctx" ]; then
@@ -315,10 +364,10 @@ if [ "$CMD" == "brainstorm" ]; then
         # Capture Context
         C_PWD=$(pwd)
         # Find active task (most recent non-closed md in .tasks)
-        C_TASK=$(ls -t .tasks/*.md 2>/dev/null | xargs grep -l '\*\*Status\*\*: \(pending\|ideating\|in-progress\)' | head -n 1 || echo "none")
+        C_TASK=$(ls -t .tasks/*.md 2>/dev/null | xargs grep -l -E '^\*\*?Status\*\*?:\s*(pending|ideating|in-progress)' | head -n 1 || echo "none")
         C_PHASE="unknown"
         if [ "$C_TASK" != "none" ]; then
-            C_PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\d+' "$C_TASK" | head -n 1)
+            C_PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$C_TASK" | head -n 1)
         fi
         
         UPLINK_CONTEXT="- **Source Project**: $C_PWD
@@ -337,16 +386,6 @@ if [ "$CMD" == "brainstorm" ]; then
 
     cat <<EOF > "$FILENAME"
 # Task: $ARG
-
-> **Covers**: [High-level summary of what this brainstorm entails]
-
-1. **[Core Area 1]**
-   - [Detail or requirement]
-2. **[Core Area 2]**
-   - [Detail or requirement]
-
-> **This task document structure is the template for future brainstorming tasks.** Use the numbered list above as the summary section.
-
 **Created**: $DATE_STR
 **Updated**: —
 **Completed**: —
@@ -356,6 +395,15 @@ if [ "$CMD" == "brainstorm" ]; then
 **Stack**: shared             <!-- frontend | backend | shared -->
 **Phase**: 0                  <!-- current active phase (0–8) -->
 **Blocked By**: —             <!-- task filename or n/a -->
+
+> **Covers**: [High-level summary of what this brainstorm entails]
+
+1. **[Core Area 1]**
+   - [Detail or requirement]
+2. **[Core Area 2]**
+   - [Detail or requirement]
+
+> **This task document structure is the template for future brainstorming tasks.** Use the numbered list above as the summary section.
 
 ## Core Concept
 $ARG
@@ -377,6 +425,7 @@ $UPLINK_CONTEXT
 EOF
 
     echo "Created brainstorm task: $FILENAME"
+    sync_task_md "$FILENAME"
 
     # Smart mount: auto-mount only if no task is currently mounted
     if [ ! -f "task.ctx" ]; then
@@ -398,17 +447,17 @@ if [ "$CMD" == "graduate" ]; then
         exit 1
     fi
 
-    PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\d+' "$FILE" | head -n 1)
+    PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$FILE" | head -n 1)
     if [ "$PHASE" -ne 0 ]; then
         echo "Error: Task is already in Phase $PHASE. Only Phase 0 tasks can be graduated."
         exit 1
     fi
 
-    TYPE=$(grep -oP '\*\*Type\*\*:\s*\K\S+' "$FILE" | head -n 1)
+    TYPE=$(grep -oP '^\*\*?Type\*\*?:\s*\K\S+' "$FILE" | head -n 1)
     
     # Update Status and Phase
-    sed -i "s/^\*\*Status\*\*:\s*ideating/**Status**: pending/" "$FILE"
-    sed -i "s/^\*\*Phase\*\*:\s*0/**Phase**: 1/" "$FILE"
+    sed -i -E "s/^\*\*?Status\*\*?:\s*ideating/**Status**: pending/" "$FILE"
+    sed -i -E "s/^\*\*?Phase\*\*?:\s*0/**Phase**: 1/" "$FILE"
     
     # Add implementation checklist if missing
     if ! grep -q "## Checklist" "$FILE"; then
@@ -460,33 +509,25 @@ $(echo "$CORE" | sed 's/^/* /')
 
 ## 2. Goals
 
-- Route all work through the SWT task lifecycle (create → graduate → implement)
-- Persist active task context across sessions and agent switches
-- Guide users to create brainstorm tasks when new topics arise mid-session
-- Prevent coding outside of swt:flow phases
+- [Goal 1: Brief description of a primary objective]
+- [Goal 2: Brief description of a primary objective]
 
 ## 3. Proposed Solution
 
 $(echo "$ALT" | sed 's/^/- /')
 
-Introduce \`task.ctx\` — a single-line file in the project root containing the active task filename. Back it with:
-- \`swt.sh ctx set/clear/show\` commands in task.sh
-- \`flow.sh\` — active engine with open/check/status commands
-- Updates to swt:status, swt:digest, swt:think, swt:flow, and AGENTS.md
+[High-level overview of the architectural or procedural changes]
 
 ## 4. User Stories
 
-- [ ] US-001: As an agent, I can read \`task.ctx\` at session start and immediately know what task is active
-- [ ] US-002: As a user, when I raise a new issue mid-session, the agent asks if I want a brainstorm task created
-- [ ] US-003: As an agent, I refuse to code outside swt:flow phases — I guide the user to create a task first
-- [ ] US-004: As a user switching agents, the new agent picks up the same task context automatically
-- [ ] US-005: As an agent, when a task is closed, I automatically clear \`task.ctx\`
+- [ ] US-001: As a user, I can...
+- [ ] US-002: As an agent, I can...
 
 ## 5. Non-Functional Requirements
 
-- \`task.ctx\` must be gitignored (not committed to repo)
-- All context reads/writes must handle stale references (task file deleted/moved)
-- Scripts must work from subdirectories (workspace root detection via AGENTS.md/.git)
+- Performance: [e.g. Minimal overhead]
+- Security: [e.g. Validates all inputs]
+- Maintainability: [e.g. Self-documenting code]
 
 ## 6. Implementation Plan
 
@@ -496,47 +537,30 @@ $(echo "$NOTES" | grep -oP '^\*\*\s*\K.*' | head -8 | sed 's/^/* /')
 
 | Risk | Mitigation |
 |---|---|
-| \`task.ctx\` points to deleted task | Validate file existence; clear stale ctx automatically |
-| Stale context after manual edits | Only \`task.sh\` modifies \`task.ctx\`; document this rule |
-| Multiple agents write simultaneously | Single line file; filesystem write is atomic |
+| [Description of risk] | [How to prevent or handle it] |
 
 ## 8. Success Criteria
 
-- [ ] \`swt.sh ctx set <file>\` creates \`task.ctx\`; \`swt.sh ctx show\` displays it
-- [ ] \`flow.sh open\` reads \`task.ctx\` and displays task metadata
-- [ ] \`flow.sh check\` exits non-zero when no/invalid context exists
-- [ ] \`status.sh\` shows active task context at top of output
-- [ ] \`task.sh close\` auto-clears \`task.ctx\` when it points to closed task
-- [ ] \`task.ctx\` is gitignored and survives across sessions
+- [ ] Criterion 1
+- [ ] Criterion 2
 
 ## 9. Out of Scope
 
-- Keyword-based task surfacing in conversation (too many false positives)
-- Auto-activation of related tasks without user confirmation
-- Complex conflict resolution for simultaneous agent writes
+- [What this task specifically avoids]
 
 ## 10. Open Questions
 
-- Should \`task.ctx\` store additional metadata (phase, last updated) or stay single-line?
-- What happens when user has multiple projects — one \`task.ctx\` per project root (current answer: yes)
+- [Unresolved design or implementation details]
 
 ## 11. References
 
 - Task file: \`$FILE\`
-- Skills: \`swt:flow\`, \`swt:task\`, \`swt:status\`, \`swt:think\`, \`swt:digest\`
-- AGENTS.md Section 7: Session Start & Restoration
+- [Link to related documentation or issues]
 
 ## 12. MVP Definition
 
-- [ ] \`task.ctx\` file tracks active task filename in project root
-- [ ] \`swt.sh ctx set/clear/show\` manages context lifecycle
-- [ ] \`flow.sh open/check/status\` provides active task engine
-- [ ] \`status.sh\` displays active context at top of output
-- [ ] \`swt:think\` documents Task-First Workflow rule
-- [ ] \`digest.sh\` includes active context in output
-- [ ] \`swt-flow/SKILL.md\` updated with task.ctx check
-- [ ] \`AGENTS.md\` Section 7 updated with task.ctx step
-- [ ] \`.gitignore\` includes \`task.ctx\`
+- [ ] Core feature A implemented and verified
+- [ ] Core feature B implemented and verified
 - [ ] User confirms MVP works as expected
 EOF
         # Add Spec link to task header (below Phase)
@@ -546,6 +570,7 @@ EOF
         echo -e "\n## Verification Checklist\n- [ ] ..." >> "$FILE"
         echo "Graduated $FILE to Phase 1 (Lite path)."
     fi
+    sync_task_md "$FILE"
     exit 0
 fi
 
@@ -564,9 +589,9 @@ if [ "$CMD" == "close" ]; then
     DATE_LOG=$(date +"%Y-%m-%d %H:%M:%S")
 
     # 1. Update Headers
-    sed -i "s/^\*\*Status\*\*:.*/\*\*Status\*\*: done/" "$FILE"
-    sed -i "s/^\*\*Completed\*\*:.*/\*\*Completed\*\*: $DATE_LOG/" "$FILE"
-    sed -i "s/^\*\*Updated\*\*:.*/\*\*Updated\*\*: $DATE_LOG/" "$FILE"
+    sed -i -E "s/^\*\*?Status\*\*?:.*/\*\*Status\*\*: done/" "$FILE"
+    sed -i -E "s/^\*\*?Completed\*\*?:.*/\*\*Completed\*\*: $DATE_LOG/" "$FILE"
+    sed -i -E "s/^\*\*?Updated\*\*?:.*/\*\*Updated\*\*: $DATE_LOG/" "$FILE"
 
     # 2. Complete Checklist
     # Matches bulleted checklist items: - [ ] or - [/]
@@ -600,9 +625,9 @@ if [ "$CMD" == "abandon" ]; then
     DATE_LOG=$(date +"%Y-%m-%d %H:%M:%S")
 
     # 1. Update Headers (status=abandoned, set Completed)
-    sed -i "s/^\*\*Status\*\*:.*/\*\*Status\*\*: abandoned/" "$FILE"
-    sed -i "s/^\*\*Completed\*\*:.*/\*\*Completed\*\*: $DATE_LOG/" "$FILE"
-    sed -i "s/^\*\*Updated\*\*:.*/\*\*Updated\*\*: $DATE_LOG/" "$FILE"
+    sed -i -E "s/^\*\*?Status\*\*?:.*/\*\*Status\*\*: abandoned/" "$FILE"
+    sed -i -E "s/^\*\*?Completed\*\*?:.*/\*\*Completed\*\*: $DATE_LOG/" "$FILE"
+    sed -i -E "s/^\*\*?Updated\*\*?:.*/\*\*Updated\*\*: $DATE_LOG/" "$FILE"
 
     # 2. Leave Checklist AS-IS (do NOT check off items)
 
@@ -676,7 +701,7 @@ if [ "$CMD" == "phase" ]; then
     fi
 
     # 1. Update Phase header
-    sed -i "s/^\*\*Phase\*\*:\s*[0-8]/**Phase**: $PHASE_NUM/" "$FILE"
+    sed -i -E "s/^\*\*?Phase\*\*?:\s*[0-8]/**Phase**: $PHASE_NUM/" "$FILE"
 
     # 2. Update Checklist (mark current phase as in-progress [/])
     # First, reset any other in-progress phases if appropriate (optional)
@@ -697,7 +722,13 @@ if [ "$CMD" == "phase" ]; then
             }
         }' "$FILE" > "${FILE}.tmp" && mv "${FILE}.tmp" "$FILE"
 
+    # 4. Ephemeral Artifact Audit (Scenario C: Enforcement)
+    if ! audit_artifacts "$PHASE_NUM"; then
+        exit 1
+    fi
+
     echo "Transitioned $FILE to Phase $PHASE_NUM. Ritual logged."
+    sync_task_md "$FILE"
     exit 0
 fi
 

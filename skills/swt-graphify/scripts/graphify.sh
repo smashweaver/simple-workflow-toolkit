@@ -38,7 +38,7 @@ ensure_agents_section() {
 set_state() {
     local state=$1
     ensure_agents_section
-    sed -i "s/- \*\*Status\*\*:.*/- \*\*Status\*\*: $state/" "$AGENTS_FILE"
+    sed -i -E "s/- \*\*?Status\*\*?:.*/- \*\*Status\*\*: $state/" "$AGENTS_FILE"
     echo "Graphify state set to: $state"
 }
 
@@ -47,7 +47,7 @@ get_state() {
         echo "missing"
         return
     fi
-    grep -oP '\*\*Status\*\*:\s*\K\S+' "$AGENTS_FILE" | tail -n 1 || echo "missing"
+    grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$AGENTS_FILE" | tail -n 1 || echo "missing"
 }
 
 # --- Command Router ---

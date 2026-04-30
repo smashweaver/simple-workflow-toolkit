@@ -39,7 +39,7 @@ fi
 PARENTS=$(ls -1 "$DIGEST_ROOT"/*_digest.md 2>/dev/null | tail -n 5)
 
 # Gather Active Tasks
-ACTIVE_TASKS=$(ls -1 .tasks/*.md 2>/dev/null | xargs grep -l '\*\*Status\*\*: \(pending\|ideating\|in-progress\)' 2>/dev/null || true)
+ACTIVE_TASKS=$(ls -1 .tasks/*.md 2>/dev/null | xargs grep -l -E '^\*\*?Status\*\*?:\s*(pending|ideating|in-progress)' 2>/dev/null || true)
 
 # Gather Recently Closed Tasks
 CLOSED_TASKS=$(ls -1 .tasks/archive/*.md 2>/dev/null | grep "$(date +%Y%m%d)" || true)
@@ -96,7 +96,7 @@ CLOSED_TASKS=$(ls -1 .tasks/archive/*.md 2>/dev/null | grep "$(date +%Y%m%d)" ||
     echo ""
     for task in $ACTIVE_TASKS; do
         SLUG=$(basename "$task" .md)
-        PRIO=$(grep -oP '\*\*Priority\*\*:\s*\K\S+' "$task" || echo "medium")
+        PRIO=$(grep -oP '^\*\*?Priority\*\*?:\s*\K\S+' "$task" | head -n 1 || echo "medium")
         echo "- **[$SLUG]($task)**: ($PRIO) Active"
     done
     echo ""
@@ -104,7 +104,8 @@ CLOSED_TASKS=$(ls -1 .tasks/archive/*.md 2>/dev/null | grep "$(date +%Y%m%d)" ||
     echo ""
     for task in $CLOSED_TASKS; do
         SLUG=$(basename "$task" .md)
-        STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$task" | head -n 1)
+        STATUS=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$task" | head -n 1)
+        PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$task" | head -n 1)
         if [ "$STATUS" == "abandoned" ]; then
             echo "- **Abandoned [$SLUG]($task)**"
         else

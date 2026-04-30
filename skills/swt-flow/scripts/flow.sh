@@ -56,10 +56,10 @@ if [ "$CMD" == "open" ]; then
     echo ""
 
     # Extract and display key metadata
-    STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
-    PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
-    TYPE=$(grep -oP '\*\*Type\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
-    PRIORITY=$(grep -oP '\*\*Priority\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
+    STATUS=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
+    PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$RESOLVED" | head -n 1)
+    TYPE=$(grep -oP '^\*\*?Type\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
+    PRIORITY=$(grep -oP '^\*\*?Priority\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
 
     echo "Status: $STATUS | Phase: $PHASE | Type: $TYPE | Priority: $PRIORITY"
     echo ""
@@ -132,8 +132,8 @@ if [ "$CMD" == "status" ]; then
             echo "Active Task: STALE ($TASK_FILE not found)"
             exit 0
         fi
-        PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
-        STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
+        PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$RESOLVED" | head -n 1)
+        STATUS=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
         echo "Active Task: $(basename "$RESOLVED")"
         echo "Status: $STATUS | Phase: $PHASE"
     fi

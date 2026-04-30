@@ -51,8 +51,8 @@ if [ -f "$ROOT_DIR/task.ctx" ]; then
     fi
 
     if [ -n "$RESOLVED" ] && [ -f "$RESOLVED" ]; then
-        CTX_STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
-        CTX_PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\S+' "$RESOLVED" | head -n 1)
+        CTX_STATUS=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
+        CTX_PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$RESOLVED" | head -n 1)
         echo "--- Active Task Context ---"
         echo "Task: $(basename "$RESOLVED")"
         echo "Status: $CTX_STATUS | Phase: $CTX_PHASE"
@@ -97,9 +97,9 @@ if [ -d "$ROOT_DIR/.tasks" ]; then
     FILES=$(ls "$ROOT_DIR/.tasks/"*.md 2>/dev/null || true)
     FOUND_ACTIVE=false
     for f in $FILES; do
-        STATUS=$(grep -oP '\*\*Status\*\*:\s*\K\S+' "$f" | head -n 1)
+        STATUS=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$f" | head -n 1)
         if [[ "$STATUS" != "done" && "$STATUS" != "abandoned" ]]; then
-            PHASE=$(grep -oP '\*\*Phase\*\*:\s*\K\S+' "$f" | head -n 1)
+            PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$f" | head -n 1)
             OBJECTIVE=$(grep -A 1 "## Objective" "$f" | grep -v "## Objective" | sed '/^$/d' | head -n 1)
             if [ -z "$OBJECTIVE" ]; then
                 OBJECTIVE=$(grep -A 1 "## Core Concept" "$f" | grep -v "## Core Concept" | sed '/^$/d' | head -n 1)
@@ -135,6 +135,7 @@ fi
 # 4. Recent Specs
 echo "--- Recent Specs ---"
 if [ -d "$ROOT_DIR/.specs" ]; then
+    ACTIVE_TASKS=$(ls -1 .tasks/*.md 2>/dev/null | xargs grep -l -E '^\*\*?Status\*\*?:\s*(pending|ideating|in-progress)' 2>/dev/null || true)
     ls -t "$ROOT_DIR/.specs/"*.md 2>/dev/null | head -n 3 | xargs -n 1 basename
 else
     echo "No .specs/ directory found."
