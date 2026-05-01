@@ -24,6 +24,17 @@ while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.gi
     ROOT_DIR=$(dirname "$ROOT_DIR")
 done
 
+function delegate_to_skill() {
+    local skill_script=$1
+    shift
+    if [ -f "$ROOT_DIR/$skill_script" ]; then
+        bash "$ROOT_DIR/$skill_script" "$@"
+    else
+        echo "❌ Error: Skill script not found at $skill_script"
+        exit 1
+    fi
+}
+
 if [ "$CMD" == "open" ]; then
     if [ ! -f "$ROOT_DIR/task.ctx" ]; then
         echo "No active task context (task.ctx not found)."
@@ -126,51 +137,25 @@ if [ "$CMD" == "check" ]; then
     exit 0
 fi
 
-if [ "$CMD" == "status" ]; then
-    echo "--- Flow Status ---"
-
-    if [ ! -f "$ROOT_DIR/task.ctx" ]; then
-        echo "Active Task: none"
-    else
-        TASK_FILE=$(cat "$ROOT_DIR/task.ctx" | tr -d '[:space:]')
-        if [ -f "$ROOT_DIR/$TASK_FILE" ]; then
-            RESOLVED="$ROOT_DIR/$TASK_FILE"
-        elif [ -f "$ROOT_DIR/.tasks/${TASK_FILE}.md" ]; then
-            RESOLVED="$ROOT_DIR/.tasks/${TASK_FILE}.md"
-        elif [ -f "$ROOT_DIR/.tasks/${TASK_FILE}" ]; then
-            RESOLVED="$ROOT_DIR/.tasks/${TASK_FILE}"
-        elif [ -f "$ROOT_DIR/.tasks/archive/${TASK_FILE}.md" ]; then
-            RESOLVED="$ROOT_DIR/.tasks/archive/${TASK_FILE}.md"
-        elif [ -f "$ROOT_DIR/.tasks/archive/${TASK_FILE}" ]; then
-            RESOLVED="$ROOT_DIR/.tasks/archive/${TASK_FILE}"
-        else
-            echo "Active Task: STALE ($TASK_FILE not found)"
-            exit 0
-        fi
-        PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$RESOLVED" | head -n 1)
-        STATUS=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
-        
-        # Allowed Next Phases based on State Machine
-        case $PHASE in
-            0) NEXT_PHASES="Phase 1 (via graduate)" ;;
-            1) NEXT_PHASES="Phase 2 (Analyze)" ;;
-            2) NEXT_PHASES="Phase 3 (Risk)" ;;
-            3) NEXT_PHASES="Gate 2 (Architecture Loop / Phase 4)" ;;
-            4) NEXT_PHASES="Phase 5 (Implement)" ;;
-            5) NEXT_PHASES="Phase 6 (Document)" ;;
-            6) NEXT_PHASES="Phase 7 (Test)" ;;
-            7) NEXT_PHASES="Phase 8 (Review & Refine)" ;;
-            8) NEXT_PHASES="Gate 5 (Commit) OR Phase 1 (Light Bulb Moment)" ;;
-            *) NEXT_PHASES="Unknown" ;;
-        esac
-
-        echo "Active Task: $(basename "$RESOLVED")"
-        echo "Status: $STATUS | Phase: $PHASE"
-        echo "Next Allowed: $NEXT_PHASES"
-    fi
-    exit 0
-fi
-
-echo "Unknown command: $CMD"
-show_help
-exit 1
+# Orchestrator Routing
+case $CMD in
+    new|brainstorm|graduate|phase|validate|list|ctx|tidy|abandon|test|sync|sync-downstream|scaffold)
+        delegate_to_skill "skills/swt-task/scripts/task.sh" "$@"
+        exit 0
+        ;;
+    status)
+        shift
+        delegate_to_skill "skills/swt-status/scripts/status.sh" "$@"
+        exit 0
+        ;;
+    digest)
+        shift
+        delegate_to_skill "skills/swt-digest/scripts/digest.sh" "$@"
+        exit 0
+        ;;
+    commit)
+        shift
+        delegate_to_skill "skills/swt-commit/scripts/commit.sh" "$@"
+        exit 0
+        ;;
+esac

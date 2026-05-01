@@ -120,9 +120,14 @@ Verify that the MVP meets the objective. Polish the implementation based on user
 *   **Action**: Initiate the `/swt:commit` workflow.
 *   **Goal**: The commit is the final act. Never rush to commit before Gate 4 is cleared.
 
-### 3.1 The Orchestrator: 8-Phase Workflow State Machine
+### 3.1 The Orchestrator: Unified Facade
 
-The **`swt:flow`** skill acts as the toolkit's **Orchestrator**. It does not merely describe a process; it mandates the handoff to specific skills at each junction. The following diagram is the "Orchestration Map" that defines allowed transitions and mandatory gates.
+The **`swt:flow`** skill is the central **Facade** and **Orchestrator** for the entire toolkit. While specialized skills (task, status, digest) maintain their own logic, all user and agent interactions MUST be routed through the `/swt:flow` interface. This ensures that the state machine is validated before any action is delegated.
+
+> [!IMPORTANT]
+> **Orchestrator Command Rule**: You are MANDATED to use `/swt:flow <sub-command>` as your primary interaction method. Direct invocation of sub-skill scripts is reserved for internal delegation and power users.
+
+The following diagram is the "Orchestration Map" that defines allowed transitions and mandatory gates.
 
 ```mermaid
 stateDiagram-v2
@@ -140,6 +145,7 @@ stateDiagram-v2
 
     state "Gate 1 - Alignment" as G1
     state "Gate 2 - Architecture" as G2
+    state "Gate 3 - Execution" as G3
     state "Gate 4 - Refinement" as G4
     state "Gate 5 - Finality" as G5
 
@@ -152,7 +158,9 @@ stateDiagram-v2
     P3 --> G2
     G2 --> P4
     P4 --> P5
-    P5 --> P6
+    P5 --> G3
+    G3 --> P5
+    G3 --> P6
     P6 --> P7
     P7 --> G4
     G4 --> P8
@@ -179,7 +187,8 @@ stateDiagram-v2
     note right of P5
         Surgical changes only.
         Follow implementation plan.
-        Checkpoint between files.
+        Gate 3: Execution Loop.
+        Pause between chunks.
     end note
 
     note right of G5
@@ -332,7 +341,7 @@ To ensure architectural continuity and prevent context drift, every session MUST
 
 ### 1. Orientation (Mandatory)
 Before discussing any task or reviewing code, the agent MUST:
-1. **Invoke the `swt:status` skill** to orient itself. This aggregates the latest digest, active tasks, and recent specs in a single step.
+1. **Invoke the `/swt:flow status` command** to orient itself. This aggregates the latest digest, active tasks, and recent specs by delegating to `swt:status`.
 1.5. **Read `task.ctx`** (if present) — contains the active task filename for session continuity across agents and restarts. The `swt:status` output includes this context at the top. *(Note: `task.ctx` survives task closures and abandonments. It is ONLY cleared by the `/swt:commit` cleanup sequence or manually by the user to ensure context isn't lost mid-workflow).*
     - If `task.ctx` exists and points to a valid task file, the agent MUST run `xdg-open <task_file> &` to open it in the system's default browser (falls back to `firefox` then `google-chrome` then `chromium` if `xdg-open` not found).
     - If the task file has a `**Spec**:` field linking a companion spec, also run `xdg-open <spec_file> &`.
@@ -344,7 +353,7 @@ Before discussing any task or reviewing code, the agent MUST:
 
 ### 2. Context Restoration (On-Demand)
 When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"*), the agent MUST:
-1. **Invoke the `swt:status` skill** to aggregate latest digest, tasks, and specs.
+1. **Invoke the `/swt:flow status` command** to aggregate latest digest, tasks, and specs.
 2. **Execute Task Validation**: The status skill automatically runs `task.sh validate` for all active tasks.
 3. **Summarize status** based on the aggregated report.
 4. **Manual Milestone Ritual**: The `swt:status` skill provides a state summary but does NOT automatically trigger a new digest. Digests are manual rituals reserved for logical session ends or major milestones.

@@ -44,12 +44,12 @@ Use `/swt:task mount <file>` to set the active task context before entering `/sw
 
 ```mermaid
 flowchart TD
-    A["/swt:task brainstorm\nPhase 0: Ideate"] --> B["/swt:task graduate\nPromote to Phase 1"]
-    B --> C["/swt:flow\nPlan, Analyze, Approve"]
+    A["/swt:flow brainstorm\nPhase 0: Ideate"] --> B["/swt:flow graduate\nPromote to Phase 1"]
+    B --> C["/swt:flow phase\nPlan, Analyze, Approve"]
     C --> D["Implement\nguided by /swt:code"]
-    D --> E["/swt:flow (Phase 8)\nReview & Refine"]
-    E --> F["/swt:commit\nDraft & Approve"]
-    F --> G["/swt:digest\nSave summary"]
+    D --> E["/swt:flow status\nReview & Refine"]
+    E --> F["/swt:flow commit\nDraft & Approve"]
+    F --> G["/swt:flow digest\nSave summary"]
     
     subgraph "Structural Awareness (Opt-in)"
     H["/swt:graphify query\nPhase 2: Analyze"] -.-> C
@@ -84,11 +84,16 @@ Guides you through the full 8-phase development lifecycle with mandatory consent
 - **Gate 4**: Agent pauses after the MVP works and waits for your review before finalizing.
 
 **Key commands**:
-| Command | Purpose |
-|---|---|
-| `/swt:flow open` | Read task.ctx and load active task context |
-| `/swt:flow check` | Validate active task context |
-| `/swt:flow status` | Show current flow status (ctx + phase) |
+| Command | Purpose | Delegation |
+|---|---|---|
+| `/swt:flow brainstorm` | Create Phase 0 ideation task | `swt:task` |
+| `/swt:flow graduate` | Promote brainstorm to Phase 1 | `swt:task` |
+| `/swt:flow phase <N>` | Transition task to Phase N | `swt:task` |
+| `/swt:flow status` | Show project status and tasks | `swt:status` |
+| `/swt:flow commit` | Start commit ritual | `swt:commit` |
+| `/swt:flow digest` | Create session summary | `swt:digest` |
+| `/swt:flow list` | Show all active tasks | `swt:task` |
+| `/swt:flow open` | Open active task and spec | Internal |
 
 ```
 /swt:flow
