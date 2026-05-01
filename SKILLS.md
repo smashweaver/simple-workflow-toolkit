@@ -83,6 +83,13 @@ Guides you through the full 8-phase development lifecycle with mandatory consent
 - **Gate 2**: Agent presents the full plan and waits for your explicit "GO" before implementation.
 - **Gate 4**: Agent pauses after the MVP works and waits for your review before finalizing.
 
+**Key commands**:
+| Command | Purpose |
+|---|---|
+| `/swt:flow open` | Read task.ctx and load active task context |
+| `/swt:flow check` | Validate active task context |
+| `/swt:flow status` | Show current flow status (ctx + phase) |
+
 ```
 /swt:flow
 ```

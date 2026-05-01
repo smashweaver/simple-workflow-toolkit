@@ -20,15 +20,15 @@ Aggregates project state (latest digest, active tasks, recent specs, and optiona
 - "resume session"
 - "status"
 
-## Usage
+## Operations
 
-```bash
-# Standard status report
-bash skills/swt-status/scripts/status.sh
+### `/swt:status` — Standard status report
+**Audience**: user-invoked, agent-driven
+Aggregates project state (latest digest, active tasks, recent specs) to restore session context or provide a quick progress update.
 
-# Include recent git commits (last 5)
-bash skills/swt-status/scripts/status.sh --git
-```
+### `/swt:status --git` — Status report with git history
+**Audience**: user-invoked
+Aggregates project state and includes the last 5 git commits for additional context.
 
 ## Behavior
 1. **Workspace Discovery**: Walks up the tree to find the root `AGENTS.md` or `.git`.

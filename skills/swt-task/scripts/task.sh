@@ -120,7 +120,7 @@ function sync_task_to_internal {
     
     echo "🔄 Ingesting checklist progress from task.md..."
     # Extract the checklist items from task.md
-    grep "^- \[" task.md > .checklist.tmp
+    grep "^- \[" task.md > .checklist.tmp || true
     
     if [ -s .checklist.tmp ]; then
         # Use a temporary file to rebuild the internal task file
@@ -460,8 +460,8 @@ if [ "$CMD" == "graduate" ]; then
     fi
 
     # 1. Update status to pending and phase to 1
-    sed -i "s/^\*\*?Status\*\*?:\s*ideating/**Status**: pending/" "$FILE"
-    sed -i "s/^\*\*?Phase\*\*?:\s*0/**Phase**: 1/" "$FILE"
+    sed -i -E "s/^\*\*Status\*\*:\s*ideating/**Status**: pending/" "$FILE"
+    sed -i -E "s/^\*\*Phase\*\*:\s*0/**Phase**: 1/" "$FILE"
     
     # 2. Add Ritual Log
     log_ritual "phase 1" "$FILE"
@@ -517,7 +517,23 @@ d}" "$file"
         scaffold_artifact "implementation_plan" "$FILE"
         
         # Add Spec link to task header (below Phase)
-        sed -i "/^\*\*Phase\*\*:/a **Spec**: $SPEC_FILE" "$FILE"
+        sed -i -E "/^\*\*Phase\*\*:/a **Spec**: $SPEC_FILE" "$FILE"
+        
+        # Append standard checklist if missing
+        if ! grep -q "## Checklist" "$FILE"; then
+            cat <<EOF >> "$FILE"
+
+## Checklist
+- [ ] Phase 1: Plan
+- [ ] Phase 2: Analyze
+- [ ] Phase 3: Risk Assessment
+- [ ] Phase 4: Approval
+- [ ] Phase 5: Implement
+- [ ] Phase 6: Document
+- [ ] Phase 7: Test
+- [ ] Phase 8: Review & Refine
+EOF
+        fi
     else
         echo -e "\n## Verification Checklist\n- [ ] ..." >> "$FILE"
         echo "Graduated $FILE to Phase 1 (Lite path)."
@@ -587,7 +603,7 @@ d}" "$file"
 
     # 2. Re-sync Implementation Plan
     echo "🔄 Re-syncing Implementation Plan..."
-    scaffold_artifact "implementation_plan" "$FILE"
+    scaffold_artifact "implementation_plan" "$FILE" --force
     
     # 3. Re-sync task.md
     sync_task_md "$FILE"
@@ -632,9 +648,9 @@ if [ "$CMD" == "close" ]; then
     fi
 
     DATE_STR=$(date +"%Y-%m-%d %H:%M:%S")
-    sed -i "s|^\*\*?Completed\*\*?:\s*—|**Completed**: $DATE_STR|" "$FILE"
-    sed -i "s/^\*\*Status\*\*:.*/**Status**: done/" "$FILE"
-    sed -i "s/^\*\*Completed\*\*:.*/**Completed**: $DATE_STR/" "$FILE"
+    sed -i -E "s|^\*\*Completed\*\*:\s*—|**Completed**: $DATE_STR|" "$FILE"
+    sed -i -E "s/^\*\*Status\*\*:\s*.*/\*\*Status\*\*: done/" "$FILE"
+    sed -i -E "s/^\*\*Completed\*\*:\s*.*/\*\*Completed\*\*: $DATE_STR/" "$FILE"
     sed -i "s/- \[[ /]\] Phase 8/- [x] Phase 8/" "$FILE"
     
     # Insert commit hash into ## Commit Reference section
@@ -814,7 +830,7 @@ if [ "$CMD" == "validate" ]; then
     # 5. Verification Audit (Test Forgery & TDD)
     if [ "$PHASE" -gt 0 ]; then
         # Check if TDD is enabled (Global or Task)
-        tdd_global=$(grep -q "## Ritual: TDD" "$ROOT_DIR/AGENTS.md" && echo "true" || echo "false")
+        tdd_global=$(grep -q "^## Ritual: TDD" "$ROOT_DIR/AGENTS.md" && echo "true" || echo "false")
         tdd_task=$(grep -q "\*\*TDD\*\*:\s*enabled" "$FILE" && echo "true" || echo "false")
         tdd_enforced="false"
         [ "$tdd_global" == "true" ] || [ "$tdd_task" == "true" ] && tdd_enforced="true"

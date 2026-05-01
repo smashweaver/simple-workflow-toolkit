@@ -391,6 +391,22 @@ Before any code updates, these items must be addressed. Adapt to the project's t
 ---
 
 
+## Operations
+
+### `/swt:flow open` — Load task context
+**Audience**: agent-driven, automated
+Reads `task.ctx` and loads the active task context. Displays key metadata (Status, Phase, Type, Priority), the task objective, and the next unchecked checklist item.
+
+### `/swt:flow check` — Validate context
+**Audience**: agent-driven, automated
+Validates the active task context. Returns a non-zero exit code if `task.ctx` is missing or points to a non-existent file.
+
+### `/swt:flow status` — Show flow status
+**Audience**: user-invoked, agent-driven
+Shows the current flow status, including the active task filename, its current status, and phase.
+
+---
+
 ## How /swt:flow Works
 
 > 🛑 **BEHAVIORAL DIRECTIVE**: `/swt:flow` is a behavioral directive, NOT an automatic execution macro. When invoked, it instructs you to strictly adhere to the SWT methodology. It does not mean "execute the whole workflow autonomously."
