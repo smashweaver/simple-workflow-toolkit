@@ -20,6 +20,11 @@ This document defines the core principles and behavioral protocols for AI coding
 
 Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot**, not an autonomous executor.
 
+*   **Proactive Task Recognition**: When the user's message describes a feature, update, refactor, or project-related change, the agent MUST offer to capture the work through SWT. Two paths:
+    1. **Active task exists**: Offer to log notes, refine the objective, or record findings in the current task.
+    2. **No active task**: Offer to create a Phase 0 brainstorm task.
+    The agent must NEVER answer ad-hoc without offering task tracking first.
+    Detection is lightweight — only trigger when the message clearly implies work.
 *   **No Autonomous Structural Changes**: The agent is FORBIDDEN from executing structural changes (git init, mkdir for skeletons, major refactors) without a direct, verbal "Go" or "Approved" from the user in the chat history.
 *   **`swt:init` Pointer Rule**: When initializing a project, always use `/swt:init` to create the mandatory `AGENTS.md` and its associated discovery pointers (`GEMINI.md`, `CLAUDE.md`).
 *   **Manual Consent Overrides System Flags**: Even if the agent generates a plan that is "auto-approved" by the system, it MUST halt and request manual confirmation for any structural modification.
@@ -114,6 +119,18 @@ Verify that the MVP meets the objective. Polish the implementation based on user
 *   **Trigger**: After Phase 8 is complete and the user confirms they are finished refining.
 *   **Action**: Initiate the `/swt:commit` workflow.
 *   **Goal**: The commit is the final act. Never rush to commit before Gate 4 is cleared.
+
+### SWT Loop Terminology
+
+The workflow defines 5 named iteration loops:
+
+| Loop | Phase(s) | Description |
+|---|---|---|
+| **Brainstorm Loop** | 0 | Task file iteration cycle. Agent updates task with notes, jailbreak patterns, objective refinements. Two behaviors: (1) update current task if user prompt pertains to it, (2) offer new brainstorm task for unrelated issues. |
+| **Planning Loop** | 1 | Artifact generation + doc target identification. Agent scans repo for existing docs, cross-references against task scope, records targets in `implementation_plan.md`. User reviews/tweaks artifacts AND doc targets before Gate 2. |
+| **Analysis Loop** | 2-3 | Agent analyzes SPEC.md + `implementation_plan.md` (impact on components, state, performance, API), assesses risks, presents findings. Gate 2 HARD STOP — user approves before Phase 4. Phases 2 and 3 are separate. |
+| **Document Refresh Protocol** | All | For all template-backed SWT documents: agent appends intended content, then reformats entire document using backing template via `Write` tool. Eliminates Edit tool failures on special characters and structural divergence. |
+| **Commit Loop** | 8 → Gate 5 | Agent invokes `swt:commit` skill only — NEVER uses `git commit` directly. Draft-and-Approve protocol: agent drafts `commit.draft` → user fine-tunes → agent applies on approval. |
 
 ## 4. The Light Bulb Iteration Loop
 

@@ -189,6 +189,31 @@ The agent **infers the topic from session context** — the user never needs to 
 
 ---
 
+### Brainstorm Loop
+
+The iteration cycle during Phase 0 where the agent refines the task file:
+
+1. **Context pertains to current task**: If the user's prompt is related to the current brainstorm task, the agent MUST update the task file (add notes, refine objective, log jailbreak patterns, etc.).
+2. **Unrelated issue worth investigating**: If the conversation reveals an unrelated problem that befits investigation, the agent MUST offer to create another brainstorm task (e.g., *"This seems like a separate issue worth brainstorming — want me to create a Phase 0 task for it?"*).
+3. **Document Refresh Protocol**: When updating the task file (or any template-backed SWT document), use the Document Refresh Protocol below — not raw Edit tool operations.
+
+---
+
+### Document Refresh Protocol
+
+Applies to **all template-backed SWT documents** (task files, SPEC.md, implementation_plan.md, task.md, commit.draft, etc.):
+
+1. **Append** intended content to the document.
+2. **Deduce** the backing template from document context:
+   - Task files (`.tasks/<timestamp>_*.md`) → `skills/swt-task/templates/brainstorm.md` (Phase 0) or `task.md` template
+   - `SPEC.md` → `skills/swt-task/templates/spec.md`
+   - `implementation_plan.md` → `skills/swt-task/templates/implementation_plan.md`
+   - `commit.draft` → standard draft format
+3. **Reformat** the ENTIRE document using the backing template via `Write` tool.
+4. **Why**: Eliminates Edit tool failures on special characters and structural divergence. Ensures Born Complete compliance.
+
+---
+
 ### `/swt:task graduate` — Phase 0 → Phase 1 promotion
 
 **Audience**: agent-driven, user-approved

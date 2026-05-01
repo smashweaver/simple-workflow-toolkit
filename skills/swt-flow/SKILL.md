@@ -147,6 +147,8 @@ Gather context before planning. For any proposed change:
 
 Then propose a detailed plan: step-by-step approach, files to modify, dependencies, testing strategy, and rollback plan.
 
+> **Planning Loop**: Phase 1 is the "Planning Loop." The agent identifies doc targets by scanning the repo for existing docs (AGENTS.md, SKILL.md files, templates, READMEs) and cross-referencing against task scope. Doc targets are recorded in `implementation_plan.md` as a **Doc Targets** section. The user reviews/tweaks artifacts AND doc targets before Gate 2 (Architecture Loop). Phase 6 then executes purely against this list — no ambiguity during documentation.
+
 ### Phase 2: Analyze
 
 For the planned change, assess:
@@ -173,6 +175,8 @@ Identify risks and propose mitigations:
 | Compatibility | Breaking APIs, version mismatches | Contract testing, deprecation warnings, feature flags |
 
 Classify severity: **low**, **medium**, **high**, **critical**.
+
+> **Analysis Loop**: Phases 2-3 form the "Analysis Loop." The agent analyzes existing artifacts (SPEC.md + implementation_plan.md) — assessing impact on components, state management, performance, and API contracts — then identifies security, performance, and compatibility risks with mitigations. After presenting the complete analysis, the agent performs a **Gate 2 HARD STOP** and waits for the user's explicit "GO" before proceeding to Phase 4. Phases 2 and 3 remain separate.
 
 ### Phase 4: Approval
 

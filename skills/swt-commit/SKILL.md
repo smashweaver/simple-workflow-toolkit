@@ -36,6 +36,8 @@ Before drafting any commit message, the agent MUST output the following audit si
 **Draft-and-Approve Workflow**: All commits must go through a formal draft phase for human review.
 - **Automated Cleanup**: Root planning artifacts are automatically removed by `swt.sh close`, while the commit skill cleans up its own temporary files (`commit.diff`, `commit.draft`).
 
+> **Commit Loop**: Phase 8 → Gate 5 is the "Commit Loop." The agent drafts `commit.draft`, the user fine-tunes it, and the agent applies the commit on explicit approval only. The agent is STRICTLY FORBIDDEN from using `git commit` or `git commit -m` directly — must always invoke the `swt:commit` skill. The commit is the absolute final act of a task.
+
 Two temporary files are used, both gitignored:
 - **`commit.diff`** — the staged diff exported from git
 - **`commit.draft`** — the agent-drafted commit message, ready to edit
