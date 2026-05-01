@@ -116,6 +116,9 @@ graph TD
 
 ### Example: stateDiagram-v2 State Machine
 
+> [!IMPORTANT]
+> **Canonical Source**: The primary state transition diagram is defined in the root **`AGENTS.md`**. This skill provides technical reference, but the root protocol is the source of truth for all orchestrations.
+
 The SWT 8-Phase Workflow validated in Mermaid Live Editor:
 
 ```mermaid

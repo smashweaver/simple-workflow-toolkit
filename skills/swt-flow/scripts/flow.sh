@@ -62,6 +62,21 @@ if [ "$CMD" == "open" ]; then
     PRIORITY=$(grep -oP '^\*\*?Priority\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
 
     echo "Status: $STATUS | Phase: $PHASE | Type: $TYPE | Priority: $PRIORITY"
+    
+    # Allowed Next Phases based on State Machine
+    case $PHASE in
+        0) NEXT_PHASES="Phase 1 (via graduate)" ;;
+        1) NEXT_PHASES="Phase 2 (Analyze)" ;;
+        2) NEXT_PHASES="Phase 3 (Risk)" ;;
+        3) NEXT_PHASES="Gate 2 (Architecture Loop / Phase 4)" ;;
+        4) NEXT_PHASES="Phase 5 (Implement)" ;;
+        5) NEXT_PHASES="Phase 6 (Document)" ;;
+        6) NEXT_PHASES="Phase 7 (Test)" ;;
+        7) NEXT_PHASES="Phase 8 (Review & Refine)" ;;
+        8) NEXT_PHASES="Gate 5 (Commit) OR Phase 1 (Light Bulb Moment)" ;;
+        *) NEXT_PHASES="Unknown" ;;
+    esac
+    echo "Next Allowed: $NEXT_PHASES"
     echo ""
 
     # Show Objective or Core Concept
@@ -134,8 +149,24 @@ if [ "$CMD" == "status" ]; then
         fi
         PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$RESOLVED" | head -n 1)
         STATUS=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
+        
+        # Allowed Next Phases based on State Machine
+        case $PHASE in
+            0) NEXT_PHASES="Phase 1 (via graduate)" ;;
+            1) NEXT_PHASES="Phase 2 (Analyze)" ;;
+            2) NEXT_PHASES="Phase 3 (Risk)" ;;
+            3) NEXT_PHASES="Gate 2 (Architecture Loop / Phase 4)" ;;
+            4) NEXT_PHASES="Phase 5 (Implement)" ;;
+            5) NEXT_PHASES="Phase 6 (Document)" ;;
+            6) NEXT_PHASES="Phase 7 (Test)" ;;
+            7) NEXT_PHASES="Phase 8 (Review & Refine)" ;;
+            8) NEXT_PHASES="Gate 5 (Commit) OR Phase 1 (Light Bulb Moment)" ;;
+            *) NEXT_PHASES="Unknown" ;;
+        esac
+
         echo "Active Task: $(basename "$RESOLVED")"
         echo "Status: $STATUS | Phase: $PHASE"
+        echo "Next Allowed: $NEXT_PHASES"
     fi
     exit 0
 fi

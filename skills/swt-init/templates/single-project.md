@@ -32,23 +32,105 @@ Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot
 *   **Checklist Discipline**: Every phase requires explicit approval before moving to the next.
 *   **Discovery Pointers**: This project uses `GEMINI.md` and `CLAUDE.md` as discovery pointers. These files shim directly to this `AGENTS.md` source of truth. Always verify their presence after an `/swt:init` or `/swt:link` operation.
 
-## 3. The 8-Phase Workflow & Consent Gates
+### 3.1 The Orchestrator: 8-Phase Workflow State Machine
+
+The **`swt:flow`** skill acts as the toolkit's **Orchestrator**. It does not merely describe a process; it mandates the handoff to specific skills at each junction. The following diagram is the "Orchestration Map" that defines allowed transitions and mandatory gates.
+
+```mermaid
+stateDiagram-v2
+    direction LR
+
+    state "Phase 0 - Ideate" as P0
+    state "Phase 1 - Plan" as P1
+    state "Phase 2 - Analyze" as P2
+    state "Phase 3 - Risk" as P3
+    state "Phase 4 - Approval" as P4
+    state "Phase 5 - Implement" as P5
+    state "Phase 6 - Document" as P6
+    state "Phase 7 - Test" as P7
+    state "Phase 8 - Review and Refine" as P8
+
+    state "Gate 1 - Alignment" as G1
+    state "Gate 2 - Architecture" as G2
+    state "Gate 4 - Refinement" as G4
+    state "Gate 5 - Finality" as G5
+
+    [*] --> P0
+
+    P0 --> G1
+    G1 --> P1
+    P1 --> P2
+    P2 --> P3
+    P3 --> G2
+    G2 --> P4
+    P4 --> P5
+    P5 --> P6
+    P6 --> P7
+    P7 --> G4
+    G4 --> P8
+    P8 --> G4
+    P8 --> G5
+    G5 --> [*]
+
+    P0 --> P0
+    P1 --> P1
+    P8 --> P1
+
+    note right of P0
+        Senior Advisor persona.
+        No source code edits allowed.
+        Scenario A B C analysis required.
+    end note
+
+    note right of G2
+        HARD STOP - Gate 2
+        User must say Go or Approved
+        before Phase 4 can begin.
+    end note
+
+    note right of P5
+        Surgical changes only.
+        Follow implementation plan.
+        Checkpoint between files.
+    end note
+
+    note right of G5
+        Commit is the final act.
+        Draft and Approve protocol.
+        Never rush to commit.
+    end note
+```
+
+### 3.2 Workflow Phases & Consent Gates
 
 To ensure the user maintains control, the workflow is punctuated by **5 Mandatory Consent Gates (HARD STOPS)**. Agents must NEVER blow past these gates, even if they have "automatic approval" capabilities. See `skills/swt-flow/SKILL.md` for the full lifecycle.
 
 **Anti-Circling Rule**: The workflow is strictly forward-moving. You are FORBIDDEN from autonomously reverting to a previous Phase or endlessly looping. If a return to an earlier phase is necessary, you MUST request manual consent from the user before invoking `swt:task phase <N> <file>`.
 
 ### Phase 0: Ideate (Brainstorming)
-Before graduating to Phase 1, the agent MUST present a Scenario-Based Trade-off Analysis. To move from Phase 0 to Phase 1, the agent MUST invoke `swt.sh graduate <task_file>`.
+Every non-trivial feature or architectural change begins with a Phase 0 brainstorm. Before graduating to Phase 1 (Plan), the agent MUST present a **Scenario-Based Trade-off Analysis**:
+
+| Scenario | Type | Description |
+|---|---|---|
+| **Scenario A** | **Discipline** | Methodology-only. Update `AGENTS.md` rules. Zero code overhead. |
+| **Scenario B** | **Automation** | Helper scripts or templates. Make the ritual easier but not mandatory. |
+| **Scenario C** | **Enforcement** | Hard Gates. Physically block execution unless the ritual is met. |
+
+> [!NOTE]
+> For trivial changes, Scenarios B and C can be marked as "N/A" or "Not recommended for simplicity."
 
 *   **User Suggestion Tracking (MANDATORY)**: If the user proposes a solution, architecture idea, or configuration, you MUST explicitly log it under `## Explored Alternatives` along with its status (e.g., accepted, rejected, pending) and reasoning. Do not let user ideas scroll off the chat history unrecorded.
 *   **Holistic Brainstorming (MANDATORY)**: Agents must "zoom out" during brainstorms and consider workspace-wide architectural impacts. Do not focus exclusively on the immediate task context.
 *   **Phase 0 Sandbox (HARD RULE)**: During Phase 0, you act as a Senior Advisor. You are STRICTLY FORBIDDEN from modifying source code (files outside `.tasks/`, `.specs/`, or root artifacts). Provide snippets and architectural analysis instead.
 
+**The Graduation Ritual**: To move from Phase 0 to Phase 1, the agent MUST invoke `swt.sh graduate <task_file>`. This command automates metadata updates and enforces artifact generation (`SPEC.md` for features, `Verification Checklist` for refactors).
+
 > 🛑 **Phase 0 Graduation Gate (MANDATORY)**
 > Before invoking `swt.sh graduate`, the agent MUST:
 > 1. Perform a **HARD STOP** and ask the user: *"Are we ready to graduate to Phase 1?"*
 > 2. Wait for an explicit verbal "Yes" or "Go" from the user.
+> 3. Only then invoke `swt.sh graduate <task_file>`.
+> 4. After graduation, present the link and **HARD STOP** again (Gate 1: Alignment Loop).
 
 ### Gate 1: The Alignment Loop (Phase 1 Entry)
 *   **Trigger**: Immediately after a task file is created or graduated.
@@ -56,22 +138,50 @@ Before graduating to Phase 1, the agent MUST present a Scenario-Based Trade-off 
 *   **Goal**: Allow the user to fine-tune the `Objective` and `Checklist` before any planning begins.
 
 > 📋 **SPEC-First Rule (MANDATORY)**
-> After Phase 0 graduation, the SPEC file must be fully populated BEFORE any Phase 2+ work begins. The SPEC is the source of truth for implementation.
+> After Phase 0 graduation, the SPEC file must be fully populated BEFORE any Phase 2+ work begins. The SPEC is the source of truth for implementation. If the SPEC is empty or placeholder-only, agents are FORBIDDEN from proceeding to Phase 2 (Analyze).
+
+### Phase 1: Plan
+Gather context, map dependencies, and propose a detailed step-by-step implementation plan.
+
+### Phase 2: Analyze
+Assess the impact on existing components, state management, performance, and API contracts.
+*   **Structural Awareness**: If `swt:graphify` is enabled, the agent MUST query the knowledge graph to identify "Affected Concepts" and "God Nodes" (central dependencies) that this change might impact.
+
+### Phase 3: Risk Assessment
+Identify security, performance, or compatibility risks. Define mitigations for each.
 
 ### Gate 2: The Architecture Loop (Phase 4)
 *   **Trigger**: After presenting the Plan, Analysis, and Risks.
 *   **Action**: **HARD STOP**. Wait for explicit "GO" from the user.
 *   **Goal**: Ensure the technical approach is sound before touching code.
 
+### Phase 4: Approval
+*(This phase is the user's explicit action of opening Gate 2).*
+
 ### Gate 3: The Execution Loop (Phase 5)
 *   **Trigger**: During code generation/modification.
 *   **Action**: Pause between logical chunks or files. Do not dump a massive, multi-file refactor in a single unverified swoop.
 *   **Goal**: Verify surgical changes as they happen.
 
+### Phase 5: Implement
+Perform surgical edits. Follow the "Coding Guidelines" for simplicity and purpose.
+
+### Phase 6: Document
+Update READMEs, Mermaid diagrams, and internal docs.
+
+### Phase 7: Test
+Run automated tests or provide a manual verification checklist. Zero tolerance for unverified code.
+
 ### Gate 4: The Refinement Loop (Phase 8 Entry)
 *   **Trigger**: After Testing (Phase 7) proves the MVP works.
 *   **Action**: **HARD STOP**. Ask the user to review the working MVP.
 *   **Goal**: Allow the user to tweak UI/UX or edge cases before the code is finalized.
+
+### Phase 8: Review & Refine (Iterative Loop)
+Verify that the MVP meets the objective. Polish the implementation based on user feedback during Gate 4. Refactor only if necessary for SOLID principles.
+*   **Iterative Development**: Phase 8 supports dynamic checklist items via `swt.sh update <file> --append "item text"`. The user may append fine-tuning items and "afterthoughts" without being forced into premature task closure.
+*   **Phase 8 Gate**: The agent must NOT push the user toward `close` during Phase 8. The loop continues as long as the user wants to refine. The agent periodically asks "Ready to close?" but the user always decides.
+*   **Structural Validation**: If `swt:graphify` is enabled, run `/swt:graphify update` and review the "Structural Diff" in `graphify-out/graph.html` to ensure no unexpected coupling or "God Nodes" were introduced.
 
 ### Gate 5: The Finality Loop (Commit Sequence)
 *   **Trigger**: After Phase 8 is complete and the user confirms they are finished refining.
@@ -110,9 +220,10 @@ Before discussing any task or reviewing code, the agent MUST:
     - If `task.ctx` exists and points to a valid task file, the agent MUST run `xdg-open <task_file> &` to open it in the system's default browser (falls back to `firefox` then `google-chrome` then `chromium` if `xdg-open` not found).
     - If the task file has a `**Spec**:` field linking a companion spec, also run `xdg-open <spec_file> &`.
     - This browser-opening behavior applies whenever the agent reads `task.ctx`: session start, `/swt:status`, `/swt:task mount`, and Phase0 ideation updates.
-2. **Read the root `AGENTS.md`** to verify project scope, stack, and conventions.
-3. **Smart Search (Tasks)**: If a task reference or file is not found in the root `.tasks/` directory, check `.tasks/archive/` before assuming it is missing or deleted.
-4. **Ritual Adherence**: If the orientation or task discovery process identifies a skill that mandates a "re-read," execute it immediately. There is zero tolerance for protocol drift.
+2. **Read the root `AGENTS.md`** — understand workspace context, project name, purpose, and conventions.
+3. **Ingest the State Transition Diagram** (Section 3.1) — verify the allowed pathing, active gates, and mandatory handoffs for the current task context.
+4. **Smart Search (Tasks)**: If a task reference or file is not found in the root `.tasks/` directory, check `.tasks/archive/` before assuming it is missing or deleted.
+5. **Ritual Adherence**: If the orientation or task discovery process identifies a skill that mandates a "re-read," execute it immediately. There is zero tolerance for protocol drift.
 
 ### 2. Context Restoration (On-Demand)
 When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"*), the agent MUST:

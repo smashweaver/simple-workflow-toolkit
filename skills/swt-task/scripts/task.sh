@@ -744,8 +744,8 @@ if [ "$CMD" == "phase" ]; then
     # First, reset any other in-progress phases if appropriate (optional)
     sed -i "s/- \[[ /]\] Phase $PHASE_NUM/- [\/] Phase $PHASE_NUM/" "$FILE"
 
-    # 3. Add Ritual Log
-    log_ritual "phase $PHASE_NUM" "$FILE"
+    # 3. Add Ritual Log (with State Verification Signature)
+    log_ritual "phase $PHASE_NUM" "$FILE" "(State Verified)"
 
 
 
@@ -794,6 +794,17 @@ if [ "$CMD" == "validate" ]; then
         echo "🛑 MANUAL PHASE FORGERY DETECTED: Header says Phase $PHASE, but the latest ritual log is Phase $MAX_RITUAL."
         echo "   Use 'swt:task phase $PHASE <file>' to transition correctly."
         exit 1
+    fi
+
+    # 2.5. Orientation Signature Validation (Continuous Orientation)
+    if [ "$PHASE" -gt 0 ]; then
+        LATEST_RITUAL_LOG=$(grep "<!-- RITUAL: phase $PHASE" "$FILE" | head -n 1)
+        if [[ ! "$LATEST_RITUAL_LOG" =~ "(State Verified)" ]]; then
+            echo "🛑 RITUAL DRIFT DETECTED: Phase $PHASE transition is missing the '(State Verified)' signature."
+            echo "   PROTOCOL VIOLATION: You MUST consult the State Transition Diagram (AGENTS.md#L122) before transitioning."
+            echo "   Fix: Re-run 'swt:task phase $PHASE $FILE' to sign-off on the orientation."
+            exit 1
+        fi
     fi
 
     # 3. Sandbox Status
