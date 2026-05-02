@@ -80,7 +80,7 @@ The agent will:
    - If the tool fails (LINT FAILED), read the errors and **self-correct autonomously**.
    - **Repeat until PASS** (Maximum 3 attempts).
 5. **Track task closure** — write the reference to `commit.task`: `Closes: .tasks/YYYYMMDDHHMMSS_slug.md`.
-6. **Display the results** — show the contents of `commit.draft` and the `LINT PASSED` report. Let the user know the mapped task will be auto-closed.
+6. **Display the results (Visual Verification Ritual)** — You MUST explicitly display the contents of `commit.draft` and `commit.task` in your response using a markdown code block. This allows the user to verify the impact and task mapping before approval. **Failure to display these artifacts is a Protocol Breach.**
 
 > ⚠️ **The agent MUST NOT execute any `git commit` command at this stage.**
 
@@ -117,7 +117,7 @@ Common fine-tuning actions:
 
 > 🚫 **The agent is STRICTLY FORBIDDEN from executing `git commit` unless the user gives explicit approval. No exceptions.**
 
-After displaying or updating the draft, the agent MUST present this exact binary choice:
+After displaying or updating the draft (and ensuring the artifacts are visible in the current response), the agent MUST present this exact binary choice:
 
 ---
 **Ready to commit?**
@@ -175,6 +175,7 @@ After the commit and task updates are complete, perform context cleanup:
 | Bullet contains jargon | Too technical | Replace with natural language outcome |
 | Bullet describes structure | Implementation noise | Remove; focus on the behavior/benefit enabled by that structure |
 | Intro paragraph present | Adds noise | Remove; move the primary intent to the commit title |
+| Missing Verification Block | Invisible Gate pattern | Always `cat` and display `commit.draft` and `commit.task` |
 
 ### Human/Final Verification
 

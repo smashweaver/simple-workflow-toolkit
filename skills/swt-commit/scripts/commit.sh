@@ -54,15 +54,15 @@ if [ "$1" == "--draft" ]; then
         mv "$TMP_FILE" "$ROOT_DIR/commit.draft"
         echo "✅ Draft generated: $ROOT_DIR/commit.draft"
         echo ""
-        echo "--- Final Commit Draft ---"
+        echo "--- Verification Artifacts (COPY-PASTE INTO RESPONSE) ---"
+        echo '```'
         cat "$ROOT_DIR/commit.draft"
         echo ""
         if [ -f "$ROOT_DIR/commit.task" ]; then
-            echo "--- Task Metadata ---"
             cat "$ROOT_DIR/commit.task"
-            echo ""
         fi
-        echo "--- End of Draft ---"
+        echo '```'
+        echo "--- End of Artifacts ---"
         exit 0
     else
         rm -f "$TMP_FILE"

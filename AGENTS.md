@@ -119,6 +119,7 @@ Verify that the MVP meets the objective. Polish the implementation based on user
 *   **Trigger**: After Phase 8 is complete and the user confirms they are finished refining.
 *   **Action**: Initiate the `/swt:commit` workflow.
 *   **Goal**: The commit is the final act. Never rush to commit before Gate 4 is cleared.
+*   **Visual Verification (MANDATORY)**: You MUST explicitly `cat` and display the contents of `commit.draft` and `commit.task` in the final approval message. Asking for approval without showing these artifacts is an **Invisible Gate** violation.
 
 ### 3.1 The Orchestrator: Unified Facade
 
@@ -284,6 +285,7 @@ Verify that the MVP meets the objective. Polish the implementation based on user
 *   **Trigger**: After Phase 8 is complete and the user confirms they are finished refining.
 *   **Action**: Initiate the `/swt:commit` workflow.
 *   **Goal**: The commit is the final act. Never rush to commit before Gate 4 is cleared.
+*   **Visual Verification (MANDATORY)**: You MUST explicitly `cat` and display the contents of `commit.draft` and `commit.task` in the final approval message. Asking for approval without showing these artifacts is an **Invisible Gate** violation.
 
 ### 3.3 SWT Loop Terminology
 
@@ -333,8 +335,8 @@ All commits follow the **Diff-First, Draft-and-Approve** protocol. There is a st
 > 2. **Guarded Generation**: Agents MUST use `./skills/swt-commit/scripts/commit.sh --draft "[message]"` to generate the draft.
 > 3. **Physical Blockage**: The tool will physically block file creation unless the message passes the `lint.sh` validation (no structural noise, correct format, Phase 8 verified).
 > 4. **Self-Correction Loop**: If linting fails, the agent must read the error, self-correct, and re-run the tool. **Limit: 3 attempts.** If stuck, ask the user for help.
-> 5. Apply commit on approval (`git commit -F commit.draft`).
-> 6. Cleanup temp files (`commit.diff`, `commit.draft`, `commit.task`).
+> 5. **Apply & Verify**: After obtaining explicit user approval (verified against the displayed draft), apply the commit: `git commit -F commit.draft`.
+> 6. **Cleanup**: Delete temporary files (`commit.diff`, `commit.draft`, `commit.task`).
 
 ## 8. Session Start & Restoration
 
