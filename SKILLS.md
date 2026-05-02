@@ -40,7 +40,7 @@ Based on their purposes and triggers:
 
 The skills are designed to work in sequence. Here is the typical lifecycle of a feature from idea to commit:
 
-Use `/swt:task mount <file>` to set the active task context before entering `/swt:flow`.
+Use `/swt:flow mount <file>` to set the active task context before entering the workflow.
 
 ```mermaid
 flowchart TD
@@ -88,6 +88,8 @@ Guides you through the full 8-phase development lifecycle with mandatory consent
 |---|---|---|
 | `/swt:flow brainstorm` | Create Phase 0 ideation task | `swt:task` |
 | `/swt:flow graduate` | Promote brainstorm to Phase 1 | `swt:task` |
+| `/swt:flow mount <file>` | Set active task context | `swt:task` |
+| `/swt:flow unmount` | Clear active task context | `swt:task` |
 | `/swt:flow phase <N>` | Transition task to Phase N | `swt:task` |
 | `/swt:flow status` | Show project status and tasks | `swt:status` |
 | `/swt:flow commit` | Start commit ritual | `swt:commit` |
@@ -114,7 +116,7 @@ Owns the full task lifecycle: creation, brainstorming, graduation, status tracki
 | `/swt:task graduate` | Promote a brainstorm task to an implementation task |
 | `/swt:task phase <N> <file>` | Transition task to Phase N (exclusive gateway — never edit Phase header manually) |
 | `/swt:task mount <file>` | Set active task context (`task.ctx`) and open task/spec in browser |
-| `/swt:task ctx clear` | Clear active task context (removes `task.ctx`) |
+| `/swt:task unmount` | Clear active task context (removes `task.ctx`) |
 | `/swt:task ctx show` | Show current active task context |
 | `/swt:task list --open` | Show all active tasks |
 | `/swt:task update <file> --append "text"` | Append a checklist item to a task |

@@ -42,8 +42,10 @@ function show_help {
     echo "  swt.sh list [--open|--done] - List tasks in the project"
     echo "  swt.sh sync-downstream <file> - Sync Spec/Plan after objective changes"
     echo "  swt.sh close <file> <hash> - Finalize task (status: done, checklist: complete)"
-    echo "  swt.sh ctx set <file>      - Set active task context (writes task.ctx)"
-    echo "  swt.sh ctx clear           - Clear active task context (removes task.ctx)"
+    echo "  swt.sh mount <file>        - Set active task context (writes task.ctx)"
+    echo "  swt.sh unmount             - Clear active task context (removes task.ctx)"
+    echo "  swt.sh ctx set <file>      - [DEPRECATED] Use mount instead"
+    echo "  swt.sh ctx clear           - [DEPRECATED] Use unmount instead"
     echo "  swt.sh ctx show            - Show current active task context"
     echo "  swt.sh tidy                 - Move done/abandoned tasks to .tasks/archive/"
     echo "  swt.sh abandon <file>      - Abandon task (status: abandoned, no commit hash)"
@@ -686,15 +688,34 @@ if [ "$CMD" == "close" ]; then
     exit 0
 fi
 
+if [ "$CMD" == "mount" ]; then
+    VAL=$2
+    if [ -z "$VAL" ]; then
+        echo "Usage: swt.sh mount <file>"
+        exit 1
+    fi
+    echo "$VAL" > task.ctx
+    echo "✅ Mounted task: $VAL"
+    exit 0
+fi
+
+if [ "$CMD" == "unmount" ]; then
+    rm -f task.ctx
+    echo "✅ Unmounted active task context."
+    exit 0
+fi
+
 if [ "$CMD" == "ctx" ]; then
     SUB=$2
     VAL=$3
     case $SUB in
         set)
+            echo "⚠️ [DEPRECATED] 'ctx set' is deprecated. Use 'mount' instead."
             echo "$VAL" > task.ctx
             echo "Set active task context: $VAL"
             ;;
         clear)
+            echo "⚠️ [DEPRECATED] 'ctx clear' is deprecated. Use 'unmount' instead."
             rm -f task.ctx
             echo "Cleared active task context."
             ;;
@@ -706,7 +727,7 @@ if [ "$CMD" == "ctx" ]; then
             fi
             ;;
         *)
-            echo "Usage: swt.sh ctx [set <file>|clear|show]"
+            echo "Usage: swt.sh ctx [set <file>|clear|show] (Note: set/clear are deprecated)"
             exit 1
             ;;
     esac

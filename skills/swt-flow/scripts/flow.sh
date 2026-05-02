@@ -8,9 +8,10 @@ CMD=${1:-""}
 
 function show_help {
     echo "Usage:"
-    echo "  flow.sh open              - Read task.ctx and load active task context"
-    echo "  flow.sh check             - Validate active task context (non-zero exit if invalid)"
+    echo "  flow.sh mount <file>      - Set active task context"
+    echo "  flow.sh unmount           - Clear active task context"
     echo "  flow.sh status            - Show current flow status (ctx + phase)"
+    echo "  flow.sh open              - Read task.ctx and load active task context"
 }
 
 if [ -z "$CMD" ]; then
@@ -38,7 +39,7 @@ function delegate_to_skill() {
 if [ "$CMD" == "open" ]; then
     if [ ! -f "$ROOT_DIR/task.ctx" ]; then
         echo "No active task context (task.ctx not found)."
-        echo "Use 'swt.sh ctx set <task_file>' to set an active task."
+        echo "Use '/swt:flow mount <task_file>' to set an active task."
         exit 0
     fi
 
@@ -139,7 +140,7 @@ fi
 
 # Orchestrator Routing
 case $CMD in
-    new|brainstorm|graduate|phase|validate|list|ctx|tidy|abandon|test|sync|sync-downstream|scaffold)
+    new|brainstorm|graduate|phase|validate|list|ctx|mount|unmount|tidy|abandon|test|sync|sync-downstream|scaffold)
         delegate_to_skill "skills/swt-task/scripts/task.sh" "$@"
         exit 0
         ;;

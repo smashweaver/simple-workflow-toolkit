@@ -342,10 +342,10 @@ To ensure architectural continuity and prevent context drift, every session MUST
 ### 1. Orientation (Mandatory)
 Before discussing any task or reviewing code, the agent MUST:
 1. **Invoke the `/swt:flow status` command** to orient itself. This aggregates the latest digest, active tasks, and recent specs by delegating to `swt:status`.
-1.5. **Read `task.ctx`** (if present) — contains the active task filename for session continuity across agents and restarts. The `swt:status` output includes this context at the top. *(Note: `task.ctx` survives task closures and abandonments. It is ONLY cleared by the `/swt:commit` cleanup sequence or manually by the user to ensure context isn't lost mid-workflow).*
+1.5. **Read `task.ctx`** (if present) — contains the active task filename for session continuity across agents and restarts. The `swt:status` output includes this context at the top. *(Note: `task.ctx` survives task closures and abandonments. It is ONLY cleared by the `/swt:commit` cleanup sequence or manually by the user via `/swt:flow unmount` to ensure context isn't lost mid-workflow).*
     - If `task.ctx` exists and points to a valid task file, the agent MUST run `xdg-open <task_file> &` to open it in the system's default browser (falls back to `firefox` then `google-chrome` then `chromium` if `xdg-open` not found).
     - If the task file has a `**Spec**:` field linking a companion spec, also run `xdg-open <spec_file> &`.
-    - This browser-opening behavior applies whenever the agent reads `task.ctx`: session start, `/swt:status`, `/swt:task mount`, and Phase0 ideation updates.
+    - This browser-opening behavior applies whenever the agent reads `task.ctx`: session start, `/swt:flow status`, `/swt:flow mount`, and Phase 0 ideation updates.
 2. **Read the root `AGENTS.md`** — understand workspace context, project name, purpose, and conventions.
 3. **Ingest the State Transition Diagram** (Section 3.1) — verify the allowed pathing, active gates, and mandatory handoffs for the current task context.
 4. **Smart Search (Tasks)**: If a task reference or file is not found in the root `.tasks/` directory, check `.tasks/archive/` before assuming it is missing or deleted.

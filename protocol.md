@@ -1,17 +1,18 @@
-# Tactical Roadmap: Automate Ephemeral Execution Protocols
-**Spec**: .specs/20260502094651_automate-ephemeral-execution-protocols.md
+# Tactical Roadmap: Refactor swt:flow unmount command
+**Spec**: .specs/20260502103548_refactor-swt-flow-unmount-command.md
 
 > This is an ephemeral execution protocol. It provides the tactical roadmap for implementation and ensures ritual compliance. 
 > **Mandatory Cleanup**: This file must be deleted before finalizing the task.
 
 ## 1. Mission Briefing
-Automate `protocol.md` scaffolding, enforce Phase 5 blocking, implement Phase 1 Reset, harden commit guardrails, implement context injection, and synchronize visual state diagrams.
+Refactor the SWT task context management to prioritize `mount` and `unmount` verbs across all scripts and documentation. Implement soft deprecation for the legacy `ctx` commands to improve CLI symmetry and agent intuition.
 
 ## 2. Gate 3: Execution Loop (Tactical Chunks)
-- [x] **Chunk 1**: Core logic in `task.sh` (scaffold, audit, reset, context injection).
-- [x] **Chunk 2**: Methodology sync in `AGENTS.md` and templates.
-- [x] **Chunk 3**: Visual state diagram synchronization.
-- [x] **Chunk 4**: Final verification and Born Complete ritual.
+Break the implementation into 3-5 logical chunks. Pause and perform a **Locked Gate Ritual** after each chunk.
+
+* [x] **Chunk 1**: Update `task.sh` with `mount`/`unmount` commands and `ctx` deprecation warnings
+* [x] **Chunk 2**: Update `flow.sh` routing table and help text to include `mount`/`unmount`
+* [x] **Chunk 3**: Synchronize `SKILLS.md`, `AGENTS.md`, and `README.md` with the new command terminology
 
 ## 3. Commit Discipline Gut Check (MANDATORY)
 Before initiating `/swt:flow commit`, you MUST perform a self-audit against these guidelines. **Failure to follow these will result in a Protocol Breach.**
