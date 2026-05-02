@@ -12,6 +12,10 @@ function show_help {
     echo "  flow.sh unmount           - Clear active task context"
     echo "  flow.sh status            - Show current flow status (ctx + phase)"
     echo "  flow.sh open              - Read task.ctx and load active task context"
+    echo "  flow.sh view-task [file]  - Open active task (or specified file) in browser"
+    echo "  flow.sh link [args]       - Delegate to swt:link"
+    echo "  flow.sh graphify [args]   - Delegate to swt:graphify"
+    echo "  flow.sh init              - Guidance for project initialization"
 }
 
 if [ -z "$CMD" ]; then
@@ -25,6 +29,32 @@ while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.gi
     ROOT_DIR=$(dirname "$ROOT_DIR")
 done
 
+function resolve_task_path() {
+    local task_input=$1
+    if [ -z "$task_input" ]; then
+        if [ -f "$ROOT_DIR/task.ctx" ]; then
+            task_input=$(cat "$ROOT_DIR/task.ctx" | tr -d '[:space:]')
+        else
+            return 1
+        fi
+    fi
+
+    # Resolve task file: try as-is, then .tasks/<name>.md, .tasks/<name>, .tasks/archive/<name>.md, .tasks/archive/<name>
+    if [ -f "$ROOT_DIR/$task_input" ]; then
+        echo "$ROOT_DIR/$task_input"
+    elif [ -f "$ROOT_DIR/.tasks/${task_input}.md" ]; then
+        echo "$ROOT_DIR/.tasks/${task_input}.md"
+    elif [ -f "$ROOT_DIR/.tasks/${task_input}" ]; then
+        echo "$ROOT_DIR/.tasks/${task_input}"
+    elif [ -f "$ROOT_DIR/.tasks/archive/${task_input}.md" ]; then
+        echo "$ROOT_DIR/.tasks/archive/${task_input}.md"
+    elif [ -f "$ROOT_DIR/.tasks/archive/${task_input}" ]; then
+        echo "$ROOT_DIR/.tasks/archive/${task_input}"
+    else
+        return 1
+    fi
+}
+
 function delegate_to_skill() {
     local skill_script=$1
     shift
@@ -37,30 +67,11 @@ function delegate_to_skill() {
 }
 
 if [ "$CMD" == "open" ]; then
-    if [ ! -f "$ROOT_DIR/task.ctx" ]; then
+    RESOLVED=$(resolve_task_path)
+    if [ $? -ne 0 ]; then
         echo "No active task context (task.ctx not found)."
         echo "Use '/swt:flow mount <task_file>' to set an active task."
         exit 0
-    fi
-
-    TASK_FILE=$(cat "$ROOT_DIR/task.ctx" | tr -d '[:space:]')
-
-    # Resolve task file: try as-is, then .tasks/<name>.md, .tasks/<name>, .tasks/archive/<name>.md, .tasks/archive/<name>
-    if [ -f "$ROOT_DIR/$TASK_FILE" ]; then
-        RESOLVED="$ROOT_DIR/$TASK_FILE"
-    elif [ -f "$ROOT_DIR/.tasks/${TASK_FILE}.md" ]; then
-        RESOLVED="$ROOT_DIR/.tasks/${TASK_FILE}.md"
-    elif [ -f "$ROOT_DIR/.tasks/${TASK_FILE}" ]; then
-        RESOLVED="$ROOT_DIR/.tasks/${TASK_FILE}"
-    elif [ -f "$ROOT_DIR/.tasks/archive/${TASK_FILE}.md" ]; then
-        RESOLVED="$ROOT_DIR/.tasks/archive/${TASK_FILE}.md"
-    elif [ -f "$ROOT_DIR/.tasks/archive/${TASK_FILE}" ]; then
-        RESOLVED="$ROOT_DIR/.tasks/archive/${TASK_FILE}"
-    else
-        echo "Stale task.ctx: $TASK_FILE not found."
-        echo "Clearing stale context..."
-        rm -f "$ROOT_DIR/task.ctx"
-        exit 1
     fi
 
     echo "--- Active Task Context ---"
@@ -111,30 +122,44 @@ if [ "$CMD" == "open" ]; then
 fi
 
 if [ "$CMD" == "check" ]; then
-    if [ ! -f "$ROOT_DIR/task.ctx" ]; then
+    RESOLVED=$(resolve_task_path)
+    if [ $? -ne 0 ]; then
         echo "No active task context."
         exit 1
     fi
 
-    TASK_FILE=$(cat "$ROOT_DIR/task.ctx" | tr -d '[:space:]')
+    echo "Active context: $(basename "$RESOLVED")"
+    exit 0
+fi
 
-    # Resolve task file
-    if [ -f "$ROOT_DIR/$TASK_FILE" ]; then
-        RESOLVED="$ROOT_DIR/$TASK_FILE"
-    elif [ -f "$ROOT_DIR/.tasks/${TASK_FILE}.md" ]; then
-        RESOLVED="$ROOT_DIR/.tasks/${TASK_FILE}.md"
-    elif [ -f "$ROOT_DIR/.tasks/${TASK_FILE}" ]; then
-        RESOLVED="$ROOT_DIR/.tasks/${TASK_FILE}"
-    elif [ -f "$ROOT_DIR/.tasks/archive/${TASK_FILE}.md" ]; then
-        RESOLVED="$ROOT_DIR/.tasks/archive/${TASK_FILE}.md"
-    elif [ -f "$ROOT_DIR/.tasks/archive/${TASK_FILE}" ]; then
-        RESOLVED="$ROOT_DIR/.tasks/archive/${TASK_FILE}"
-    else
-        echo "Invalid task context: $TASK_FILE not found."
+if [ "$CMD" == "view-task" ]; then
+    RESOLVED=$(resolve_task_path "$2")
+    if [ $? -ne 0 ]; then
+        echo "❌ Error: Could not resolve task path."
         exit 1
     fi
+    
+    echo "Opening task in browser: $(basename "$RESOLVED")"
+    xdg-open "$RESOLVED" &>/dev/null || open "$RESOLVED" &>/dev/null || echo "⚠️ Could not open browser automatically. Path: $RESOLVED"
+    
+    # If there is a Spec: link, open it too
+    SPEC_FILE=$(grep -oP '^\*\*?Spec\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
+    if [ -n "$SPEC_FILE" ] && [ -f "$ROOT_DIR/$SPEC_FILE" ]; then
+        echo "Opening companion spec: $(basename "$SPEC_FILE")"
+        xdg-open "$ROOT_DIR/$SPEC_FILE" &>/dev/null || open "$ROOT_DIR/$SPEC_FILE" &>/dev/null || true
+    fi
+    exit 0
+fi
 
-    echo "Active context: $(basename "$RESOLVED")"
+if [ "$CMD" == "init" ]; then
+    echo "--- SWT Project Initialization ---"
+    echo "The '/swt:init' command is a behavioral directive for your AI agent."
+    echo ""
+    echo "1. Describe your project to the agent."
+    echo "2. The agent will interview you to determine the workspace type."
+    echo "3. It will then scaffold the mandatory AGENTS.md and discovery pointers."
+    echo ""
+    echo "To begin, say: \"Bootstrap this project using /swt:init\""
     exit 0
 fi
 
@@ -159,4 +184,15 @@ case $CMD in
         delegate_to_skill "skills/swt-commit/scripts/commit.sh" "$@"
         exit 0
         ;;
+    link)
+        shift
+        delegate_to_skill "skills/swt-link/scripts/link.sh" "$@"
+        exit 0
+        ;;
+    graphify)
+        shift
+        delegate_to_skill "skills/swt-graphify/scripts/graphify.sh" "$@"
+        exit 0
+        ;;
 esac
+

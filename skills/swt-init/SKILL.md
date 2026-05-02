@@ -1,5 +1,6 @@
 ---
 name: "swt:init"
+inherits: "swt:think"
 description: >
   Use when setting up a new project or workspace that will consume the Simple Workflow Toolkit
   (SWT). Trigger when the user says things like "/swt:init", "bootstrap this

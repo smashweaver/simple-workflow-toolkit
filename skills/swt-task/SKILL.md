@@ -1,5 +1,6 @@
 ---
 name: "swt:task"
+inherits: "swt:think"
 description: >
   Owns the lifecycle of tasks in the `.tasks/` directory. Trigger when the user
   says "/swt:task", "list tasks", "create a new task", or "status of task X".

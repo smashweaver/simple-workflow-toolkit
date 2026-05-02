@@ -1,5 +1,6 @@
 ---
 name: "swt:commit"
+inherits: "swt:think"
 description: Use when writing commit messages, creating commits, or when the user asks about commit message format. Follows a diff-first workflow: staged changes are captured to a `commit.diff` file, the agent drafts a message and saves it to `commit.draft`, the user fine-tunes, then the agent commits and cleans up both files on approval. Enforces a structured, impact-focused commit message format.
 user-invocable: true
 allowed-tools:

@@ -1,5 +1,6 @@
 ---
 name: "swt:graphify"
+inherits: "swt:think"
 description: >
   Thin wrapper and orchestrator for the graphify engine (safishamsi/graphify).
   Enforces structural awareness rituals during the Analyze (Phase 2) and Review (Phase 8) phases of the SWT workflow.

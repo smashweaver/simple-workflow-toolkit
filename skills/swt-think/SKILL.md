@@ -1,5 +1,6 @@
 ---
 name: "swt:think"
+inherits: none
 description: Base behavioral guidelines for AI agent reasoning. Use when handling non-coding tasks (swt:digest, swt:task, swt:spec, swt:init, swt:commit, AGENTS.md generation). Coding-specific tasks should use swt:code which inherits from this skill.
 user-invocable: false
 allowed-tools:

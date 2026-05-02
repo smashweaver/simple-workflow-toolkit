@@ -58,6 +58,7 @@ swt/
 ├── scripts/
 │   └── install-skill.sh    # Installs skills into any project
 ├── SKILLS.md               # Full Skills Catalog (usage guide)
+├── ARCHITECTURE.md         # Structural Manifest (inheritance & patterns)
 └── AGENTS.md               # Internal development protocol (dogfooding)
 ```
 
@@ -68,6 +69,12 @@ Unlike a traditional linter, this suite operates at the **agent behavior level**
 ## Methodology
 
 The `AGENTS.md` file contains the full internal development protocol, including the 8-phase workflow, 5 mandatory consent gates, and Locked Gate enforcement logic.
+
+## Architecture & Inheritance
+
+SWT follows a strict inheritance model where all skills derive from the **swt:think** base layer. The ecosystem is unified by the **swt:flow** orchestrator, which acts as a facade for all toolkit operations.
+
+→ **[See ARCHITECTURE.md](./ARCHITECTURE.md)** for structural diagrams and design rationale.
 
 ## Structural Awareness (Recommended)
 

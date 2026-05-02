@@ -38,24 +38,9 @@ Based on their purposes and triggers:
 
 ## How Skills Work Together
 
-The skills are designed to work in sequence. Here is the typical lifecycle of a feature from idea to commit:
+The Simple Workflow Toolkit uses an **Orchestrator Pattern** to unify the user experience. All high-level commands are routed through the `/swt:flow` facade, ensuring consistent methodology enforcement across all project operations.
 
-Use `/swt:flow mount <file>` to set the active task context before entering the workflow.
-
-```mermaid
-flowchart TD
-    A["/swt:flow brainstorm\nPhase 0: Ideate"] --> B["/swt:flow graduate\nPromote to Phase 1"]
-    B --> C["/swt:flow phase\nPlan, Analyze, Approve"]
-    C --> D["Implement\nguided by /swt:code"]
-    D --> E["/swt:flow status\nReview & Refine"]
-    E --> F["/swt:flow commit\nDraft & Approve"]
-    F --> G["/swt:flow digest\nSave summary"]
-    
-    subgraph "Structural Awareness (Opt-in)"
-    H["/swt:graphify query\nPhase 2: Analyze"] -.-> C
-    I["/swt:graphify update\nPhase 8: Refine"] -.-> E
-    end
-```
+→ **[See ARCHITECTURE.md](./ARCHITECTURE.md)** for detailed inheritance diagrams and structural rationale.
 
 ---
 
@@ -96,6 +81,10 @@ Guides you through the full 8-phase development lifecycle with mandatory consent
 | `/swt:flow digest` | Create session summary | `swt:digest` |
 | `/swt:flow list` | Show all active tasks | `swt:task` |
 | `/swt:flow open` | Open active task and spec | Internal |
+| `/swt:flow view-task` | Open task in browser (Smart Search) | Internal |
+| `/swt:flow link` | Install skills into project/global | `swt:link` |
+| `/swt:flow graphify` | Structural awareness & impact | `swt:graphify` |
+| `/swt:flow init` | Bootstrap AGENTS.md (Behavioral) | `swt:init` |
 
 ```
 /swt:flow

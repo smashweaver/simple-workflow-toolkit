@@ -1,5 +1,6 @@
 ---
 name: "swt:digest"
+inherits: "swt:think"
 description: >
   Automates the creation of structured session summaries for continuity.
   Trigger at the end of a session, after a major milestone, or when the user

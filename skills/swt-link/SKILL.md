@@ -1,5 +1,6 @@
 ---
 name: "swt:link"
+inherits: "swt:think"
 description: >
   Universal skill linker for SWT. Use when the user says "link my skills", 
   "setup dogfooding", or "install SWT into this project". It symlinks all 

@@ -1,5 +1,6 @@
 ---
 name: "swt:mermaid"
+inherits: "swt:think"
 description: Use when creating Mermaid diagrams for documentation. Provides syntax rules and common pitfalls to avoid parse errors in GitHub and Markdown viewers.
 user-invocable: true
 allowed-tools:

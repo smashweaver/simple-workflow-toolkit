@@ -1,5 +1,6 @@
 ---
 name: "swt:status"
+inherits: "swt:think"
 description: >
   Aggregates project state (latest digest, active tasks, recent specs, and
   optional git history) to restore session context or provide a quick progress

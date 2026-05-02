@@ -1,5 +1,6 @@
 ---
 name: "swt:flow"
+inherits: "swt:think"
 description: Use when planning or implementing any non-trivial code change. This is a behavioral directive that enforces a structured 8-phase workflow. It is NOT an automatic execution command. Ensures agents act as advisors and co-pilots rather than autonomous coders.
 user-invocable: true
 allowed-tools:
@@ -392,10 +393,11 @@ Before any code updates, these items must be addressed. Adapt to the project's t
 > All task creation, naming rules, templates, graduation rituals, and status updates are owned by the **`/swt:task` skill** (`skills/swt-task/SKILL.md`). Read that skill before creating or modifying any task file.
 
 **Quick reference:**
-- **New task**: `/swt:task new` or `scripts/swt.sh new "<Feature Name>"`
-- **Brainstorm task**: `/swt:task brainstorm` or `scripts/swt.sh brainstorm "<Topic>"`
-- **Graduate Phase 0 → 1**: `/swt:task graduate`
-- **List tasks**: `scripts/swt.sh list`
+- **New task**: `/swt:flow new`
+- **Brainstorm task**: `/swt:flow brainstorm`
+- **Graduate Phase 0 → 1**: `/swt:flow graduate`
+- **List tasks**: `/swt:flow list --open`
+- **View task**: `/swt:flow view-task`
 - **Update progress**: Edit the `.tasks/` file to mark `[x]` checkboxes
 
 > ⚠️ **Naming rule** (enforced by `/swt:task`): Name the thing being built, not the phase. No lifecycle verbs (`ideate-`, `brainstorm-`, `fix-`). The `/swt:task` skill always proposes the name for confirmation before writing.
@@ -416,6 +418,22 @@ Validates the active task context. Returns a non-zero exit code if `task.ctx` is
 ### `/swt:flow status` — Show flow status
 **Audience**: user-invoked, agent-driven
 Shows the current flow status, including the active task filename, its current status, and phase.
+
+### `/swt:flow view-task` — Open task in browser
+**Audience**: user-invoked
+Resolves the active task context (or a specific file/slug) and opens it in the system's default browser. If a companion SPEC is linked, it is also opened.
+
+### `/swt:flow link` — Universal Skill Linker
+**Audience**: user-invoked, developer
+Delegates to `swt:link` to automate symlinking skills into agent discovery paths. Use with `--global` for home directory installation.
+
+### `/swt:flow graphify` — Structural Awareness
+**Audience**: user-invoked
+Delegates to `swt:graphify` to manage knowledge graph state, perform structural queries, and assess architectural impact.
+
+### `/swt:flow init` — Project Initialization
+**Audience**: user-invoked
+Guidance for project initialization. Trigger when starting a new project to bootstrap `AGENTS.md` and discovery pointers.
 
 ---
 
