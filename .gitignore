@@ -45,6 +45,7 @@ sample_task.md
 
 # Planning Mode root artifacts
 /implementation_plan.md
+/protocol.md
 /walkthrough.md
 /task.md
 .tests/
