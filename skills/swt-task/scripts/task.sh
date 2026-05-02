@@ -79,6 +79,11 @@ function audit_artifacts {
             echo "🛑 PROTOCOL VIOLATION: Phase $phase requires task.md at the project root."
             return 1
         fi
+        if [ ! -f "protocol.md" ]; then
+            check_phantom "protocol.md"
+            echo "🛑 PROTOCOL VIOLATION: Phase $phase requires protocol.md at the project root as an Execution Guard."
+            return 1
+        fi
     fi
     return 0
 }
@@ -181,8 +186,12 @@ function scaffold_artifact {
         return 0
     fi
     
-    local title=$(grep -m 1 "^# Task:" "$task_file" | sed 's/# Task: //')
-    sed "s/{{Task Name}}/$title/g" "$template_path" > "$target_path"
+    local title=$(grep -m 1 "^# Task:" "$task_file" | sed 's/^# Task:[[:space:]]*//')
+    local spec_link=$(grep -m 1 "^\*\*Spec\*\*:" "$task_file" | sed 's/^\*\*Spec\*\*:[[:space:]]*//')
+    
+    sed "s/{{Task Name}}/$title/g" "$template_path" | \
+    sed "s|{{Spec Link}}|$spec_link|g" > "$target_path"
+    
     echo "✨ Scaffolded $target_path from template."
 }
 
@@ -246,7 +255,7 @@ if [ "$CMD" == "init" ]; then
     fi
     
     # Add SWT ignores if they don't exist
-    for ignore in ".digests/" ".tasks/*.tmp" "task.ctx" "implementation_plan.md" "task.md" "commit.diff" "commit.draft" "commit.task"; do
+    for ignore in ".digests/" ".tasks/*.tmp" "task.ctx" "implementation_plan.md" "task.md" "protocol.md" "commit.diff" "commit.draft" "commit.task"; do
         if ! grep -q "^$ignore" .gitignore; then
             echo "$ignore" >> .gitignore
         fi
@@ -513,8 +522,9 @@ d}" "$file"
         echo "Graduated $FILE to Phase 1. Spec created from template: $SPEC_FILE"
         xdg-open "$SPEC_FILE" &
         
-        # Scaffold implementation plan
+        # Scaffold implementation plan and protocol
         scaffold_artifact "implementation_plan" "$FILE"
+        scaffold_artifact "protocol" "$FILE"
         
         # Add Spec link to task header (below Phase)
         sed -i -E "/^\*\*Phase\*\*:/a **Spec**: $SPEC_FILE" "$FILE"
@@ -601,14 +611,22 @@ d}" "$file"
         echo "✅ Spec updated: $SPEC_FILE"
     fi
 
-    # 2. Re-sync Implementation Plan
-    echo "🔄 Re-syncing Implementation Plan..."
+    # 2. Re-sync Implementation Plan and Protocol
+    echo "🔄 Re-syncing Implementation Plan and Protocol..."
     scaffold_artifact "implementation_plan" "$FILE" --force
+    scaffold_artifact "protocol" "$FILE" --force
     
-    # 3. Re-sync task.md
+    # 3. Physically reset Task to Phase 1
+    echo "🔄 Resetting Task to Phase 1 due to objective change..."
+    sed -i -E "s/^\*\*Phase\*\*:\s*[0-8]/**Phase**: 1/" "$FILE"
+    sed -i "s/- \[[x /]\] Phase [0-8]/- [ ] Phase [0-8]/g" "$FILE"
+    sed -i "s/- \[ \] Phase 1/- [\/] Phase 1/" "$FILE"
+    log_ritual "phase 1" "$FILE" "(Reset via sync-downstream)"
+
+    # 4. Re-sync task.md
     sync_task_md "$FILE"
     
-    echo "✨ Downstream artifacts synchronized. Review and Approval (Gate 2) reset."
+    echo "✨ Downstream artifacts synchronized. Task reset to Phase 1. Review and Approval (Gate 2) required."
     xdg-open "$SPEC_FILE" &
     exit 0
 fi
@@ -663,7 +681,7 @@ if [ "$CMD" == "close" ]; then
     # Move to archive
     mkdir -p .tasks/archive
     mv "$FILE" .tasks/archive/
-    rm -f implementation_plan.md task.md
+    rm -f implementation_plan.md task.md protocol.md
     echo "✅ Task closed: $FILE (Commit: $HASH)"
     exit 0
 fi
@@ -718,7 +736,7 @@ if [ "$CMD" == "abandon" ]; then
     
     mkdir -p .tasks/archive
     mv "$FILE" .tasks/archive/
-    rm -f implementation_plan.md task.md
+    rm -f implementation_plan.md task.md protocol.md
     echo "Task abandoned: $FILE"
     exit 0
 fi

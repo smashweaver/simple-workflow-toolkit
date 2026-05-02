@@ -1,4 +1,5 @@
 # Implementation Plan - {{Task Name}}
+**Spec**: {{Spec Link}}
 
 {{Brief description of the problem and what the change accomplishes.}}
 

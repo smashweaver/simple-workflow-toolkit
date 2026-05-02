@@ -12,9 +12,9 @@ This document defines the core principles and behavioral protocols for AI coding
 6.  **Ritual Discipline**: "Mandatory" means mandatory. Never skip a re-read step, self-correction pass, or consent gate, even if you feel "familiar" with the context.
 13. **Exclusive Gateway**: You are FORBIDDEN from manually editing the `Phase` header in task files. All phase transitions MUST be executed via `swt:task phase <N> <task_file>`. The `validate` script reads the historical breadcrumb logs and physically blocks execution if the header was manually forged (e.g. Header Phase != Latest Ritual Log) or phases were skipped.
 14. **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `skills/swt-task/scripts/task.sh validate`. Validation includes checks for Phase Forgery and Phantom Artifacts.
-9.  **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation.
-10. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1) and `task.md` (Phase 5). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
-11. **Task Separation of Concerns**: The root `task.md` artifact is an ephemeral "Live Checklist" for human and cross-agent verification. The internal `.tasks/<timestamp>_task.md` remains the persistent "Source of Truth" for ritual metadata and state tracking. Root artifacts are automatically removed upon task completion.
+9.  **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation. **Mandatory Repopulation**: When an artifact is reset/re-scaffolded (e.g. via `sync-downstream`), the agent MUST immediately re-populate it with the current technical context to maintain continuity.
+10. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1), `protocol.md` (Phase 1), and `task.md` (Phase 5). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
+11. **Task Separation of Concerns**: The root `task.md` artifact is an ephemeral "Live Checklist" for human and cross-agent verification. The `protocol.md` is an ephemeral "Tactical Roadmap" for execution. The internal `.tasks/<timestamp>_task.md` remains the persistent "Source of Truth" for ritual metadata and state tracking. Root artifacts are automatically removed upon task completion.
 
 ## 2. Execution Boundaries: The Senior Advisor Persona
 
@@ -291,7 +291,7 @@ The workflow defines 5 named iteration loops:
 | Loop | Phase(s) | Description |
 |---|---|---|
 | **Brainstorm Loop** | 0 | Task file iteration cycle. Agent updates task with notes, jailbreak patterns, objective refinements. Two behaviors: (1) update current task if user prompt pertains to it, (2) offer new brainstorm task for unrelated issues. |
-| **Planning Loop** | 1 | Artifact generation + doc target identification. Agent scans repo for existing docs, cross-references against task scope, records targets in `implementation_plan.md`. User reviews/tweaks artifacts AND doc targets before Gate 2. |
+| **Planning Loop** | 1 | Artifact generation + doc target identification. Agent scans repo for existing docs, cross-references against task scope, records targets in `implementation_plan.md`. Scaffolds `protocol.md` for tactical execution. User reviews/tweaks artifacts AND doc targets before Gate 2. |
 | **Analysis Loop** | 2-3 | Agent analyzes SPEC.md + `implementation_plan.md` (impact on components, state, performance, API), assesses risks, presents findings. Gate 2 HARD STOP — user approves before Phase 4. Phases 2 and 3 are separate. |
 | **Document Refresh Protocol** | All | For all template-backed SWT documents: agent appends intended content, then reformats entire document using backing template via `Write` tool. Eliminates Edit tool failures on special characters and structural divergence. |
 | **Commit Loop** | 8 → Gate 5 | Agent invokes `swt:commit` skill only — NEVER uses `git commit` directly. Draft-and-Approve protocol: agent drafts `commit.draft` → user fine-tunes → agent applies on approval. |
@@ -301,7 +301,7 @@ The workflow defines 5 named iteration loops:
 If the Task objectives change after Phase 1 (e.g., a "Light Bulb Moment" during implementation), the agent MUST loop back to synchronize downstream artifacts:
 
 1.  **Update Task**: Log the new ideas in the task file.
-2.  **Sync Downstream**: Run `swt:task sync-downstream <file>` to propagate changes to the Spec and Implementation Plan.
+2.  **Sync Downstream**: Run `swt:task sync-downstream <file>` to propagate changes to the Spec and Implementation Plan. **Mandatory Reset**: This command physically resets the Task Phase to 1.
 3.  **Gate 2 Reset**: Treat the new Plan as unapproved. You MUST perform a **HARD STOP** and obtain user approval for the updated architecture before resuming implementation.
 4.  **Stale Enforcement**: The `validate` command will physically block execution if the Task is newer than the Spec or the Spec is newer than the Plan.
 
@@ -362,7 +362,8 @@ When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"
 ### 3. Ephemeral Artifact Enforcement (Scenario C)
 To prevent ritual bypasses, the toolkit enforces the presence of root artifacts during key phases. `task.sh validate` and `task.sh phase` will block execution if these files are missing from the project root. All artifacts are scaffolded from standard templates in `skills/swt-task/templates/`:
 
-- **Phase 1-7**: Requires `implementation_plan.md` at project root (auto-scaffolded by `graduate`).
+- **Phase 1-8**: Requires `implementation_plan.md` at project root (auto-scaffolded by `graduate`).
+- **Phase 1-8**: Requires `protocol.md` at project root (auto-scaffolded by `graduate`). Tactical roadmap and Commit Gut Check.
 - **Phase 5-8**: Requires `task.md` at project root (auto-synced from task checklist).
 - **Verification Proof**: Phase 8 (Review) requires a successful `Test Ritual Log` that is newer than the latest code change. Agents are physically blocked from proceeding to Review without proof of verification.
 

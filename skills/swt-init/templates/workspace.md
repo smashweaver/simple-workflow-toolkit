@@ -15,9 +15,9 @@
 6.  **Ritual Discipline**: "Mandatory" means mandatory. Never skip a re-read step, self-correction pass, or consent gate, even if you feel "familiar" with the context.
 7.  **Exclusive Gateway**: You are FORBIDDEN from manually editing the `Phase` header in task files. All phase transitions MUST be executed via `swt:task phase <N> <task_file>`. This ensures ritual integrity and synchronization.
 8.  **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `skills/swt-task/scripts/task.sh validate`.
-9.  **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation.
-10. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1) and `task.md` (Phase 5). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
-11. **Task Separation of Concerns**: The root `task.md` artifact is an ephemeral "Live Checklist" for human and cross-agent verification. The internal `.tasks/<timestamp>_task.md` remains the persistent "Source of Truth" for ritual metadata and state tracking.
+9.  **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation. **Mandatory Repopulation**: When an artifact is reset/re-scaffolded (e.g. via `sync-downstream`), the agent MUST immediately re-populate it with the current technical context to maintain continuity.
+10. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1), `protocol.md` (Phase 1), and `task.md` (Phase 5). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
+11. **Task Separation of Concerns**: The root `task.md` artifact is an ephemeral "Live Checklist" for human and cross-agent verification. The `protocol.md` is an ephemeral "Tactical Roadmap" for execution. The internal `.tasks/<timestamp>_task.md` remains the persistent "Source of Truth" for ritual metadata and state tracking.
 
 ## 2. Execution Boundaries: The Senior Advisor Persona
 
@@ -83,6 +83,7 @@ stateDiagram-v2
 
     state "Gate 1 - Alignment" as G1
     state "Gate 2 - Architecture" as G2
+    state "Gate 3 - Execution" as G3
     state "Gate 4 - Refinement" as G4
     state "Gate 5 - Finality" as G5
 
@@ -95,7 +96,9 @@ stateDiagram-v2
     P3 --> G2
     G2 --> P4
     P4 --> P5
-    P5 --> P6
+    P5 --> G3
+    G3 --> P5
+    G3 --> P6
     P6 --> P7
     P7 --> G4
     G4 --> P8
@@ -122,7 +125,8 @@ stateDiagram-v2
     note right of P5
         Surgical changes only.
         Follow implementation plan.
-        Checkpoint between files.
+        Gate 3: Execution Loop.
+        Pause between chunks.
     end note
 
     note right of G5
