@@ -327,14 +327,14 @@ This repository provides a comprehensive suite of workflow skills. Agents must b
 
 All commits follow the **Diff-First, Draft-and-Approve** protocol. There is a strict separation of concerns: `commit.draft` is ONLY for the human-readable, impact-focused commit message, while `commit.task` is ONLY for automation metadata (e.g., `Closes: .tasks/...`). Do not mix them.
 
-> 🛑 **Gate 5 Rule:** A commit is the absolute final act of a task. Never invoke `/swt:flow commit` until Phase 8 (Review & Refine) is fully verified and explicitly closed by the user.
-
-1. Stage changes with `git add .` (never per-file `git add <path>` — respects `.gitignore` and prevents ignored files from leaking into commits).
-2. Export `commit.diff`.
-3. Agent drafts to `commit.draft` and tracks tasks in `commit.task`.
-4. User fine-tunes `commit.draft`; Agent iterates with probing questions. **Agent must wait for user edits — no auto-approval.**
-5. Apply commit on approval (`git commit -F commit.draft`).
-6. Cleanup temp files (`commit.diff`, `commit.draft`, `commit.task`).
+> 🛑 **The Shell Gate Protocol (MANDATORY)**
+> To eliminate methodology drift, the creation of `commit.draft` is protected by a **Hard Shell Gate**:
+> 1. **Forbidden Action**: Agents are STRICTLY FORBIDDEN from creating or modifying `commit.draft` manually via `write_to_file`.
+> 2. **Guarded Generation**: Agents MUST use `./skills/swt-commit/scripts/commit.sh --draft "[message]"` to generate the draft.
+> 3. **Physical Blockage**: The tool will physically block file creation unless the message passes the `lint.sh` validation (no structural noise, correct format, Phase 8 verified).
+> 4. **Self-Correction Loop**: If linting fails, the agent must read the error, self-correct, and re-run the tool. **Limit: 3 attempts.** If stuck, ask the user for help.
+> 5. Apply commit on approval (`git commit -F commit.draft`).
+> 6. Cleanup temp files (`commit.diff`, `commit.draft`, `commit.task`).
 
 ## 8. Session Start & Restoration
 

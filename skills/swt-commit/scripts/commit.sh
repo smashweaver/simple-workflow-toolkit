@@ -1,5 +1,8 @@
 #!/bin/bash
-# swt:commit — Commit Workflow Orchestrator
+# swt:commit — Commit Workflow Orchestrator & Hard Shell Gate
+# Usage: 
+#   ./commit.sh                 # Show ritual guide
+#   ./commit.sh --draft "msg"    # Validate and generate commit.draft
 
 set -e
 
@@ -9,41 +12,66 @@ while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.gi
     ROOT_DIR=$(dirname "$ROOT_DIR")
 done
 
-if [ ! -f "$ROOT_DIR/task.ctx" ]; then
-    echo "❌ Error: No active task context. You must be working on a task to commit."
-    exit 1
-fi
+LINT_SCRIPT="$ROOT_DIR/skills/swt-commit/scripts/lint.sh"
 
-TASK_FILE=$(cat "$ROOT_DIR/task.ctx" | tr -d '[:space:]')
-# Resolve task file
-if [ -f "$ROOT_DIR/$TASK_FILE" ]; then RESOLVED="$ROOT_DIR/$TASK_FILE"
-elif [ -f "$ROOT_DIR/.tasks/${TASK_FILE}.md" ]; then RESOLVED="$ROOT_DIR/.tasks/${TASK_FILE}.md"
-elif [ -f "$ROOT_DIR/.tasks/${TASK_FILE}" ]; then RESOLVED="$ROOT_DIR/.tasks/${TASK_FILE}"
-elif [ -f "$ROOT_DIR/.tasks/archive/${TASK_FILE}.md" ]; then RESOLVED="$ROOT_DIR/.tasks/archive/${TASK_FILE}.md"
-elif [ -f "$ROOT_DIR/.tasks/archive/${TASK_FILE}" ]; then RESOLVED="$ROOT_DIR/.tasks/archive/${TASK_FILE}"
-else RESOLVED=""; fi
-
-if [ -n "$RESOLVED" ] && [ -f "$RESOLVED" ]; then
-    PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$RESOLVED" | head -n 1)
-    if [ "$PHASE" -lt 8 ]; then
-        echo "⚠️  Phase Warning: You are in Phase $PHASE. Commits are reserved for Phase 8 (Review & Refine)."
-        echo "   Proceeding anyway as requested, but ensure verification is complete."
+function show_guide() {
+    echo "🚀 Loading swt:commit ritual..."
+    echo "--- Step 1: Stage Changes ---"
+    echo "Command: git add ."
+    echo ""
+    echo "--- Step 2: Export Diff ---"
+    echo "Command: git diff --cached > commit.diff"
+    echo ""
+    echo "--- Step 3: Draft Message ---"
+    echo "Command: ./skills/swt-commit/scripts/commit.sh --draft \"type(scope): summary\n\n* bullet\" "
+    echo ""
+    echo "--- Step 4: Approval ---"
+    echo "Ask the user for approval of commit.draft."
+    echo ""
+    echo "--- Step 5: Apply & Close ---"
+    echo "Command: git commit -F commit.draft"
+    
+    if [ -f "$ROOT_DIR/task.ctx" ]; then
+        TASK_FILE=$(cat "$ROOT_DIR/task.ctx" | tr -d '[:space:]')
+        echo "Command: bash skills/swt-task/scripts/task.sh close $TASK_FILE <hash>"
+    else
+        echo "Command: bash skills/swt-task/scripts/task.sh close <task_file> <hash>"
     fi
-fi
+}
 
-echo "🚀 Loading swt:commit ritual..."
-echo "--- Step 1: Stage Changes ---"
-echo "Command: git add ."
-echo ""
-echo "--- Step 2: Export Diff ---"
-echo "Command: git diff --cached > commit.diff"
-echo ""
-echo "--- Step 3: Draft Message ---"
-echo "Command: Use 'generate_commit_message' tool or draft manually to commit.draft"
-echo ""
-echo "--- Step 4: Approval ---"
-echo "Ask the user for approval of commit.draft."
-echo ""
-echo "--- Step 5: Apply & Close ---"
-echo "Command: git commit -F commit.draft"
-echo "Command: bash skills/swt-task/scripts/task.sh close $(basename "$RESOLVED") <hash>"
+if [ "$1" == "--draft" ]; then
+    MESSAGE=$2
+    if [ -z "$MESSAGE" ]; then
+        echo "❌ Error: No message provided for --draft."
+        exit 1
+    fi
+
+    TMP_FILE=".commit.tmp"
+    echo -e "$MESSAGE" > "$TMP_FILE"
+
+    echo "🔍 Validating commit message..."
+    if bash "$LINT_SCRIPT" "$TMP_FILE"; then
+        mv "$TMP_FILE" "$ROOT_DIR/commit.draft"
+        echo "✅ Draft generated: $ROOT_DIR/commit.draft"
+        echo ""
+        echo "--- Final Commit Draft ---"
+        cat "$ROOT_DIR/commit.draft"
+        echo ""
+        if [ -f "$ROOT_DIR/commit.task" ]; then
+            echo "--- Task Metadata ---"
+            cat "$ROOT_DIR/commit.task"
+            echo ""
+        fi
+        echo "--- End of Draft ---"
+        exit 0
+    else
+        rm -f "$TMP_FILE"
+        echo ""
+        echo "🛑 LINT FAILED: The commit message violates swt:commit guidelines."
+        echo "👉 Self-Correction Required: Read the errors above, re-read swt:commit/SKILL.md, and try again."
+        echo "⚠️  Loop Limit: Do not exceed 3 attempts. If you are stuck, ask the user for help."
+        exit 1
+    fi
+else
+    show_guide
+fi

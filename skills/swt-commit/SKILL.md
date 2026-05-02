@@ -67,22 +67,20 @@ Export the staged diff to a temporary file in the project root:
 git diff --cached > commit.diff
 ```
 
-### Step 3 — Invoke the commit skill
-Ask the agent to draft a commit message:
-> *"Generate a commit message for the diff in `commit.diff`"*
+### Step 3 — Invoke the shell gate
+Ask the agent to generate a validated commit draft:
+> *"Generate a commit message using the shell gate for the diff in `commit.diff`"*
 
 The agent will:
 1. **Re-read this `SKILL.md` file** — always refresh your understanding of these specific commit guidelines before drafting.
 2. **Execute Protocol Audit Ritual** — output the audit signature at the start of your response.
-3. **Read `commit.diff`** — never run `git diff` directly; always read from the file.
-4. **Scan for active tasks** — search for `.tasks/*.md` files in the **current directory**, **parent directory**, and any **sub-project directories** to understand the active work context and align terminology.
-5. **Execute Task Validation** — run `bash skills/swt-task/scripts/task.sh validate <task_file>` to ensure Phases 5–7 are marked as complete. If validation fails, STOP and fix the task file before drafting.
-6. **Consult `AGENTS.md`** — read both the project-level and parent-level `AGENTS.md` for strategic goals and conventions.
-7. **Analyze the changes** — identify what changed, why, and the impact.
-8. **Draft a commit message** — following the format and principles below. Store the message in `commit.draft`.
-9. **Agent Self-Correction Pass** — Before finalizing, the agent MUST review the draft against the "Agent Self-Correction Guardrails" above. There is no automated linting; this is a mandatory manual ritual.
-10. **Track task closure** — if an active task was found in Step 4, write the reference to `commit.task`: `Closes: .tasks/YYYYMMDDHHMMSS_slug.md`. STRICTLY separate this metadata from the `commit.draft` message.
-11. **Display the draft** — show the contents of `commit.draft` and `commit.task` for review. Let the user know the mapped task will be auto-closed.
+3. **Read `commit.diff`** — identify the impact and intent.
+4. **Execute Guarded Generation**:
+   - Run `./skills/swt-commit/scripts/commit.sh --draft "type(scope): summary\n\n* bullet"`
+   - If the tool fails (LINT FAILED), read the errors and **self-correct autonomously**.
+   - **Repeat until PASS** (Maximum 3 attempts).
+5. **Track task closure** — write the reference to `commit.task`: `Closes: .tasks/YYYYMMDDHHMMSS_slug.md`.
+6. **Display the results** — show the contents of `commit.draft` and the `LINT PASSED` report. Let the user know the mapped task will be auto-closed.
 
 > ⚠️ **The agent MUST NOT execute any `git commit` command at this stage.**
 
