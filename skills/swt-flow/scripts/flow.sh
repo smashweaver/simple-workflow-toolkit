@@ -121,7 +121,12 @@ case $CMD in
         ;;
 
     # Task Lifecycle
-    new|brainstorm|graduate) shift; delegate "skills/swt-task/scripts/task.sh" "$CMD" "$@" ;;
+    new|brainstorm) shift; delegate "skills/swt-task/scripts/task.sh" "$CMD" "$@" ;;
+    graduate) shift;
+        RESOLVED=$(resolve_task_path "$1")
+        if [ $? -ne 0 ]; then echo "❌ Error: No active task context."; exit 1; fi
+        [ -n "$1" ] && [ -f "$ROOT_DIR/.tasks/$1.md" ] && shift
+        delegate "skills/swt-task/scripts/task.sh" "graduate" "$RESOLVED" "$@" ;;
     backlog) shift; delegate "skills/swt-task/scripts/task.sh" list --open "$@" ;;
     history) shift; delegate "skills/swt-task/scripts/task.sh" list --all "$@" ;;
     archive) shift; delegate "skills/swt-task/scripts/task.sh" list --done "$@" ;;

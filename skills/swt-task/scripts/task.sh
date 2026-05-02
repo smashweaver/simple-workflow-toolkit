@@ -38,9 +38,32 @@ function unmount_task {
     done
 
     rm -f "$root_dir/task.ctx" "$root_dir/task.md" "$root_dir/protocol.md" "$root_dir/implementation_plan.md"
+    rm -f "$root_dir/commit.draft" "$root_dir/commit.task" "$root_dir/commit.diff"
     # Debris Sweep
     rm -f "$root_dir"/.*.tmp
     echo "✅ Unmounted active task context and cleared ephemeral artifacts."
+}
+
+function check_sandbox {
+    # Ensure we are in the root directory for cleanup
+    local root_dir=$(pwd)
+    while [[ "$root_dir" != "/" && ! -f "$root_dir/AGENTS.md" && ! -d "$root_dir/.git" ]]; do
+        root_dir=$(dirname "$root_dir")
+    done
+
+    # Green Zones: .tasks/, .specs/, .digests/, .tests/, root artifacts, metadata, and graphify output
+    local violations=$(git -C "$root_dir" status --porcelain | grep -vE '^.. (\.tasks/|\.specs/|\.digests/|\.tests/|task\.md|implementation_plan\.md|protocol\.md|task\.ctx|commit\.|walkthrough\.md|graphify-out/)' || true)
+
+    if [ -n "$violations" ]; then
+        echo "🛑 SANDBOX VIOLATION DETECTED"
+        echo "The following files were modified during Phase 0 (Ideate):"
+        echo "$violations" | sed 's/^/   /'
+        echo ""
+        echo "👉 Phase 0 is for architecture and trade-offs ONLY."
+        echo "👉 You must discard, stash, or commit these changes before graduating."
+        return 1
+    fi
+    return 0
 }
 
 function show_help {
@@ -483,6 +506,11 @@ if [ "$CMD" == "graduate" ]; then
         exit 1
     fi
 
+    # 0. Sandbox Check (Safety Interlock)
+    if ! check_sandbox; then
+        exit 1
+    fi
+
     # 1. Update status to pending and phase to 1
     if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
         uv run "$ROOT_DIR/skills/swt-task/scripts/crow.py" "$FILE" --meta "Status" "pending" --meta "Phase" "1"
@@ -850,7 +878,7 @@ if [ "$CMD" == "phase" ]; then
     exit 0
 fi
 
-if [ "$CMD" == "validate" ]; then
+if [ "$CMD" == "audit" ]; then
     FILE=$2
     if [ -z "$FILE" ]; then
         FILE=$(cat "$ROOT_DIR/task.ctx" 2>/dev/null)
@@ -903,6 +931,9 @@ if [ "$CMD" == "validate" ]; then
         echo "🛡️  SANDBOX ACTIVE: Task is in Phase 0 (Ideating)."
         echo "   AGENT PERSONA: Senior Advisor / Co-pilot."
         echo "   RESTRICTION: Source code edits are FORBIDDEN. Graduation required for implementation."
+        if ! check_sandbox; then
+            exit 1
+        fi
     fi
 
     # 4. Stale Artifact Detection (Dependency Chain)
