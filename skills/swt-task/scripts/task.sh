@@ -30,6 +30,19 @@ function log_ritual() {
     fi
 }
 
+function unmount_task {
+    # Ensure we are in the root directory for cleanup
+    local root_dir=$(pwd)
+    while [[ "$root_dir" != "/" && ! -f "$root_dir/AGENTS.md" && ! -d "$root_dir/.git" ]]; do
+        root_dir=$(dirname "$root_dir")
+    done
+
+    rm -f "$root_dir/task.ctx" "$root_dir/task.md" "$root_dir/protocol.md" "$root_dir/implementation_plan.md"
+    # Debris Sweep
+    rm -f "$root_dir"/.*.tmp
+    echo "✅ Unmounted active task context and cleared ephemeral artifacts."
+}
+
 function show_help {
     echo "Usage:"
     echo "  swt.sh init              - Initialize .tasks/ directory and update .gitignore"
@@ -576,10 +589,10 @@ EOF
     exit 0
 fi
 
-if [ "$CMD" == "sync-downstream" ]; then
+if [ "$CMD" == "sync-docs" ]; then
     FILE=$2
     if [ -z "$FILE" ]; then
-        echo "Usage: swt.sh sync-downstream <task_file>"
+        echo "Usage: swt.sh sync-docs <task_file>"
         exit 1
     fi
     
@@ -719,8 +732,8 @@ if [ "$CMD" == "close" ]; then
     # Move to archive
     mkdir -p .tasks/archive
     mv "$FILE" .tasks/archive/
-    rm -f implementation_plan.md task.md protocol.md
     echo "✅ Task closed: $FILE (Commit: $HASH)"
+    unmount_task
     exit 0
 fi
 
@@ -736,8 +749,7 @@ if [ "$CMD" == "mount" ]; then
 fi
 
 if [ "$CMD" == "unmount" ]; then
-    rm -f task.ctx
-    echo "✅ Unmounted active task context."
+    unmount_task
     exit 0
 fi
 
@@ -793,8 +805,8 @@ if [ "$CMD" == "abandon" ]; then
     
     mkdir -p .tasks/archive
     mv "$FILE" .tasks/archive/
-    rm -f implementation_plan.md task.md protocol.md
     echo "Task abandoned: $FILE"
+    unmount_task
     exit 0
 fi
 

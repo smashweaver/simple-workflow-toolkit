@@ -127,16 +127,36 @@ case $CMD in
     archive) shift; delegate "skills/swt-task/scripts/task.sh" list --done "$@" ;;
 
     # Ritual Enforcement
-    audit) shift; delegate "skills/swt-task/scripts/task.sh" validate "$@" ;;
-    phase) shift; delegate "skills/swt-task/scripts/task.sh" phase "$@" ;;
-    test) shift; delegate "skills/swt-task/scripts/task.sh" test "$@" ;;
-    test-fail) shift; delegate "skills/swt-task/scripts/task.sh" test "$@" --fail ;;
-    sync) shift; delegate "skills/swt-task/scripts/task.sh" sync "$@" ;;
-    sync-docs) shift; delegate "skills/swt-task/scripts/task.sh" sync-downstream "$@" ;;
-    scaffold) shift; delegate "skills/swt-task/scripts/task.sh" scaffold "$@" ;;
+    audit|sync|sync-docs|scaffold) shift;
+        RESOLVED=$(resolve_task_path "$1")
+        if [ $? -ne 0 ]; then echo "❌ Error: No active task context."; exit 1; fi
+        [ -n "$1" ] && [ -f "$ROOT_DIR/.tasks/$1.md" ] && shift
+        delegate "skills/swt-task/scripts/task.sh" "$CMD" "$RESOLVED" "$@" ;;
+    phase) shift;
+        PHASE_NUM=$1; shift
+        RESOLVED=$(resolve_task_path "$1")
+        if [ $? -ne 0 ]; then echo "❌ Error: No active task context."; exit 1; fi
+        delegate "skills/swt-task/scripts/task.sh" "phase" "$PHASE_NUM" "$RESOLVED" "$@" ;;
+    test) shift;
+        RESOLVED=$(resolve_task_path "$1")
+        if [ $? -ne 0 ]; then echo "❌ Error: No active task context."; exit 1; fi
+        delegate "skills/swt-task/scripts/task.sh" "test" "$RESOLVED" "$@" ;;
+    test-fail) shift;
+        RESOLVED=$(resolve_task_path "$1")
+        if [ $? -ne 0 ]; then echo "❌ Error: No active task context."; exit 1; fi
+        delegate "skills/swt-task/scripts/task.sh" "test" "$RESOLVED" --fail "$@" ;;
 
     # Lifecycle & Hygiene
-    close|abandon|tidy) shift; delegate "skills/swt-task/scripts/task.sh" "$CMD" "$@" ;;
+    close) shift;
+        HASH=$1; shift
+        RESOLVED=$(resolve_task_path "$1")
+        if [ $? -ne 0 ]; then echo "❌ Error: No active task context."; exit 1; fi
+        delegate "skills/swt-task/scripts/task.sh" "close" "$RESOLVED" "$HASH" "$@" ;;
+    abandon) shift;
+        RESOLVED=$(resolve_task_path "$1")
+        if [ $? -ne 0 ]; then echo "❌ Error: No active task context."; exit 1; fi
+        delegate "skills/swt-task/scripts/task.sh" "abandon" "$RESOLVED" "$@" ;;
+    tidy) shift; delegate "skills/swt-task/scripts/task.sh" tidy "$@" ;;
     bug) shift; delegate "skills/swt-task/scripts/task.sh" brainstorm "$@" --uplink ;;
 
     # Environment & Continuity
