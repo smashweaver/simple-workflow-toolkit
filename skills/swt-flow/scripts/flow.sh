@@ -44,7 +44,7 @@ function show_help {
     echo "  digest            - Daily session summary"
     echo "  milestone         - Full project roll-up"
     echo "  setup             - Physical workspace setup (.tasks, .specs)"
-    echo "  link-dev          - Global dev setup (--global --clear)"
+    echo "  symlink           - Global dev setup (--global --clear)"
     echo "  link              - Link skills into current project"
     echo "  link-dry          - Preview symlink changes"
     echo ""
@@ -143,7 +143,7 @@ case $CMD in
     digest) shift; delegate "skills/swt-digest/scripts/digest.sh" "$@" ;;
     milestone) shift; delegate "skills/swt-digest/scripts/digest.sh" --milestone "$@" ;;
     setup) shift; delegate "skills/swt-task/scripts/task.sh" init "$@" ;;
-    link-dev) shift; delegate "skills/swt-link/scripts/link.sh" --global --clear "$@" ;;
+    symlink) shift; delegate "skills/swt-link/scripts/link.sh" --global --clear "$@" ;;
     link) shift; delegate "skills/swt-link/scripts/link.sh" "$@" ;;
     link-dry) shift; delegate "skills/swt-link/scripts/link.sh" --dry-run "$@" ;;
     link-clear) shift; delegate "skills/swt-link/scripts/link.sh" --clear "$@" ;;

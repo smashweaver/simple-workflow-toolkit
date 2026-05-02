@@ -76,7 +76,7 @@ The director of the toolkit. This skill ensures that every session follows a dis
 | **/swt:flow digest** | `swt:digest` | Daily session summary |
 | **/swt:flow milestone** | `swt:digest` | Full project roll-up |
 | **/swt:flow setup** | `swt:task` | Physical workspace setup (`.tasks/`, etc.) |
-| **/swt:flow link-dev** | `swt:link` | Global dev setup (`--global --clear`) |
+| **/swt:flow symlink** | `swt:link` | Global dev setup (`--global --clear`) |
 | **/swt:flow link** | `swt:link` | Link skills into current project |
 | **/swt:flow link-dry** | `swt:link` | Preview symlink changes |
 

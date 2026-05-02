@@ -13,9 +13,9 @@
 4.  **Verifiable Outcomes**: Every change must have a clear path to verification (tests or checklists).
 5.  **Gitignored Awareness**: Runtime directories (`.digests/`, `.tasks/`) are gitignored. Use `bash ls` + `read` for these — glob/search tools will return empty results.
 6.  **Ritual Discipline**: "Mandatory" means mandatory. Never skip a re-read step, self-correction pass, or consent gate, even if you feel "familiar" with the context.
-7.  **Exclusive Gateway**: You are FORBIDDEN from manually editing the `Phase` header in task files. All phase transitions MUST be executed via `swt:task phase <N> <task_file>`. This ensures ritual integrity and synchronization.
-8.  **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `skills/swt-task/scripts/task.sh validate`.
-9.  **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation. **Mandatory Repopulation**: When an artifact is reset/re-scaffolded (e.g. via `sync-downstream`), the agent MUST immediately re-populate it with the current technical context to maintain continuity.
+7.  **Exclusive Gateway**: You are FORBIDDEN from manually editing the `Phase` header in task files. All phase transitions MUST be executed via `/swt:flow phase <N> <task_file>`. This ensures ritual integrity and synchronization.
+8.  **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `/swt:flow audit`.
+9.  **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation. **Mandatory Repopulation**: When an artifact is reset/re-scaffolded (e.g. via `/swt:flow sync-docs`), the agent MUST immediately re-populate it with the current technical context to maintain continuity.
 10. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1), `protocol.md` (Phase 1), and `task.md` (Phase 5). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
 11. **Task Separation of Concerns**: The root `task.md` artifact is an ephemeral "Live Checklist" for human and cross-agent verification. The `protocol.md` is an ephemeral "Tactical Roadmap" for execution. The internal `.tasks/<timestamp>_task.md` remains the persistent "Source of Truth" for ritual metadata and state tracking.
 
@@ -34,7 +34,7 @@ Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot
 *   **Task-Centric Flow**: All work maps to an active task file in the **relevant sub-project's** `.tasks/`.
 *   **Checklist Discipline**: Every phase requires explicit approval before moving to the next.
 *   **Sub-project Scoping**: At session start, always confirm which sub-project is in scope before proceeding.
-*   **Discovery Pointers**: This workspace uses `GEMINI.md` and `CLAUDE.md` as discovery pointers. These files shim directly to this `AGENTS.md` source of truth. Always verify their presence after an `/swt:init` or `/swt:link` operation.
+*   **Discovery Pointers**: This workspace uses `GEMINI.md` and `CLAUDE.md` as discovery pointers. These files shim directly to this `AGENTS.md` source of truth. Always verify their presence after an `/swt:flow setup` or `/swt:flow link` operation.
 
 ## 3. Workspace Structure
 
@@ -140,7 +140,7 @@ stateDiagram-v2
 
 To ensure the user maintains control, the workflow is punctuated by **5 Mandatory Consent Gates (HARD STOPS)**. Agents must NEVER blow past these gates, even if they have "automatic approval" capabilities. See `skills/swt-flow/SKILL.md` for the full lifecycle. 
 
-**Anti-Circling Rule**: The workflow is strictly forward-moving. You are FORBIDDEN from autonomously reverting to a previous Phase or endlessly looping. If a return to an earlier phase is necessary, you MUST request manual consent from the user before invoking `swt:task phase <N> <file>`.
+**Anti-Circling Rule**: The workflow is strictly forward-moving. You are FORBIDDEN from autonomously reverting to a previous Phase or endlessly looping. If a return to an earlier phase is necessary, you MUST request manual consent from the user before invoking `/swt:flow phase <N> <file>`.
 
 Always pin the tech stack in the relevant **sub-project** `AGENTS.md`, never in this parent file. Use `swt:graphify` for **Structural Awareness** in Phase 2 and **Structural Validation** in Phase 8 to prevent cross-project architectural drift.
 
@@ -160,13 +160,13 @@ Every non-trivial feature or architectural change begins with a Phase 0 brainsto
 *   **Holistic Brainstorming (MANDATORY)**: Agents must "zoom out" during brainstorms and consider workspace-wide architectural impacts. Do not focus exclusively on the immediate task context.
 *   **Phase 0 Sandbox (HARD RULE)**: During Phase 0, you act as a Senior Advisor. You are STRICTLY FORBIDDEN from modifying source code (files outside `.tasks/`, `.specs/`, or root artifacts). Provide snippets and architectural analysis instead.
 
-**The Graduation Ritual**: To move from Phase 0 to Phase 1, the agent MUST invoke `swt.sh graduate <task_file>`. This command automates metadata updates and enforces artifact generation (`SPEC.md` for features, `Verification Checklist` for refactors).
+**The Graduation Ritual**: To move from Phase 0 to Phase 1, the agent MUST invoke `/swt:flow graduate <task_file>`. This command automates metadata updates and enforces artifact generation (`SPEC.md` for features, `Verification Checklist` for refactors).
 
 > 🛑 **Phase 0 Graduation Gate (MANDATORY)**
 > Before invoking `swt.sh graduate`, the agent MUST:
 > 1. Perform a **HARD STOP** and ask the user: *"Are we ready to graduate to Phase 1?"*
 > 2. Wait for an explicit verbal "Yes" or "Go" from the user.
-> 3. Only then invoke `swt.sh graduate <task_file>`.
+> 3. Only then invoke `/swt:flow graduate <task_file>`.
 > 4. After graduation, present the link and **HARD STOP** again (Gate 1: Alignment Loop).
 
 ### Gate 1: The Alignment Loop (Phase 1 Entry)
@@ -182,7 +182,7 @@ Gather context, map dependencies, and propose a detailed step-by-step implementa
 
 ### Phase 2: Analyze
 Assess the impact on existing components, state management, performance, and API contracts.
-*   **Structural Awareness**: If `swt:graphify` is enabled, the agent MUST query the knowledge graph to identify "Affected Concepts" and "God Nodes" (central dependencies) that this change might impact.
+*   **Structural Awareness**: If `swt:graphify` is enabled, the agent MUST query the knowledge graph to identify "Affected Concepts" and "God Nodes" (central dependencies) that this change might impact using `/swt:flow query`.
 
 ### Phase 3: Risk Assessment
 Identify security, performance, or compatibility risks. Define mitigations for each.
@@ -218,21 +218,21 @@ Run automated tests or provide a manual verification checklist. Zero tolerance f
 Verify that the MVP meets the objective. Polish the implementation based on user feedback during Gate 4. Refactor only if necessary for SOLID principles.
 *   **Iterative Development**: Phase 8 supports dynamic checklist items via `swt.sh update <file> --append "item text"`. The user may append fine-tuning items and "afterthoughts" without being forced into premature task closure.
 *   **Phase 8 Gate**: The agent must NOT push the user toward `close` during Phase 8. The loop continues as long as the user wants to refine. The agent periodically asks "Ready to close?" but the user always decides.
-*   **Structural Validation**: If `swt:graphify` is enabled, run `/swt:graphify update` and review the "Structural Diff" in `graphify-out/graph.html` to ensure no unexpected coupling or "God Nodes" were introduced.
+*   **Structural Validation**: If `swt:graphify` is enabled, run `/swt:flow graph-up` and review the "Structural Diff" in `graphify-out/graph.html` to ensure no unexpected coupling or "God Nodes" were introduced.
 
 ### Gate 5: The Finality Loop (Commit Sequence)
 *   **Trigger**: After Phase 8 is complete and the user confirms they are finished refining.
-*   **Action**: Initiate the `/swt:commit` workflow.
+*   **Action**: Initiate the `/swt:flow commit` workflow.
 *   **Goal**: The commit is the final act. Never rush to commit before Gate 4 is cleared.
 
 ## 6. Commit Discipline
 
 > 🚫 **Forbidden:** Agents are STRICTLY FORBIDDEN from using standard `git commit -m` commands directly. All commits must go through the Draft-and-Approve protocol below.
-> 💡 **Enforce Default:** Whenever prompted for a git commit or help with a git commit message, agents MUST default to invoking the `/swt:commit` skill.
+> 💡 **Enforce Default:** Whenever prompted for a git commit or help with a git commit message, agents MUST default to invoking the `/swt:flow commit` skill.
 
 All commits follow the **Diff-First, Draft-and-Approve** protocol. There is a strict separation of concerns: `commit.draft` is ONLY for the human-readable, impact-focused commit message, while `commit.task` is ONLY for automation metadata (e.g., `Closes: .tasks/...`). Do not mix them.
 
-> 🛑 **Gate 5 Rule:** A commit is the absolute final act of a task. Never invoke `/swt:commit` until Phase 8 (Review & Refine) is fully verified and explicitly closed by the user.
+> 🛑 **Gate 5 Rule:** A commit is the absolute final act of a task. Never invoke `/swt:flow commit` until Phase 8 (Review & Refine) is fully verified and explicitly closed by the user.
 
 1. Stage changes with `git add .` (never per-file `git add <path>` — respects `.gitignore` and prevents ignored files from leaking into commits).
 2. Export `commit.diff`.
@@ -247,11 +247,11 @@ To ensure architectural continuity and prevent context drift, every session MUST
 
 ### 1. Orientation (Mandatory)
 Before discussing any task or reviewing code, the agent MUST:
-1. **Invoke the `swt:status` skill** to orient itself. This aggregates the latest digest, active tasks, and recent specs in a single step.
+1. **Invoke the `/swt:flow status` command** to orient itself. This aggregates the latest digest, active tasks, and recent specs in a single step.
 1.5. **Read `task.ctx`** (if present) — contains the active task filename for session continuity across agents and restarts. The `swt:status` output includes this context at the top.
     - If `task.ctx` exists and points to a valid task file, the agent MUST run `xdg-open <task_file> &` to open it in the system's default browser (falls back to `firefox` then `google-chrome` then `chromium` if `xdg-open` not found).
     - If the task file has a `**Spec**:` field linking a companion spec, also run `xdg-open <spec_file> &`.
-    - This browser-opening behavior applies whenever the agent reads `task.ctx`: session start, `/swt:status`, `/swt:task mount`, and Phase0 ideation updates.
+    - This browser-opening behavior applies whenever the agent reads `task.ctx`: session start, `/swt:flow status`, `/swt:flow mount`, and Phase 0 ideation updates.
 2. **Read the root `AGENTS.md`** — understand workspace context, project name, purpose, and conventions.
 3. **Ingest the State Transition Diagram** (Section 5.1) — verify the allowed pathing, active gates, and mandatory handoffs for the current task context.
 4. **Smart Search (Tasks)**: If a task reference or file is not found in the root `.tasks/` directory, check `.tasks/archive/` before assuming it is missing or deleted.
@@ -259,7 +259,7 @@ Before discussing any task or reviewing code, the agent MUST:
 
 ### 2. Context Restoration (On-Demand)
 When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"*), the agent MUST:
-1. **Invoke the `swt:status` skill** to aggregate latest digest, tasks, and specs.
+1. **Invoke the `/swt:flow status` command** to aggregate latest digest, tasks, and specs.
 2. **Execute Task Validation**: The status skill automatically runs `task.sh validate` for all active tasks.
 3. **Summarize status** based on the aggregated report.
 4. **Manual Milestone Ritual**: The `swt:status` skill provides a state summary but does NOT automatically trigger a new digest. Digests are manual rituals reserved for logical session ends or major milestones.
@@ -285,5 +285,5 @@ To prevent "runaway" agent behavior, all structural modifications are protected 
 
 If the user reports frustration or identifies a gap with the SWT toolkit itself during this session:
 - Offer to uplink the issue to SWT core: *"Want me to uplink this to the SWT toolkit backlog?"*
-- On confirmation: invoke `/swt:task` uplink with the friction point as the topic
+- On confirmation: invoke `/swt:flow bug` to capture the friction point for the SWT toolkit backlog.
 - The session context (workspace path, active task, phase) is automatically captured for SWT maintainers

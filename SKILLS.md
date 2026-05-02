@@ -71,7 +71,7 @@ The primary "Command Center" for the toolkit. It unifies all specialized skills 
 | `/swt:flow audit` | Deep ritual integrity check | `swt:task` |
 | `/swt:flow commit` | Start commit ritual | `swt:commit` |
 | `/swt:flow digest` | Create session summary | `swt:digest` |
-| `/swt:flow link-dev` | Global dev setup (Ongoing Dev) | `swt:link` |
+| `/swt:flow symlink` | Global dev setup (--global --clear) | `swt:link` |
 | `/swt:flow query` | Semantic structural search | `swt:graphify` |
 
 ---

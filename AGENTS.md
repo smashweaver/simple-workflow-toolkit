@@ -5,14 +5,14 @@ This document defines the core principles and behavioral protocols for AI coding
 ## 1. Core Principles
 
 1.  **Plan First**: Never start implementation without a detailed, peer-reviewed plan.
-2.  **Surgical Changes**: Touch only what you must. Avoid "cleaning up" adjacent code unless it's part of the task. **Mandatory Cleanup**: All temporary testing artifacts (temp tasks, scratch scripts, etc.) must be deleted before finalizing the task. Root planning artifacts (`implementation_plan.md`, `task.md`) are automatically cleaned up by `swt.sh close/abandon`.
+2.  **Surgical Changes**: Touch only what you must. Avoid "cleaning up" adjacent code unless it's part of the task. **Mandatory Cleanup**: All temporary testing artifacts (temp tasks, scratch scripts, etc.) must be deleted before finalizing the task. Root planning artifacts (`implementation_plan.md`, `task.md`) are automatically cleaned up by `/swt:flow close`.
 3.  **Simplicity Over Specification**: No speculative features or premature abstractions.
 4.  **Verifiable Outcomes**: Every change must have a clear path to verification (tests or checklists).
 5.  **Gitignored Awareness**: Runtime directories (`.digests/`, `.tasks/`) are gitignored. Use `bash ls` + `read` for these — glob/search tools will return empty results.
 6.  **Ritual Discipline**: "Mandatory" means mandatory. Never skip a re-read step, self-correction pass, or consent gate, even if you feel "familiar" with the context.
-13. **Exclusive Gateway**: You are FORBIDDEN from manually editing the `Phase` header in task files. All phase transitions MUST be executed via `swt:task phase <N> <task_file>`. The `validate` script reads the historical breadcrumb logs and physically blocks execution if the header was manually forged (e.g. Header Phase != Latest Ritual Log) or phases were skipped.
-14. **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `skills/swt-task/scripts/task.sh validate`. Validation includes checks for Phase Forgery and Phantom Artifacts.
-9.  **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation. **Mandatory Repopulation**: When an artifact is reset/re-scaffolded (e.g. via `sync-downstream`), the agent MUST immediately re-populate it with the current technical context to maintain continuity.
+13. **Exclusive Gateway**: You are FORBIDDEN from manually editing the `Phase` header in task files. All phase transitions MUST be executed via `/swt:flow phase <N> <task_file>`. The `validate` script reads the historical breadcrumb logs and physically blocks execution if the header was manually forged (e.g. Header Phase != Latest Ritual Log) or phases were skipped.
+14. **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `/swt:flow audit`. Validation includes checks for Phase Forgery and Phantom Artifacts.
+9.  **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation. **Mandatory Repopulation**: When an artifact is reset/re-scaffolded (e.g. via `/swt:flow sync-docs`), the agent MUST immediately re-populate it with the current technical context to maintain continuity.
 10. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1), `protocol.md` (Phase 1), and `task.md` (Phase 5). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
 11. **Task Separation of Concerns**: The root `task.md` artifact is an ephemeral "Live Checklist" for human and cross-agent verification. The `protocol.md` is an ephemeral "Tactical Roadmap" for execution. The internal `.tasks/<timestamp>_task.md` remains the persistent "Source of Truth" for ritual metadata and state tracking. Root artifacts are automatically removed upon task completion.
 
@@ -26,7 +26,7 @@ Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot
     The agent must NEVER answer ad-hoc without offering task tracking first.
     Detection is lightweight — only trigger when the message clearly implies work.
 *   **No Autonomous Structural Changes**: The agent is FORBIDDEN from executing structural changes (git init, mkdir for skeletons, major refactors) without a direct, verbal "Go" or "Approved" from the user in the chat history.
-*   **`swt:init` Pointer Rule**: When initializing a project, always use `/swt:init` to create the mandatory `AGENTS.md` and its associated discovery pointers (`GEMINI.md`, `CLAUDE.md`).
+*   **`swt:init` Pointer Rule**: When initializing a project, always use `/swt:flow setup` to create the mandatory `AGENTS.md` and its associated discovery pointers (`GEMINI.md`, `CLAUDE.md`).
 *   **Manual Consent Overrides System Flags**: Even if the agent generates a plan that is "auto-approved" by the system, it MUST halt and request manual confirmation for any structural modification.
 *   **Locked Gate Protocol**: When a structural junction is reached, the agent must halt and state: *"I am at a Locked Gate. This change is structural. Do I have your approval to proceed?"*
 *   **Task-Centric Flow**: All work maps to an active task file in `.tasks/`.
@@ -284,6 +284,7 @@ Verify that the MVP meets the objective. Polish the implementation based on user
 *   **Trigger**: After Phase 8 is complete and the user confirms they are finished refining.
 *   **Action**: Initiate the `/swt:commit` workflow.
 *   **Goal**: The commit is the final act. Never rush to commit before Gate 4 is cleared.
+
 ### 3.3 SWT Loop Terminology
 
 The workflow defines 5 named iteration loops:
@@ -294,16 +295,16 @@ The workflow defines 5 named iteration loops:
 | **Planning Loop** | 1 | Artifact generation + doc target identification. Agent scans repo for existing docs, cross-references against task scope, records targets in `implementation_plan.md`. Scaffolds `protocol.md` for tactical execution. User reviews/tweaks artifacts AND doc targets before Gate 2. |
 | **Analysis Loop** | 2-3 | Agent analyzes SPEC.md + `implementation_plan.md` (impact on components, state, performance, API), assesses risks, presents findings. Gate 2 HARD STOP — user approves before Phase 4. Phases 2 and 3 are separate. |
 | **Document Refresh Protocol** | All | For all template-backed SWT documents: the agent MUST use the surgical `crow.py` patcher to update specific sections (identified by `## Header`) and metadata. Direct overwriting of documents is STRICTLY FORBIDDEN to ensure manual human edits are preserved. |
-| **Commit Loop** | 8 → Gate 5 | Agent invokes `swt:commit` skill only — NEVER uses `git commit` directly. Draft-and-Approve protocol: agent drafts `commit.draft` → user fine-tunes → agent applies on approval. |
+| **Commit Loop** | 8 → Gate 5 | Agent invokes `/swt:flow commit` skill only — NEVER uses `git commit` directly. Draft-and-Approve protocol: agent drafts `commit.draft` → user fine-tunes → agent applies on approval. |
 
 ## 4. The Light Bulb Iteration Loop
 
 If the Task objectives change after Phase 1 (e.g., a "Light Bulb Moment" during implementation), the agent MUST loop back to synchronize downstream artifacts:
 
 1.  **Update Task**: Log the new ideas in the task file.
-2.  **Sync Downstream**: Run `swt:task sync-downstream <file>` to propagate changes to the Spec and Implementation Plan. **Mandatory Reset**: This command physically resets the Task Phase to 1.
+2.  **Sync Downstream**: Run `/swt:flow sync-docs <file>` to propagate changes to the Spec and Implementation Plan. **Mandatory Reset**: This command physically resets the Task Phase to 1.
 3.  **Gate 2 Reset**: Treat the new Plan as unapproved. You MUST perform a **HARD STOP** and obtain user approval for the updated architecture before resuming implementation.
-4.  **Stale Enforcement**: The `validate` command will physically block execution if the Task is newer than the Spec or the Spec is newer than the Plan.
+4.  **Stale Enforcement**: The `/swt:flow audit` command will physically block execution if the Task is newer than the Spec or the Spec is newer than the Plan.
 
 ## 5. Workspaces & Projects
 
@@ -322,11 +323,11 @@ This repository provides a comprehensive suite of workflow skills. Agents must b
 ## 7. Commit Discipline
 
 > 🚫 **Forbidden:** Agents are STRICTLY FORBIDDEN from using standard `git commit -m` commands directly. All commits must go through the Draft-and-Approve protocol below.
-> 💡 **Enforce Default:** Whenever prompted for a git commit or help with a git commit message, agents MUST default to invoking the `/swt:commit` skill. Presenting a "naked" `git commit -m` command in the chat without the Draft-and-Approve ritual is a **PROTOCOL VIOLATION**.
+> 💡 **Enforce Default:** Whenever prompted for a git commit or help with a git commit message, agents MUST default to invoking the `/swt:flow commit` skill. Presenting a "naked" `git commit -m` command in the chat without the Draft-and-Approve ritual is a **PROTOCOL VIOLATION**.
 
 All commits follow the **Diff-First, Draft-and-Approve** protocol. There is a strict separation of concerns: `commit.draft` is ONLY for the human-readable, impact-focused commit message, while `commit.task` is ONLY for automation metadata (e.g., `Closes: .tasks/...`). Do not mix them.
 
-> 🛑 **Gate 5 Rule:** A commit is the absolute final act of a task. Never invoke `/swt:commit` until Phase 8 (Review & Refine) is fully verified and explicitly closed by the user.
+> 🛑 **Gate 5 Rule:** A commit is the absolute final act of a task. Never invoke `/swt:flow commit` until Phase 8 (Review & Refine) is fully verified and explicitly closed by the user.
 
 1. Stage changes with `git add .` (never per-file `git add <path>` — respects `.gitignore` and prevents ignored files from leaking into commits).
 2. Export `commit.diff`.
@@ -354,13 +355,13 @@ Before discussing any task or reviewing code, the agent MUST:
 ### 2. Context Restoration (On-Demand)
 When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"*), the agent MUST:
 1. **Invoke the `/swt:flow status` command** to aggregate latest digest, tasks, and specs.
-2. **Execute Task Validation**: The status skill automatically runs `task.sh validate` for all active tasks.
+2. **Execute Task Validation**: The status skill automatically runs `/swt:flow audit` for all active tasks.
 3. **Summarize status** based on the aggregated report.
-4. **Manual Milestone Ritual**: The `swt:status` skill provides a state summary but does NOT automatically trigger a new digest. Digests are manual rituals reserved for logical session ends or major milestones.
+4. **Manual Milestone Ritual**: The `/swt:flow status` command provides a state summary but does NOT automatically trigger a new digest. Digests are manual rituals reserved for logical session ends or major milestones.
 5. **HARD STOP**: Inform the user and wait for explicit confirmation before starting any implementation or planning work.
 
 ### 3. Ephemeral Artifact Enforcement (Scenario C)
-To prevent ritual bypasses, the toolkit enforces the presence of root artifacts during key phases. `task.sh validate` and `task.sh phase` will block execution if these files are missing from the project root. All artifacts are scaffolded from standard templates in `skills/swt-task/templates/`:
+To prevent ritual bypasses, the toolkit enforces the presence of root artifacts during key phases. `/swt:flow audit` and `/swt:flow phase` will block execution if these files are missing from the project root. All artifacts are scaffolded from standard templates in `skills/swt-task/templates/`:
 
 - **Phase 1-8**: Requires `implementation_plan.md` at project root (auto-scaffolded by `graduate`).
 - **Phase 1-8**: Requires `protocol.md` at project root (auto-scaffolded by `graduate`). Tactical roadmap and Commit Gut Check.
@@ -368,7 +369,7 @@ To prevent ritual bypasses, the toolkit enforces the presence of root artifacts 
 - **Verification Proof**: Phase 8 (Review) requires a successful `Test Ritual Log` that is newer than the latest code change. Agents are physically blocked from proceeding to Review without proof of verification.
 
 > [!CAUTION]
-> **Phantom Artifacts**: If a required artifact is found in a hidden directory (e.g., `.gemini/`, `.agents/`, `.claude/`) but is missing from the root, `validate` will fail. You MUST move artifacts to the project root to pass verification.
+> **Phantom Artifacts**: If a required artifact is found in a hidden directory (e.g., `.gemini/`, `.agents/`, `.claude/`) but is missing from the root, `/swt:flow audit` will fail. You MUST move artifacts to the project root to pass verification.
 
 
 ## 9. Developing the Toolkit
@@ -397,7 +398,7 @@ New skills or changes to existing skills must be verified by:
 Update the root `README.md` and `AGENTS.md` if a new skill is added or a core methodology change is made.
 
 ### 5. Symlink Maintenance
-After committing updates to this repository, run `swt:link --clear --global` to refresh symlinks across all agent discovery paths (`.agents/`, `.claude/`). This ensures the live skill changes are immediately available for dogfooding.
+After committing updates to this repository, run `/swt:flow symlink` to refresh symlinks across all agent discovery paths (`.agents/`, `.claude/`). This ensures the live skill changes are immediately available for dogfooding.
 
 ## 10. Structural Changes & Manual Consent (HITL)
 
@@ -419,7 +420,7 @@ To prevent "runaway" agent behavior, all structural modifications are protected 
 
 To prevent "Verification Forgery," all toolkit outcomes must be proven via physical evidence.
 
-1. **Test Ritual Logs**: Every successful verification MUST be logged in the task file via `swt:task test <file>`. This command captures raw output to `.tests/` and appends a ritual breadcrumb.
+1. **Test Ritual Logs**: Every successful verification MUST be logged in the task file via `/swt:flow test`. This command captures raw output to `.tests/` and appends a ritual breadcrumb.
 2. **Staleness Gate**: The toolkit physically blocks the transition to Phase 8 (Review) if the latest code modification is newer than the latest recorded test pass.
 3. **Evidence Requirement**: Agents are FORBIDDEN from stating "Tests passed" without providing a link to the corresponding log file in `.tests/`.
 

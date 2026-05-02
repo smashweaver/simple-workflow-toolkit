@@ -48,7 +48,7 @@ swt/
 │   ├── swt-task/           # Task Manager (backlog, history, archive)
 │   ├── swt-status/         # Project state & heartbeat (pulse)
 │   ├── swt-init/           # Workspace bootstrap (AGENTS.md)
-│   ├── swt-link/           # Skill linker (setup, link-dev)
+│   ├── swt-link/           # Skill linker (setup, symlink)
 │   ├── swt-spec/           # Idea-to-specification (SPEC.md)
 │   ├── swt-code/           # Surgical coding guidelines
 │   ├── swt-graphify/       # Structural awareness (query, explain, path)
@@ -98,8 +98,8 @@ MIT
 
 ### Ongoing Development Setup
 
-If you are developing the toolkit itself, use the **`link-dev`** shortcut to keep your global agent environment in sync with your local changes:
+If you are developing the toolkit itself, use the **`symlink`** shortcut to keep your global agent environment in sync with your local changes:
 
 ```bash
-/swt:flow link-dev      # System-wide dev setup (--global --clear)
+/swt:flow symlink      # System-wide dev setup (--global --clear)
 ```
