@@ -156,6 +156,7 @@ case $CMD in
     graph-off) shift; delegate "skills/swt-graphify/scripts/graphify.sh" off "$@" ;;
     graph-check) shift; delegate "skills/swt-graphify/scripts/graphify.sh" verify "$@" ;;
     graph-wipe) shift; delegate "skills/swt-graphify/scripts/graphify.sh" uninstall "$@" ;;
+    commit) shift; delegate "skills/swt-commit/scripts/commit.sh" "$@" ;;
     query|explain|path) shift; delegate "skills/swt-graphify/scripts/graphify.sh" "$CMD" "$@" ;;
 
     # Legacy / Internal
