@@ -293,7 +293,7 @@ The workflow defines 5 named iteration loops:
 | **Brainstorm Loop** | 0 | Task file iteration cycle. Agent updates task with notes, jailbreak patterns, objective refinements. Two behaviors: (1) update current task if user prompt pertains to it, (2) offer new brainstorm task for unrelated issues. |
 | **Planning Loop** | 1 | Artifact generation + doc target identification. Agent scans repo for existing docs, cross-references against task scope, records targets in `implementation_plan.md`. Scaffolds `protocol.md` for tactical execution. User reviews/tweaks artifacts AND doc targets before Gate 2. |
 | **Analysis Loop** | 2-3 | Agent analyzes SPEC.md + `implementation_plan.md` (impact on components, state, performance, API), assesses risks, presents findings. Gate 2 HARD STOP — user approves before Phase 4. Phases 2 and 3 are separate. |
-| **Document Refresh Protocol** | All | For all template-backed SWT documents: agent appends intended content, then reformats entire document using backing template via `Write` tool. Eliminates Edit tool failures on special characters and structural divergence. |
+| **Document Refresh Protocol** | All | For all template-backed SWT documents: the agent MUST use the surgical `crow.py` patcher to update specific sections (identified by `## Header`) and metadata. Direct overwriting of documents is STRICTLY FORBIDDEN to ensure manual human edits are preserved. |
 | **Commit Loop** | 8 → Gate 5 | Agent invokes `swt:commit` skill only — NEVER uses `git commit` directly. Draft-and-Approve protocol: agent drafts `commit.draft` → user fine-tunes → agent applies on approval. |
 
 ## 4. The Light Bulb Iteration Loop

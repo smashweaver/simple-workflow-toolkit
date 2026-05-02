@@ -471,8 +471,12 @@ if [ "$CMD" == "graduate" ]; then
     fi
 
     # 1. Update status to pending and phase to 1
-    sed -i -E "s/^\*\*Status\*\*:\s*ideating/**Status**: pending/" "$FILE"
-    sed -i -E "s/^\*\*Phase\*\*:\s*0/**Phase**: 1/" "$FILE"
+    if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
+        uv run "$ROOT_DIR/skills/swt-task/scripts/crow.py" "$FILE" --meta "Status" "pending" --meta "Phase" "1"
+    else
+        sed -i -E "s/^\*\*Status\*\*:\s*ideating/**Status**: pending/" "$FILE"
+        sed -i -E "s/^\*\*Phase\*\*:\s*0/**Phase**: 1/" "$FILE"
+    fi
     
     # 2. Add Ritual Log
     log_ritual "phase 1" "$FILE"
@@ -513,15 +517,28 @@ d}" "$file"
             fi
         }
 
-        inject_section "{{PROBLEM_STATEMENT}}" "$CORE" "$SPEC_FILE"
-        inject_section "{{GOALS}}" "$GOALS" "$SPEC_FILE"
-        inject_section "{{PROPOSED_SOLUTION}}" "$ALT" "$SPEC_FILE"
-        inject_section "{{USER_STORIES}}" "$STORIES" "$SPEC_FILE"
-        inject_section "{{SUCCESS_CRITERIA}}" "$CRITERIA" "$SPEC_FILE"
-        inject_section "{{MVP}}" "$MVP" "$SPEC_FILE"
-        inject_section "{{NOTES}}" "$NOTES" "$SPEC_FILE"
+        # Use crow.py for surgical patching if available
+        if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
+            uv run "$ROOT_DIR/skills/swt-task/scripts/crow.py" "$SPEC_FILE" \
+                --patch "1. Problem Statement" "$CORE" \
+                --patch "2. Goals" "$GOALS" \
+                --patch "3. Proposed Solution" "$ALT" \
+                --patch "4. User Stories" "$STORIES" \
+                --patch "8. Success Criteria" "$CRITERIA" \
+                --patch "12. MVP Definition" "$MVP" \
+                --patch "6. Implementation Plan" "$NOTES"
+        else
+            # Legacy fallback
+            inject_section "{{PROBLEM_STATEMENT}}" "$CORE" "$SPEC_FILE"
+            inject_section "{{GOALS}}" "$GOALS" "$SPEC_FILE"
+            inject_section "{{PROPOSED_SOLUTION}}" "$ALT" "$SPEC_FILE"
+            inject_section "{{USER_STORIES}}" "$STORIES" "$SPEC_FILE"
+            inject_section "{{SUCCESS_CRITERIA}}" "$CRITERIA" "$SPEC_FILE"
+            inject_section "{{MVP}}" "$MVP" "$SPEC_FILE"
+            inject_section "{{NOTES}}" "$NOTES" "$SPEC_FILE"
+        fi
 
-        echo "Graduated $FILE to Phase 1. Spec created from template: $SPEC_FILE"
+        echo "Graduated $FILE to Phase 1. Spec created: $SPEC_FILE"
         xdg-open "$SPEC_FILE" &
         
         # Scaffold implementation plan and protocol
@@ -529,7 +546,11 @@ d}" "$file"
         scaffold_artifact "protocol" "$FILE"
         
         # Add Spec link to task header (below Phase)
-        sed -i -E "/^\*\*Phase\*\*:/a **Spec**: $SPEC_FILE" "$FILE"
+        if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
+            uv run "$ROOT_DIR/skills/swt-task/scripts/crow.py" "$FILE" --meta "Spec" "$SPEC_FILE"
+        else
+            sed -i -E "/^\*\*Phase\*\*:/a **Spec**: $SPEC_FILE" "$FILE"
+        fi
         
         # Append standard checklist if missing
         if ! grep -q "## Checklist" "$FILE"; then
@@ -583,34 +604,45 @@ if [ "$CMD" == "sync-downstream" ]; then
     NOTES=$(sed -n '/^## Notes/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -20)
 
     # Re-inject into existing Spec (patching the slots)
-    # Since we can't easily "patch" multiline without a fresh scaffold, 
-    # we'll re-scaffold from template but preserving the Spec filename.
-    template_path="$ROOT_DIR/skills/swt-task/templates/spec.md"
-    if [ -f "$template_path" ]; then
-        cp "$template_path" "$SPEC_FILE"
-        sed -i "s|{{Task Slug}}|$SLUG|g" "$SPEC_FILE"
-        sed -i "s|{{Task File}}|$FILE|g" "$SPEC_FILE"
-        
-        inject_section() {
-            local tag=$1; local content=$2; local file=$3
-            if [ -n "$content" ]; then
-                echo "$content" > .content.tmp
-                sed -i "/$tag/{r .content.tmp
-d}" "$file"
-                rm .content.tmp
-            else
-                sed -i "s|$tag|*|g" "$file"
-            fi
-        }
+    if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
+        uv run "$ROOT_DIR/skills/swt-task/scripts/crow.py" "$SPEC_FILE" \
+            --patch "1. Problem Statement" "$CORE" \
+            --patch "2. Goals" "$GOALS" \
+            --patch "3. Proposed Solution" "$ALT" \
+            --patch "4. User Stories" "$STORIES" \
+            --patch "8. Success Criteria" "$CRITERIA" \
+            --patch "12. MVP Definition" "$MVP" \
+            --patch "6. Implementation Plan" "$NOTES"
+        echo "✅ Spec updated surgically: $SPEC_FILE"
+    else
+        # Legacy re-scaffold logic
+        template_path="$ROOT_DIR/skills/swt-task/templates/spec.md"
+        if [ -f "$template_path" ]; then
+            cp "$template_path" "$SPEC_FILE"
+            sed -i "s|{{Task Slug}}|$SLUG|g" "$SPEC_FILE"
+            sed -i "s|{{Task File}}|$FILE|g" "$SPEC_FILE"
+            
+            inject_section() {
+                local tag=$1; local content=$2; local file=$3
+                if [ -n "$content" ]; then
+                    echo "$content" > .content.tmp
+                    sed -i "/$tag/{r .content.tmp
+    d}" "$file"
+                    rm .content.tmp
+                else
+                    sed -i "s|$tag|*|g" "$file"
+                fi
+            }
 
-        inject_section "{{PROBLEM_STATEMENT}}" "$CORE" "$SPEC_FILE"
-        inject_section "{{GOALS}}" "$GOALS" "$SPEC_FILE"
-        inject_section "{{PROPOSED_SOLUTION}}" "$ALT" "$SPEC_FILE"
-        inject_section "{{USER_STORIES}}" "$STORIES" "$SPEC_FILE"
-        inject_section "{{SUCCESS_CRITERIA}}" "$CRITERIA" "$SPEC_FILE"
-        inject_section "{{MVP}}" "$MVP" "$SPEC_FILE"
-        inject_section "{{NOTES}}" "$NOTES" "$SPEC_FILE"
-        echo "✅ Spec updated: $SPEC_FILE"
+            inject_section "{{PROBLEM_STATEMENT}}" "$CORE" "$SPEC_FILE"
+            inject_section "{{GOALS}}" "$GOALS" "$SPEC_FILE"
+            inject_section "{{PROPOSED_SOLUTION}}" "$ALT" "$SPEC_FILE"
+            inject_section "{{USER_STORIES}}" "$STORIES" "$SPEC_FILE"
+            inject_section "{{SUCCESS_CRITERIA}}" "$CRITERIA" "$SPEC_FILE"
+            inject_section "{{MVP}}" "$MVP" "$SPEC_FILE"
+            inject_section "{{NOTES}}" "$NOTES" "$SPEC_FILE"
+            echo "✅ Spec updated (destructive fallback): $SPEC_FILE"
+        fi
     fi
 
     # 2. Re-sync Implementation Plan and Protocol
@@ -620,7 +652,11 @@ d}" "$file"
     
     # 3. Physically reset Task to Phase 1
     echo "🔄 Resetting Task to Phase 1 due to objective change..."
-    sed -i -E "s/^\*\*Phase\*\*:\s*[0-8]/**Phase**: 1/" "$FILE"
+    if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
+        uv run "$ROOT_DIR/skills/swt-task/scripts/crow.py" "$FILE" --meta "Phase" "1"
+    else
+        sed -i -E "s/^\*\*Phase\*\*:\s*[0-8]/**Phase**: 1/" "$FILE"
+    fi
     sed -i "s/- \[[x /]\] Phase [0-8]/- [ ] Phase [0-8]/g" "$FILE"
     sed -i "s/- \[ \] Phase 1/- [\/] Phase 1/" "$FILE"
     log_ritual "phase 1" "$FILE" "(Reset via sync-downstream)"
@@ -777,7 +813,11 @@ if [ "$CMD" == "phase" ]; then
     fi
 
     # 1. Update Phase header
-    sed -i -E "s/^\*\*?Phase\*\*?:\s*[0-8]/**Phase**: $PHASE_NUM/" "$FILE"
+    if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
+        uv run "$ROOT_DIR/skills/swt-task/scripts/crow.py" "$FILE" --meta "Phase" "$PHASE_NUM"
+    else
+        sed -i -E "s/^\*\*?Phase\*\*?:\s*[0-8]/**Phase**: $PHASE_NUM/" "$FILE"
+    fi
 
     # 2. Update Checklist (mark current phase as in-progress [/])
     # First, reset any other in-progress phases if appropriate (optional)
