@@ -1,5 +1,5 @@
-# Tactical Roadmap: {{Task Name}}
-**Spec**: {{Spec Link}}
+# Tactical Roadmap: {{Task Title}}
+**Spec**: {{Spec File}}
 
 > This is an ephemeral execution protocol. It provides the tactical roadmap for implementation and ensures ritual compliance. 
 > **Mandatory Cleanup**: This file must be deleted before finalizing the task.
@@ -17,17 +17,25 @@ Break the implementation into 3-5 logical chunks. Pause and perform a **Locked G
 - [ ] **Chunk 5**: [Description]
 
 ## 3. Commit Discipline Gut Check (MANDATORY)
-Before initiating `/swt:flow commit`, you MUST perform a self-audit against these guidelines. **Failure to follow these will result in a Protocol Breach.**
+Before initiating `/swt:flow commit`, you MUST perform the **Double-Pass Drafting** ritual. **Failure to follow these will result in a Protocol Breach.**
+
+### The Double-Pass Ritual
+1. **Pass 1 (The Technical Draft)**: Generate a technical summary of the changes based on the diff and task state.
+2. **Ritual Intermission**: Re-read `swt:commit/SKILL.md`.
+3. **Pass 2 (The Impact Refactor)**: Sanitized the draft into impact-focused bullets.
+   - **Zero Structural Noise**: Remove all file names, extensions, and directory paths.
+   - **Zero Jargon**: Replace technical commands and internal toolkit names with natural language outcomes.
+   - **User Benefit**: Focus on what the user or the developer team gains from this change.
 
 ### Audit Signature (Proof of Compliance)
 Copy and paste this into your session output before drafting:
 
 > **Protocol Audit**:
-> - [x] Re-read `swt:commit/SKILL.md`
-> - [x] Task state validated (`task.sh validate <file>`)
-> - [x] Checked for red flags (no dots/slashes in bullets, no jargon)
-> - [x] Verified Phase 8 (Review & Refine) is closed
-> - [x] Verified **Repo Hygiene** (no leftover trash/temp files)
+> - [ ] Re-read `swt:commit/SKILL.md`
+> - [ ] Task state validated (`task.sh validate <file>`)
+> - [ ] Checked for red flags (no dots/slashes in bullets, no jargon)
+> - [ ] Verified Phase 8 (Review & Refine) is closed
+> - [ ] Verified **Repo Hygiene** (no leftover trash/temp files)
 
 ### Formatting Guardrails
 - [ ] **Title Format**: MUST follow `<type>(<scope>): <summary>` (e.g., `feat(ui): add button`).
@@ -35,7 +43,6 @@ Copy and paste this into your session output before drafting:
 - [ ] **Bullet Syntax**: Use `*` for all bullets (NOT `-`).
 - [ ] **Punctuation Discipline**: No terminal periods at the end of the summary or bullet points.
 - [ ] **Visual Structure**: Mandatory empty line between the header and the first bullet point.
-- [ ] **Formatting Pass**: Perform an explicit self-correction pass on the draft before presenting it to the user.
 
 ## 4. Finality Ritual
 1. Verify Phase 8 (Review & Refine) is complete.
