@@ -1,29 +1,69 @@
 #!/bin/bash
 # swt:flow — Active workflow engine
-# Manages task context (task.ctx) and session restoration
+# Unified Facade for the Simple Workflow Toolkit
 
 set -e
 
 CMD=${1:-""}
 
 function show_help {
-    echo "Usage:"
-    echo "  flow.sh mount <file>      - Set active task context"
-    echo "  flow.sh unmount           - Clear active task context"
-    echo "  flow.sh status            - Show current flow status (ctx + phase)"
-    echo "  flow.sh open              - Read task.ctx and load active task context"
-    echo "  flow.sh view-task [file]  - Open active task (or specified file) in browser"
-    echo "  flow.sh link [args]       - Delegate to swt:link"
-    echo "  flow.sh graphify [args]   - Delegate to swt:graphify"
-    echo "  flow.sh init              - Guidance for project initialization"
+    echo "Usage: /swt:flow <command> [args]"
+    echo ""
+    echo "Workspace & Context:"
+    echo "  status            - Project summary"
+    echo "  pulse             - Status + Git history (Heartbeat)"
+    echo "  context           - Show current active task path"
+    echo "  mount <task>      - Set active task & open browser"
+    echo "  unmount           - Clear active task context"
+    echo "  view-task         - Resolve and open task in browser"
+    echo ""
+    echo "Task Lifecycle:"
+    echo "  new <name>        - Create Implementation Task (Phase 1)"
+    echo "  brainstorm <topic>- Create Ideation Task (Phase 0)"
+    echo "  graduate          - Promote Phase 0 → 1 (+ Spec)"
+    echo "  backlog           - Show all open/active tasks"
+    echo "  history           - Show complete project timeline"
+    echo "  archive           - Show only finished/abandoned tasks"
+    echo ""
+    echo "Ritual Enforcement:"
+    echo "  audit             - Deep ritual/protocol integrity check"
+    echo "  phase <N>         - Manual ritual phase transition"
+    echo "  test              - Run tests via swt.json harness"
+    echo "  test-fail         - Verify test failure (TDD ritual)"
+    echo "  sync              - Sync root task.md checklist"
+    echo "  sync-docs         - Re-sync Spec/Plan after changes"
+    echo "  scaffold <type>   - Manually generate artifacts"
+    echo ""
+    echo "Lifecycle & Hygiene:"
+    echo "  close <hash>      - Finalize task (hash required)"
+    echo "  abandon           - Mark task abandoned & archive"
+    echo "  tidy              - Move closed tasks to archive"
+    echo "  bug               - Report friction to SWT core (Upstream)"
+    echo ""
+    echo "Environment & Continuity:"
+    echo "  digest            - Daily session summary"
+    echo "  milestone         - Full project roll-up"
+    echo "  setup             - Physical workspace setup (.tasks, .specs)"
+    echo "  link-dev          - Global dev setup (--global --clear)"
+    echo "  link              - Link skills into current project"
+    echo "  link-dry          - Preview symlink changes"
+    echo ""
+    echo "Structural Awareness (Graphify):"
+    echo "  graph-init        - Full deep scan and graph build"
+    echo "  graph-up          - Incremental update (Review)"
+    echo "  query <text>      - Semantic structural search"
+    echo "  explain <node>    - Component breakdown"
+    echo "  path <A> <B>      - Relationship between components"
+    echo "  graph-on          - Enable structural rituals"
+    echo "  graph-off         - Disable structural rituals"
 }
 
-if [ -z "$CMD" ]; then
+if [ -z "$CMD" ] || [ "$CMD" == "help" ] || [ "$CMD" == "--help" ]; then
     show_help
-    exit 1
+    exit 0
 fi
 
-# Determine workspace root (look for AGENTS.md or .git)
+# Determine workspace root
 ROOT_DIR=$(pwd)
 while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.git" ]]; do
     ROOT_DIR=$(dirname "$ROOT_DIR")
@@ -39,160 +79,99 @@ function resolve_task_path() {
         fi
     fi
 
-    # Resolve task file: try as-is, then .tasks/<name>.md, .tasks/<name>, .tasks/archive/<name>.md, .tasks/archive/<name>
-    if [ -f "$ROOT_DIR/$task_input" ]; then
-        echo "$ROOT_DIR/$task_input"
-    elif [ -f "$ROOT_DIR/.tasks/${task_input}.md" ]; then
-        echo "$ROOT_DIR/.tasks/${task_input}.md"
-    elif [ -f "$ROOT_DIR/.tasks/${task_input}" ]; then
-        echo "$ROOT_DIR/.tasks/${task_input}"
-    elif [ -f "$ROOT_DIR/.tasks/archive/${task_input}.md" ]; then
-        echo "$ROOT_DIR/.tasks/archive/${task_input}.md"
-    elif [ -f "$ROOT_DIR/.tasks/archive/${task_input}" ]; then
-        echo "$ROOT_DIR/.tasks/archive/${task_input}"
-    else
-        return 1
-    fi
+    if [ -f "$ROOT_DIR/$task_input" ]; then echo "$ROOT_DIR/$task_input"
+    elif [ -f "$ROOT_DIR/.tasks/${task_input}.md" ]; then echo "$ROOT_DIR/.tasks/${task_input}.md"
+    elif [ -f "$ROOT_DIR/.tasks/${task_input}" ]; then echo "$ROOT_DIR/.tasks/${task_input}"
+    elif [ -f "$ROOT_DIR/.tasks/archive/${task_input}.md" ]; then echo "$ROOT_DIR/.tasks/archive/${task_input}.md"
+    elif [ -f "$ROOT_DIR/.tasks/archive/${task_input}" ]; then echo "$ROOT_DIR/.tasks/archive/${task_input}"
+    else return 1; fi
 }
 
-function delegate_to_skill() {
-    local skill_script=$1
+function delegate() {
+    local script=$1
     shift
-    if [ -f "$ROOT_DIR/$skill_script" ]; then
-        bash "$ROOT_DIR/$skill_script" "$@"
-    else
-        echo "❌ Error: Skill script not found at $skill_script"
-        exit 1
-    fi
+    bash "$ROOT_DIR/$script" "$@"
 }
 
-if [ "$CMD" == "open" ]; then
-    RESOLVED=$(resolve_task_path)
-    if [ $? -ne 0 ]; then
-        echo "No active task context (task.ctx not found)."
-        echo "Use '/swt:flow mount <task_file>' to set an active task."
-        exit 0
-    fi
-
-    echo "--- Active Task Context ---"
-    echo "Task: $(basename "$RESOLVED")"
-    echo ""
-
-    # Extract and display key metadata
-    STATUS=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
-    PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$RESOLVED" | head -n 1)
-    TYPE=$(grep -oP '^\*\*?Type\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
-    PRIORITY=$(grep -oP '^\*\*?Priority\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
-
-    echo "Status: $STATUS | Phase: $PHASE | Type: $TYPE | Priority: $PRIORITY"
-    
-    # Allowed Next Phases based on State Machine
-    case $PHASE in
-        0) NEXT_PHASES="Phase 1 (via graduate)" ;;
-        1) NEXT_PHASES="Phase 2 (Analyze)" ;;
-        2) NEXT_PHASES="Phase 3 (Risk)" ;;
-        3) NEXT_PHASES="Gate 2 (Architecture Loop / Phase 4)" ;;
-        4) NEXT_PHASES="Phase 5 (Implement)" ;;
-        5) NEXT_PHASES="Phase 6 (Document)" ;;
-        6) NEXT_PHASES="Phase 7 (Test)" ;;
-        7) NEXT_PHASES="Phase 8 (Review & Refine)" ;;
-        8) NEXT_PHASES="Gate 5 (Commit) OR Phase 1 (Light Bulb Moment)" ;;
-        *) NEXT_PHASES="Unknown" ;;
-    esac
-    echo "Next Allowed: $NEXT_PHASES"
-    echo ""
-
-    # Show Objective or Core Concept
-    OBJECTIVE=$(grep -A 2 "## Objective" "$RESOLVED" | grep -v "## Objective" | sed '/^$/d' | head -n 1)
-    if [ -z "$OBJECTIVE" ]; then
-        OBJECTIVE=$(grep -A 2 "## Core Concept" "$RESOLVED" | grep -v "## Core Concept" | sed '/^$/d' | head -n 1)
-    fi
-    if [ -n "$OBJECTIVE" ]; then
-        echo "Summary: $OBJECTIVE"
-        echo ""
-    fi
-
-    # Show next unchecked item from checklist
-    NEXT=$(grep -m 1 "\[ \]" "$RESOLVED" | sed 's/.*\[ \] //' || true)
-    if [ -n "$NEXT" ]; then
-        echo "Next Step: $NEXT"
-    fi
-
-    exit 0
-fi
-
-if [ "$CMD" == "check" ]; then
-    RESOLVED=$(resolve_task_path)
-    if [ $? -ne 0 ]; then
-        echo "No active task context."
-        exit 1
-    fi
-
-    echo "Active context: $(basename "$RESOLVED")"
-    exit 0
-fi
-
-if [ "$CMD" == "view-task" ]; then
-    RESOLVED=$(resolve_task_path "$2")
-    if [ $? -ne 0 ]; then
-        echo "❌ Error: Could not resolve task path."
-        exit 1
-    fi
-    
-    echo "Opening task in browser: $(basename "$RESOLVED")"
-    xdg-open "$RESOLVED" &>/dev/null || open "$RESOLVED" &>/dev/null || echo "⚠️ Could not open browser automatically. Path: $RESOLVED"
-    
-    # If there is a Spec: link, open it too
-    SPEC_FILE=$(grep -oP '^\*\*?Spec\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
-    if [ -n "$SPEC_FILE" ] && [ -f "$ROOT_DIR/$SPEC_FILE" ]; then
-        echo "Opening companion spec: $(basename "$SPEC_FILE")"
-        xdg-open "$ROOT_DIR/$SPEC_FILE" &>/dev/null || open "$ROOT_DIR/$SPEC_FILE" &>/dev/null || true
-    fi
-    exit 0
-fi
-
-if [ "$CMD" == "init" ]; then
-    echo "--- SWT Project Initialization ---"
-    echo "The '/swt:init' command is a behavioral directive for your AI agent."
-    echo ""
-    echo "1. Describe your project to the agent."
-    echo "2. The agent will interview you to determine the workspace type."
-    echo "3. It will then scaffold the mandatory AGENTS.md and discovery pointers."
-    echo ""
-    echo "To begin, say: \"Bootstrap this project using /swt:init\""
-    exit 0
-fi
-
-# Orchestrator Routing
 case $CMD in
-    new|brainstorm|graduate|phase|validate|list|ctx|mount|unmount|tidy|abandon|test|sync|sync-downstream|scaffold)
-        delegate_to_skill "skills/swt-task/scripts/task.sh" "$@"
-        exit 0
+    # Workspace & Context
+    status) shift; delegate "skills/swt-status/scripts/status.sh" "$@" ;;
+    pulse) shift; delegate "skills/swt-status/scripts/status.sh" --git "$@" ;;
+    context) shift; delegate "skills/swt-task/scripts/task.sh" ctx show "$@" ;;
+    mount) shift; delegate "skills/swt-task/scripts/task.sh" mount "$@" ;;
+    unmount) shift; delegate "skills/swt-task/scripts/task.sh" unmount "$@" ;;
+    open) shift; # Internal flow.sh logic
+        RESOLVED=$(resolve_task_path)
+        if [ $? -ne 0 ]; then echo "No active task context."; exit 0; fi
+        echo "--- Active Task Context ---"
+        echo "Task: $(basename "$RESOLVED")"
+        grep -E "^\*\*?(Status|Phase|Type|Priority)\*\*?:" "$RESOLVED"
+        echo ""
+        grep -A 1 "## Objective" "$RESOLVED" | grep -v "## Objective" | sed '/^$/d' | head -1
+        grep -m 1 "\[ \]" "$RESOLVED" | sed 's/.*\[ \] /Next: /'
         ;;
-    status)
-        shift
-        delegate_to_skill "skills/swt-status/scripts/status.sh" "$@"
-        exit 0
+    view-task) shift; # Internal flow.sh logic
+        RESOLVED=$(resolve_task_path "$1")
+        if [ $? -ne 0 ]; then echo "❌ Error: Could not resolve task."; exit 1; fi
+        xdg-open "$RESOLVED" &>/dev/null || open "$RESOLVED" &>/dev/null || true
+        SPEC_FILE=$(grep -oP '^\*\*?Spec\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
+        if [ -n "$SPEC_FILE" ] && [ -f "$ROOT_DIR/$SPEC_FILE" ]; then
+            xdg-open "$ROOT_DIR/$SPEC_FILE" &>/dev/null || open "$ROOT_DIR/$SPEC_FILE" &>/dev/null || true
+        fi
         ;;
-    digest)
-        shift
-        delegate_to_skill "skills/swt-digest/scripts/digest.sh" "$@"
-        exit 0
+
+    # Task Lifecycle
+    new|brainstorm|graduate) shift; delegate "skills/swt-task/scripts/task.sh" "$CMD" "$@" ;;
+    backlog) shift; delegate "skills/swt-task/scripts/task.sh" list --open "$@" ;;
+    history) shift; delegate "skills/swt-task/scripts/task.sh" list --all "$@" ;;
+    archive) shift; delegate "skills/swt-task/scripts/task.sh" list --done "$@" ;;
+
+    # Ritual Enforcement
+    audit) shift; delegate "skills/swt-task/scripts/task.sh" validate "$@" ;;
+    phase) shift; delegate "skills/swt-task/scripts/task.sh" phase "$@" ;;
+    test) shift; delegate "skills/swt-task/scripts/task.sh" test "$@" ;;
+    test-fail) shift; delegate "skills/swt-task/scripts/task.sh" test "$@" --fail ;;
+    sync) shift; delegate "skills/swt-task/scripts/task.sh" sync "$@" ;;
+    sync-docs) shift; delegate "skills/swt-task/scripts/task.sh" sync-downstream "$@" ;;
+    scaffold) shift; delegate "skills/swt-task/scripts/task.sh" scaffold "$@" ;;
+
+    # Lifecycle & Hygiene
+    close|abandon|tidy) shift; delegate "skills/swt-task/scripts/task.sh" "$CMD" "$@" ;;
+    bug) shift; delegate "skills/swt-task/scripts/task.sh" brainstorm "$@" --uplink ;;
+
+    # Environment & Continuity
+    digest) shift; delegate "skills/swt-digest/scripts/digest.sh" "$@" ;;
+    milestone) shift; delegate "skills/swt-digest/scripts/digest.sh" --milestone "$@" ;;
+    setup) shift; delegate "skills/swt-task/scripts/task.sh" init "$@" ;;
+    link-dev) shift; delegate "skills/swt-link/scripts/link.sh" --global --clear "$@" ;;
+    link) shift; delegate "skills/swt-link/scripts/link.sh" "$@" ;;
+    link-dry) shift; delegate "skills/swt-link/scripts/link.sh" --dry-run "$@" ;;
+    link-clear) shift; delegate "skills/swt-link/scripts/link.sh" --clear "$@" ;;
+    link-global) shift; delegate "skills/swt-link/scripts/link.sh" --global "$@" ;;
+
+    # Structural Awareness (Graphify)
+    graph-init) shift; delegate "skills/swt-graphify/scripts/graphify.sh" init "$@" ;;
+    graph-up) shift; delegate "skills/swt-graphify/scripts/graphify.sh" update "$@" ;;
+    graph-on) shift; delegate "skills/swt-graphify/scripts/graphify.sh" on "$@" ;;
+    graph-off) shift; delegate "skills/swt-graphify/scripts/graphify.sh" off "$@" ;;
+    graph-check) shift; delegate "skills/swt-graphify/scripts/graphify.sh" verify "$@" ;;
+    graph-wipe) shift; delegate "skills/swt-graphify/scripts/graphify.sh" uninstall "$@" ;;
+    query|explain|path) shift; delegate "skills/swt-graphify/scripts/graphify.sh" "$CMD" "$@" ;;
+
+    # Legacy / Internal
+    init) # swt:init guidance
+        echo "--- SWT Project Initialization ---"
+        echo "The '/swt:init' command is a behavioral directive for your AI agent."
+        echo "To begin, say: \"Bootstrap this project using /swt:init\""
         ;;
-    commit)
-        shift
-        delegate_to_skill "skills/swt-commit/scripts/commit.sh" "$@"
-        exit 0
+    check) shift; # Internal context check
+        RESOLVED=$(resolve_task_path)
+        if [ $? -ne 0 ]; then exit 1; fi
+        echo "Active context: $(basename "$RESOLVED")"
         ;;
-    link)
-        shift
-        delegate_to_skill "skills/swt-link/scripts/link.sh" "$@"
-        exit 0
-        ;;
-    graphify)
-        shift
-        delegate_to_skill "skills/swt-graphify/scripts/graphify.sh" "$@"
-        exit 0
+    *)
+        echo "Unknown command: $CMD"
+        show_help
+        exit 1
         ;;
 esac
-
