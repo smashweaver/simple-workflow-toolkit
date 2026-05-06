@@ -21,10 +21,13 @@ def resolve(task_input, root_dir):
     if os.path.isfile(root_rel_path):
         return os.path.abspath(root_rel_path)
 
-    # 3. Search in .tasks and .tasks/archive
+    # 3. Search in .tasks, .tasks/archive, .digests, and .specs
     search_dirs = [
         os.path.join(root_dir, ".tasks"),
-        os.path.join(root_dir, ".tasks/archive")
+        os.path.join(root_dir, ".tasks/archive"),
+        os.path.join(root_dir, ".digests"),
+        os.path.join(root_dir, ".digests/archive"),
+        os.path.join(root_dir, ".specs")
     ]
     
     # Priority 1: Exact timestamp/prefix match (e.g. 20260506100443)

@@ -73,18 +73,23 @@ done
 function open_browser() {
     local target=$1
     if [ -z "$target" ]; then return 1; fi
+    
+    # Ensure target is an absolute path
+    if [[ "$target" != /* ]]; then
+        target="$ROOT_DIR/$target"
+    fi
 
     echo "🌐 Attempting to open: $(basename "$target")"
     
-    # Try xdg-open first as it was reported to work previously
+    # Try xdg-open first
     if command -v xdg-open >/dev/null 2>&1; then
         if xdg-open "$target" &>/dev/null; then 
-            echo "✅ Opened via xdg-open."
-            return 0
+            echo "✅ Sent to xdg-open."
+            # We don't return here because xdg-open often lies about success
         fi
     fi
 
-    # Fallback to direct browser commands
+    # Fallback to direct browser commands if no graphical window appeared
     if [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; then
         for cmd in firefox google-chrome chromium open; do
             if command -v "$cmd" >/dev/null 2>&1; then
@@ -96,10 +101,11 @@ function open_browser() {
         done
     fi
 
-    # Fallback to terminal display
-    echo "⚠️ Warning: No graphical display detected or browser failed. Falling back to terminal..."
+    # Fallback to terminal display if all else fails
+    if [ ! -f "$target" ]; then return 1; fi
+    echo "⚠️ Warning: Graphical open might have failed. Displaying in terminal..."
     echo "--- Start of Document ---"
-    cat "$target"
+    cat "$target" | head -n 50
     echo "--- End of Document ---"
     return 0
 }
