@@ -65,11 +65,13 @@ The toolkit's documentation is divided into three distinct layers to prevent "Go
 
 | Document | Purpose | Audience |
 |---|---|---|
-| **AGENTS.md** | **Behavioral Methodology** — Rules of engagement, workflow phases, and consent gates. | AI Agents |
+| **AGENTS.md** | **Atomic Methodology** — Rules of engagement, recursive state machine, and consent gates. | AI Agents |
 | **SKILLS.md** | **Operational Catalog** — CLI reference, command table, and usage examples. | Users & Agents |
 | **ARCHITECTURE.md** | **Structural Manifest** — Inheritance model, design patterns, and system rationale. | Contributors & Agents |
 
-## 4. Machine-Readable Manifests
+## 4. Recursive Workflow Rationale
+
+Unlike standard linear workflows, SWT assumes that **understanding is iterative**. The recursive state machine in `AGENTS.md` explicitly models the "Light Bulb Reset" where implementation findings force a loop back to planning. This architecture ensures that agents never "ghost" changes into the codebase without re-aligning the documentation (Specs/Plans) first.
 
 Every skill directory contains a `SKILL.md` file with a YAML frontmatter block. This block identifies the skill's name and its parent in the inheritance hierarchy.
 

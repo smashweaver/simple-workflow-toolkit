@@ -62,7 +62,11 @@ swt/
 
 ## What Makes This Different
 
-Unlike a traditional linter, this suite operates at the **agent behavior level**. It defines the boundaries of AI collaboration, ensuring the agent remains a **Senior Advisor and Co-pilot** while the user maintains final oversight and execution control.
+Unlike a traditional linter, this suite operates at the **agent behavior level**. It defines the boundaries of AI collaboration through a **Recursive State Machine**, ensuring the agent remains a **Senior Advisor and Co-pilot** while the user maintains final oversight and execution control. 
+
+Every session follows a structured plan-approve-implement workflow that explicitly models the "Light Bulb" iteration loop, preventing agent drift and loop jumping.
+
+→ **[See AGENTS.md](./AGENTS.md)** for the full recursive methodology.
 
 ## Architecture & Inheritance
 

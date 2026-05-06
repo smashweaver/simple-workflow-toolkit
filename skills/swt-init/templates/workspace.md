@@ -63,78 +63,115 @@ Shared agreements that all sub-projects must honour. Update this section as cont
 - **Shared data formats**: *(e.g. ISO 8601 dates, snake_case JSON keys)*
 - **Git branching strategy**: *(e.g. `main` = production, `develop` = integration, feature branches per task)*
 
-### 5.1 The Orchestrator: 8-Phase Workflow State Machine
+### 5.1 Recursive State Machine
 
-The **`swt:flow`** skill acts as the toolkit's **Orchestrator**. It does not merely describe a process; it mandates the handoff to specific skills at each junction. The following diagram is the "Orchestration Map" that defines allowed transitions and mandatory gates.
+The workflow is a recursive state machine with nested loops and mandatory "Hard Stop" gates.
 
 ```mermaid
 stateDiagram-v2
-    direction LR
+    direction TD
 
-    state "Phase 0 - Ideate" as P0
-    state "Phase 1 - Plan" as P1
-    state "Phase 2 - Analyze" as P2
-    state "Phase 3 - Risk" as P3
-    state "Phase 4 - Approval" as P4
-    state "Phase 5 - Implement" as P5
-    state "Phase 6 - Document" as P6
-    state "Phase 7 - Test" as P7
-    state "Phase 8 - Review and Refine" as P8
+    state "Phase 0: Ideate" as P0
+    state "Phase 1: Plan" as P1
+    state "Phase 2: Analyze" as P2
+    state "Phase 3: Risk" as P3
+    state "Phase 4: Approval" as P4
+    state "Phase 5: Implement" as P5
+    state "Phase 6: Document" as P6
+    state "Phase 7: Test" as P7
+    state "Phase 8: Refine" as P8
 
-    state "Gate 1 - Alignment" as G1
-    state "Gate 2 - Architecture" as G2
-    state "Gate 3 - Execution" as G3
-    state "Gate 4 - Refinement" as G4
-    state "Gate 5 - Finality" as G5
+    state "Gate 1: Alignment" as G1
+    state "Gate 2: Architecture" as G2
+    state "Gate 3: Execution" as G3
+    state "Gate 4: Refinement" as G4
+    state "Gate 5: Finality" as G5
 
-    [*] --> P0
+    [*] --> P0: Orientation Protocol
 
+    %% The Brainstorm Loop
+    P0 --> P0: Brainstorm Loop
     P0 --> G1
     G1 --> P1
+
+    %% The Planning & Analysis Loops
+    P1 --> P1: Planning Loop
     P1 --> P2
-    P2 --> P3
+    P2 --> P3: Analysis Loop
+    P3 --> P2: Analysis Loop
     P3 --> G2
+
+    %% The Execution Loop
     G2 --> P4
     P4 --> P5
     P5 --> G3
-    G3 --> P5
+    G3 --> P5: Execution Loop
     G3 --> P6
     P6 --> P7
-    P7 --> G4
-    G4 --> P8
-    P8 --> G4
-    P8 --> G5
-    G5 --> [*]
 
-    P0 --> P0
-    P1 --> P1
-    P8 --> P1
+    %% The Light Bulb Iteration Loop (Reset)
+    P5 --> P1: Light Bulb Loop (Reset)
+    P6 --> P1: Light Bulb Loop (Reset)
+    P7 --> P1: Light Bulb Loop (Reset)
+
+    %% The Refinement Loop
+    P7 --> G4
+    G4 --> P8: Refinement Loop
+    P8 --> G4: Refinement Loop
+
+    %% The Commit Loop
+    P8 --> G5
+    G5 --> G5: Self-Correction Loop (Linting)
+    G5 --> [*]: Task Closed
 
     note right of P0
-        Senior Advisor persona.
-        No source code edits allowed.
-        Scenario A B C analysis required.
+        Senior Advisor Persona
+        No code edits allowed
     end note
 
     note right of G2
-        HARD STOP - Gate 2
-        User must say Go or Approved
-        before Phase 4 can begin.
-    end note
-
-    note right of P5
-        Surgical changes only.
-        Follow implementation plan.
-        Gate 3: Execution Loop.
-        Pause between chunks.
+        HARD STOP
+        User Architecture Approval
     end note
 
     note right of G5
-        Commit is the final act.
-        Draft and Approve protocol.
-        Never rush to commit.
+        Draft-and-Approve
+        Zero-Leeway Hygiene
     end note
 ```
+
+---
+
+## 📖 Loop Definitions
+
+### 1. Orientation Protocol ([*] → P0)
+Every new session begins with this recovery cycle. The agent runs `/swt:flow status` to aggregate the latest digests and tasks, reads `task.ctx` to find the active context, and automatically opens relevant docs for the user.
+
+### 2. Brainstorm Loop (Phase 0)
+The ideation cycle where the agent acts as a **Senior Advisor**. It requires a Scenario A/B/C trade-off analysis before graduation.
+
+### 3. Planning & Analysis Loops (Phases 1–3)
+Artifact generation and dependency mapping. Concludes with **Gate 2 (The Architecture Loop)**, a **HARD STOP** where the technical approach must be approved by the user.
+
+### 4. Execution Loop (Phases 5–7)
+The implementation cycle where surgical edits are made. Governed by the `protocol.md` (Tactical Roadmap) and `task.md` (Live Checklist).
+
+### 5. Light Bulb Iteration Loop (Reset Mechanism)
+A critical "Fail-Safe" that triggers if requirements or understanding change mid-implementation. It physically resets the task to Phase 1, forcing a re-approval at Gate 2.
+
+### 6. Refinement Loop (Phase 8)
+A "Polishing" cycle at **Gate 4** where the user can fine-tune implementation or UI tweaks until they explicitly initiate the closure sequence.
+
+### 7. The Commit Loop (Gate 5)
+The finality sequence governing the move from code to history. Includes the **Self-Correction Loop (Linting)** and **Zero-Leeway Hygiene**.
+
+---
+
+### 5.2 Workflow Phases & Consent Gates
+
+To ensure the user maintains control, the workflow is punctuated by **5 Mandatory Consent Gates (HARD STOPS)**. Agents must NEVER blow past these gates, even if they have "automatic approval" capabilities. See `skills/swt-flow/SKILL.md` for the full lifecycle.
+
+**Anti-Circling Rule**: The workflow is strictly forward-moving. You are FORBIDDEN from autonomously reverting to a previous Phase or endlessly looping. If a return to an earlier phase is necessary, you MUST request manual consent from the user before invoking `/swt:flow phase <N> <file>`.
 
 ### 5.2 Workflow Phases & Consent Gates
 
