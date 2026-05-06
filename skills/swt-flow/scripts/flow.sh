@@ -113,7 +113,8 @@ function resolve_task_path() {
         fi
     fi
 
-    if [ -f "$ROOT_DIR/$task_input" ]; then echo "$ROOT_DIR/$task_input"
+    if [[ "$task_input" = /* ]] && [ -f "$task_input" ]; then echo "$task_input"
+    elif [ -f "$ROOT_DIR/$task_input" ]; then echo "$ROOT_DIR/$task_input"
     elif [ -f "$ROOT_DIR/.tasks/${task_input}.md" ]; then echo "$ROOT_DIR/.tasks/${task_input}.md"
     elif [ -f "$ROOT_DIR/.tasks/${task_input}" ]; then echo "$ROOT_DIR/.tasks/${task_input}"
     elif [ -f "$ROOT_DIR/.tasks/archive/${task_input}.md" ]; then echo "$ROOT_DIR/.tasks/archive/${task_input}.md"

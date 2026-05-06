@@ -892,7 +892,8 @@ if [ "$CMD" == "validate" ]; then
     fi
 
     # Resolve Path (mimic flow.sh)
-    if [ -f "$ROOT_DIR/$FILE" ]; then RESOLVED="$ROOT_DIR/$FILE"
+    if [[ "$FILE" = /* ]] && [ -f "$FILE" ]; then RESOLVED="$FILE"
+    elif [ -f "$ROOT_DIR/$FILE" ]; then RESOLVED="$ROOT_DIR/$FILE"
     elif [ -f "$ROOT_DIR/.tasks/${FILE}" ]; then RESOLVED="$ROOT_DIR/.tasks/${FILE}"
     elif [ -f "$ROOT_DIR/.tasks/${FILE}.md" ]; then RESOLVED="$ROOT_DIR/.tasks/${FILE}.md"
     elif [ -f "$ROOT_DIR/.tasks/archive/${FILE}" ]; then RESOLVED="$ROOT_DIR/.tasks/archive/${FILE}"
