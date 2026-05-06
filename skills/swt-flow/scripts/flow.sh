@@ -15,7 +15,8 @@ function show_help {
     echo "  context           - Show current active task path"
     echo "  mount <task>      - Set active task & open browser"
     echo "  unmount           - Clear active task context"
-    echo "  view-task         - Resolve and open task in browser"
+    echo "  open              - Resolve and open task in browser"
+    echo "  peek              - Quick terminal summary of task"
     echo ""
     echo "Task Lifecycle:"
     echo "  new <name>        - Create Implementation Task (Phase 1)"
@@ -113,6 +114,16 @@ function resolve_task_path() {
         fi
     fi
 
+    # Use the new python resolver for smart resolution
+    if [ -f "$ROOT_DIR/skills/swt-task/scripts/resolve.py" ]; then
+        RESOLVED=$(python3 "$ROOT_DIR/skills/swt-task/scripts/resolve.py" "$task_input" --root "$ROOT_DIR")
+        if [ $? -eq 0 ] && [ -n "$RESOLVED" ]; then
+            echo "$RESOLVED"
+            return 0
+        fi
+    fi
+
+    # Fallback to legacy bash logic
     if [[ "$task_input" = /* ]] && [ -f "$task_input" ]; then echo "$task_input"
     elif [ -f "$ROOT_DIR/$task_input" ]; then echo "$ROOT_DIR/$task_input"
     elif [ -f "$ROOT_DIR/.tasks/${task_input}.md" ]; then echo "$ROOT_DIR/.tasks/${task_input}.md"
@@ -133,19 +144,24 @@ case $CMD in
     status) shift; delegate "skills/swt-status/scripts/status.sh" "$@" ;;
     pulse) shift; delegate "skills/swt-status/scripts/status.sh" --git "$@" ;;
     context) shift; delegate "skills/swt-task/scripts/task.sh" ctx show "$@" ;;
-    mount) shift; delegate "skills/swt-task/scripts/task.sh" mount "$@" ;;
+    mount) shift; # Internal flow.sh logic (merged behavior: set context + open browser)
+        delegate "skills/swt-task/scripts/task.sh" mount "$@"
+        RESOLVED=$(resolve_task_path "$1")
+        if [ $? -eq 0 ]; then open_browser "$RESOLVED"; fi
+        ;;
     unmount) shift; delegate "skills/swt-task/scripts/task.sh" unmount "$@" ;;
-    open) shift; # Internal flow.sh logic
-        RESOLVED=$(resolve_task_path)
+    peek) shift; # Internal flow.sh logic (Terminal Peek)
+        RESOLVED=$(resolve_task_path "$1")
         if [ $? -ne 0 ]; then echo "No active task context."; exit 0; fi
         echo "--- Active Task Context ---"
         echo "Task: $(basename "$RESOLVED")"
         grep -E "^\*\*?(Status|Phase|Type|Priority)\*\*?:" "$RESOLVED"
         echo ""
+        # Extract objective (handle multiline)
         grep -A 1 "## Objective" "$RESOLVED" | grep -v "## Objective" | sed '/^$/d' | head -1
         grep -m 1 "\[ \]" "$RESOLVED" | sed 's/.*\[ \] /Next: /'
         ;;
-    view-task) shift; # Internal flow.sh logic
+    open) shift; # Internal flow.sh logic (Browser Open)
         RESOLVED=$(resolve_task_path "$1")
         if [ $? -ne 0 ]; then echo "❌ Error: Could not resolve task."; exit 1; fi
         open_browser "$RESOLVED"
