@@ -6,6 +6,7 @@
 **Status**: ideating
 **Priority**: medium          <!-- low | medium | high | critical -->
 **Type**: brainstorm          <!-- feature | bugfix | refactor | chore | docs -->
+**Category**: research        <!-- feature | infrastructure | maintenance | bug | docs | research -->
 **Stack**: shared             <!-- frontend | backend | shared -->
 **Phase**: 0                  <!-- current active phase (0–8) -->
 **Blocked By**: —             <!-- task filename or n/a -->

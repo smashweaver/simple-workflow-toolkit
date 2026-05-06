@@ -25,7 +25,9 @@ Aggregates project state (latest digest, active tasks, recent specs, and optiona
 
 ### `/swt:status` — Standard status report
 **Audience**: user-invoked, agent-driven
-Aggregates project state (latest digest, active tasks, recent specs) to restore session context or provide a quick progress update.
+Aggregates project state (latest digest, active tasks, recent specs) to restore session context. 
+- **Categorization**: Groups tasks by category (Infrastructure, Feature, Bug, etc.) for high-signal scannability.
+- **Recommendations**: Surfaces "Low-Hanging Fruit" (docs/chores in Phase 0) at the top.
 
 ### `/swt:status --git` — Status report with git history
 **Audience**: user-invoked

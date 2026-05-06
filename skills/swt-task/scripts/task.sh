@@ -321,6 +321,7 @@ if [ "$CMD" == "new" ]; then
 **Status**: pending
 **Priority**: medium          <!-- low | medium | high | critical -->
 **Type**: feature           <!-- feature | bugfix | refactor | chore | docs -->
+**Category**: feature         <!-- feature | infrastructure | maintenance | bug | docs | research -->
 **Stack**: shared             <!-- frontend | backend | shared -->
 **Phase**: 1                  <!-- current active phase (0–8) -->
 **Blocked By**: —             <!-- task filename or n/a -->
