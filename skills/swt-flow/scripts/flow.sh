@@ -26,7 +26,7 @@ function show_help {
     echo "  archive           - Show only finished/abandoned tasks"
     echo ""
     echo "Ritual Enforcement:"
-    echo "  audit             - Deep ritual/protocol integrity check"
+    echo "  validate          - Deep ritual/protocol integrity check"
     echo "  phase <N>         - Manual ritual phase transition"
     echo "  test              - Run tests via swt.json harness"
     echo "  test-fail         - Verify test failure (TDD ritual)"
@@ -68,6 +68,40 @@ ROOT_DIR=$(pwd)
 while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.git" ]]; do
     ROOT_DIR=$(dirname "$ROOT_DIR")
 done
+
+function open_browser() {
+    local target=$1
+    if [ -z "$target" ]; then return 1; fi
+
+    echo "🌐 Attempting to open: $(basename "$target")"
+    
+    # Try xdg-open first as it was reported to work previously
+    if command -v xdg-open >/dev/null 2>&1; then
+        if xdg-open "$target" &>/dev/null; then 
+            echo "✅ Opened via xdg-open."
+            return 0
+        fi
+    fi
+
+    # Fallback to direct browser commands
+    if [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; then
+        for cmd in firefox google-chrome chromium open; do
+            if command -v "$cmd" >/dev/null 2>&1; then
+                if "$cmd" "$target" &>/dev/null; then
+                    echo "🚀 Launched $cmd."
+                    return 0
+                fi
+            fi
+        done
+    fi
+
+    # Fallback to terminal display
+    echo "⚠️ Warning: No graphical display detected or browser failed. Falling back to terminal..."
+    echo "--- Start of Document ---"
+    cat "$target"
+    echo "--- End of Document ---"
+    return 0
+}
 
 function resolve_task_path() {
     local task_input=$1
@@ -113,10 +147,10 @@ case $CMD in
     view-task) shift; # Internal flow.sh logic
         RESOLVED=$(resolve_task_path "$1")
         if [ $? -ne 0 ]; then echo "❌ Error: Could not resolve task."; exit 1; fi
-        xdg-open "$RESOLVED" &>/dev/null || open "$RESOLVED" &>/dev/null || true
+        open_browser "$RESOLVED"
         SPEC_FILE=$(grep -oP '^\*\*?Spec\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
         if [ -n "$SPEC_FILE" ] && [ -f "$ROOT_DIR/$SPEC_FILE" ]; then
-            xdg-open "$ROOT_DIR/$SPEC_FILE" &>/dev/null || open "$ROOT_DIR/$SPEC_FILE" &>/dev/null || true
+            open_browser "$ROOT_DIR/$SPEC_FILE"
         fi
         ;;
 
@@ -132,7 +166,7 @@ case $CMD in
     archive) shift; delegate "skills/swt-task/scripts/task.sh" list --done "$@" ;;
 
     # Ritual Enforcement
-    audit|sync|sync-docs|scaffold) shift;
+    validate|sync|sync-docs|scaffold) shift;
         RESOLVED=$(resolve_task_path "$1")
         if [ $? -ne 0 ]; then echo "❌ Error: No active task context."; exit 1; fi
         [ -n "$1" ] && [ -f "$ROOT_DIR/.tasks/$1.md" ] && shift

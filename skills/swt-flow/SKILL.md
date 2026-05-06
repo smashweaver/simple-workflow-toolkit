@@ -24,7 +24,7 @@ The director of the toolkit. This skill ensures that every session follows a dis
 2. **Consent Gates**: 
    - **Gate 2 (Approval)**: You MUST halt and wait for explicit approval of the implementation plan (Phase 4).
    - **Gate 4 (Review)**: You MUST halt after MVP implementation for a human review pass (Phase 8).
-3. **Locked Gate Validation**: You MUST run `bash skills/swt-flow/scripts/flow.sh audit` before initiating any Phase 5 edits or proposing a Phase 8 review.
+3. **Locked Gate Validation**: You MUST run `bash skills/swt-flow/scripts/flow.sh validate` before initiating any Phase 5 edits or proposing a Phase 8 review.
 4. **Mandatory Planning**: For non-trivial changes, you are mandated to generate root artifacts: `implementation_plan.md` (Phase 1), `protocol.md` (Phase 1), and `task.md` (Phase 5).
 
 ---
@@ -54,7 +54,7 @@ The director of the toolkit. This skill ensures that every session follows a dis
 #### 3. Ritual Enforcement (The "Guards")
 | **Facade Command** | **Skill** | **Purpose** |
 | :--- | :--- | :--- |
-| **/swt:flow audit** | `swt:task` | Deep ritual/protocol integrity check |
+| **/swt:flow validate** | `swt:task` | Deep ritual/protocol integrity check |
 | **/swt:flow phase <N>** | `swt:task` | Manual ritual phase transition |
 | **/swt:flow test** | `swt:task` | Run tests via `swt.json` harness |
 | **/swt:flow test-fail** | `swt:task` | Verify test failure (TDD ritual) |

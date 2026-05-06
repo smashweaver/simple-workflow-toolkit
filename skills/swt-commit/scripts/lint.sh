@@ -77,9 +77,9 @@ fi
     else RESOLVED=""; fi
 
     if [ -n "$RESOLVED" ] && [ -f "$RESOLVED" ]; then
-        # Use swt-task audit for a thorough check
-        if ! bash "$ROOT_DIR/skills/swt-task/scripts/task.sh" audit "$TASK_FILE" > /dev/null 2>&1; then
-            echo "❌ Audit: Task validation failed (likely a stale spec). Run swt:flow sync-docs."
+        # Use swt-task validate for a thorough check
+        if ! bash "$ROOT_DIR/skills/swt-task/scripts/task.sh" validate "$TASK_FILE"; then
+            echo "❌ Validation: Task ritual failed."
             FAILED=1
         else
             # Check Phase explicitly

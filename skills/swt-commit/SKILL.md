@@ -14,11 +14,11 @@ Clear, impact-focused commit messages make code history readable and maintainabl
 
 ---
 
-## 🛑 Protocol Audit Ritual (MANDATORY)
+## 🛑 Protocol Validation Ritual (MANDATORY)
 
-Before drafting any commit message, the agent MUST output the following audit signature to prove compliance:
+Before drafting any commit message, the agent MUST output the following validation signature to prove compliance:
 
-> **Protocol Audit**:
+> **Protocol Validation**:
 > - [x] Re-read `swt:commit/SKILL.md`
 > - [x] Task state validated (`skills/swt-task/scripts/task.sh validate <file>`)
 > - [x] Checked for red flags (no dots/slashes in bullets, no jargon)
@@ -73,7 +73,7 @@ Ask the agent to generate a validated commit draft:
 
 The agent will:
 1. **Re-read this `SKILL.md` file** — always refresh your understanding of these specific commit guidelines before drafting.
-2. **Execute Protocol Audit Ritual** — output the audit signature at the start of your response.
+2. **Execute Protocol Validation Ritual** — output the validation signature at the start of your response.
 3. **Read `commit.diff`** — identify the impact and intent.
 4. **Execute Guarded Generation**:
    - Run `./skills/swt-commit/scripts/commit.sh --draft "type(scope): summary\n\n* bullet"`

@@ -88,7 +88,7 @@ function show_help {
     echo "  swt.sh test <file> [--fail] - Run tests via swt.json harness and log ritual"
 }
 
-function audit_artifacts {
+function validate_artifacts {
     local phase=$1
 
     # Phantom Artifact Check
@@ -191,7 +191,7 @@ function sync_task_md {
     local items=$(sed -n '/## Checklist/,/##/p' "$file" | grep -v "##" | sed '/^$/d')
 
     if [ -f "$template_path" ]; then
-        sed "s/{{Task Name}}/$title/g" "$template_path" > task.md
+        sed "s|{{Task Name}}|$title|g" "$template_path" > task.md
         echo "$items" > .items.tmp
         sed -i "/{{CHECKLIST_ITEMS}}/{r .items.tmp
 d}" task.md
@@ -227,7 +227,7 @@ function scaffold_artifact {
     local title=$(grep -m 1 "^# Task:" "$task_file" | sed 's/^# Task:[[:space:]]*//')
     local spec_link=$(grep -m 1 "^\*\*Spec\*\*:" "$task_file" | sed 's/^\*\*Spec\*\*:[[:space:]]*//')
     
-    sed "s/{{Task Name}}/$title/g" "$template_path" | \
+    sed "s|{{Task Name}}|$title|g" "$template_path" | \
     sed "s|{{Spec Link}}|$spec_link|g" > "$target_path"
     
     echo "✨ Scaffolded $target_path from template."
@@ -396,17 +396,19 @@ if [ "$CMD" == "brainstorm" ]; then
     template_path="$ROOT_DIR/skills/swt-task/templates/brainstorm.md"
     if [ -f "$template_path" ]; then
         cp "$template_path" "$FILENAME"
-        sed -i "s/{{Task Title}}/$ARG/g" "$FILENAME"
-        sed -i "s/{{DATE}}/$DATE_STR/g" "$FILENAME"
-        sed -i "s/{{ARG}}/$ARG/g" "$FILENAME"
+        sed -i "s|{{Task Title}}|$ARG|g" "$FILENAME"
+        sed -i "s|{{DATE}}|$DATE_STR|g" "$FILENAME"
+        sed -i "s|{{ARG}}|$ARG|g" "$FILENAME"
         # Handle UPLINK_CONTEXT which might contain newlines
         if [ -n "$UPLINK_CONTEXT" ]; then
             echo "$UPLINK_CONTEXT" > .uplink.tmp
-            sed -i "/{{UPLINK_CONTEXT}}/{r .uplink.tmp
+            sed -i "s|{{UPLINK_CONTEXT}}|$UPLINK_CONTEXT|g" "$FILENAME" 2>/dev/null || {
+                sed -i "/{{UPLINK_CONTEXT}}/{r .uplink.tmp
 d}" "$FILENAME"
+            }
             rm .uplink.tmp
         else
-            sed -i "s/{{UPLINK_CONTEXT}}//g" "$FILENAME"
+            sed -i "s|{{UPLINK_CONTEXT}}||g" "$FILENAME"
         fi
     else
         cat <<EOF > "$FILENAME"
@@ -550,7 +552,7 @@ if [ "$CMD" == "graduate" ]; then
             local file=$3
             if [ -n "$content" ]; then
                 echo "$content" > .content.tmp
-                sed -i "/$tag/{r .content.tmp
+                sed -i "|$tag|{r .content.tmp
 d}" "$file"
                 rm .content.tmp
             else
@@ -869,7 +871,7 @@ if [ "$CMD" == "phase" ]; then
 
 
     # 4. Ephemeral Artifact Audit (Scenario C: Enforcement)
-    if ! audit_artifacts "$PHASE_NUM"; then
+    if ! validate_artifacts "$PHASE_NUM"; then
         exit 1
     fi
 
@@ -878,15 +880,28 @@ if [ "$CMD" == "phase" ]; then
     exit 0
 fi
 
-if [ "$CMD" == "audit" ]; then
+if [ "$CMD" == "validate" ]; then
     FILE=$2
     if [ -z "$FILE" ]; then
-        FILE=$(cat "$ROOT_DIR/task.ctx" 2>/dev/null)
+        if [ -f "$ROOT_DIR/task.ctx" ]; then
+            FILE=$(cat "$ROOT_DIR/task.ctx" | tr -d '[:space:]')
+        else
+            echo "❌ No active task context. Use 'swt:task mount <file>'."
+            exit 1
+        fi
     fi
-    if [ -z "$FILE" ] || [ ! -f "$FILE" ]; then
-        echo "❌ No active task context. Use 'swt:task mount <file>'."
+
+    # Resolve Path (mimic flow.sh)
+    if [ -f "$ROOT_DIR/$FILE" ]; then RESOLVED="$ROOT_DIR/$FILE"
+    elif [ -f "$ROOT_DIR/.tasks/${FILE}" ]; then RESOLVED="$ROOT_DIR/.tasks/${FILE}"
+    elif [ -f "$ROOT_DIR/.tasks/${FILE}.md" ]; then RESOLVED="$ROOT_DIR/.tasks/${FILE}.md"
+    elif [ -f "$ROOT_DIR/.tasks/archive/${FILE}" ]; then RESOLVED="$ROOT_DIR/.tasks/archive/${FILE}"
+    elif [ -f "$ROOT_DIR/.tasks/archive/${FILE}.md" ]; then RESOLVED="$ROOT_DIR/.tasks/archive/${FILE}.md"
+    else
+        echo "❌ Error: Task file not found: $FILE"
         exit 1
     fi
+    FILE=$RESOLVED
 
     # 0. Sync human progress back to internal task file
     sync_task_to_internal "$FILE"
@@ -945,7 +960,7 @@ if [ "$CMD" == "audit" ]; then
             spec_time=$(stat -c %Y "$spec")
             if [ "$task_time" -gt $((spec_time + 60)) ]; then
                 echo "🛑 STALE SPEC DETECTED: Task objectives are newer than the Spec."
-                echo "   Loop back to re-sync: swt.sh sync-downstream $FILE"
+                echo "   Loop back to re-sync: swt.sh sync-docs $FILE"
                 exit 1
             fi
             
@@ -953,7 +968,7 @@ if [ "$CMD" == "audit" ]; then
                 plan_time=$(stat -c %Y "implementation_plan.md")
                 if [ "$spec_time" -gt $((plan_time + 60)) ]; then
                     echo "🛑 STALE PLAN DETECTED: Spec is newer than the Implementation Plan."
-                    echo "   Loop back to re-sync: swt.sh sync-downstream $FILE"
+                    echo "   Loop back to re-sync: swt.sh sync-docs $FILE"
                     exit 1
                 fi
             fi
@@ -1003,7 +1018,7 @@ if [ "$CMD" == "audit" ]; then
     fi
 
     # 6. Artifact Audit
-    if ! audit_artifacts "$PHASE"; then
+    if ! validate_artifacts "$PHASE"; then
         exit 1
     fi
 

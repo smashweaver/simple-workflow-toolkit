@@ -27,10 +27,10 @@ Before initiating `/swt:flow commit`, you MUST perform the **Double-Pass Draftin
    - **Zero Jargon**: Replace technical commands and internal toolkit names with natural language outcomes.
    - **User Benefit**: Focus on what the user or the developer team gains from this change.
 
-### Audit Signature (Proof of Compliance)
+### Validation Signature (Proof of Compliance)
 Copy and paste this into your session output before drafting:
 
-> **Protocol Audit**:
+> **Protocol Validation**:
 > - [ ] Re-read `swt:commit/SKILL.md`
 > - [ ] Task state validated (`task.sh validate <file>`)
 > - [ ] Checked for red flags (no dots/slashes in bullets, no jargon)
