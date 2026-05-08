@@ -51,6 +51,13 @@ When `/swt:digest` is invoked, follow these steps:
 ### 2. Synthesize Outcomes
 Identify the 3–5 most important achievements or decisions from the session. Focus on the *why* and the *impact*. **Recursive Awareness**: Carry forward any critical architectural decisions from the previous digest that remain relevant.
 
+### 2.5 Technical Retrospective (MANDATORY)
+Explicitly identify any technical hurdles, ritual failures, or tooling friction encountered.
+- **Ritual Failures**: Did an agent skip a step? Was a template unpopulated? Was a gate bypassed?
+- **Tooling Friction**: Did a script fail? Was a regex too brittle?
+- **Roadblocks**: What slowed us down or required complex workarounds?
+Capturing these ensures the next session can prioritize project hardening.
+
 ### 3. Identify Next Steps
 Look at the active tasks, current conversation, and the "Next Steps" from the previous digest. If previous steps are still unresolved, carry them forward or update them to reflect new priorities.
 
@@ -68,12 +75,16 @@ Look at the active tasks, current conversation, and the "Next Steps" from the pr
 {{A 1-2 sentence summary of the session's primary focus.}}
 
 ## Key Outcomes & Architecture
-
 - **{{Outcome Title}}**: {{Brief explanation of what was decided/built and its impact.}}
 - ...
 
-## Active Tasks in `.tasks/`
+## Technical Retrospective (Hurdles & Friction)
+- **Ritual Failures**: {{Describe skipping steps, unpopulated templates, or bypassed gates.}}
+- **Tooling Friction**: {{Describe script failures, brittle regex, or environment issues.}}
+- **Roadblocks**: {{Describe what slowed down progress or required workarounds.}}
 
+## Active Tasks in `.tasks/`
+...
 - **[{{task-slug}}]({{file-path}})**: ({{Priority}}) {{Status summary}}
 - ...
 

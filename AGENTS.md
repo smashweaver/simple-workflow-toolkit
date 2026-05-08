@@ -385,7 +385,7 @@ When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"
 1. **Invoke the `/swt:flow status` command** to aggregate latest digest, tasks, and specs.
 2. **Execute Task Validation**: The status skill automatically runs `/swt:flow audit` for all active tasks.
 3. **Summarize status** based on the aggregated report.
-4. **Manual Milestone Ritual**: The `/swt:flow status` command provides a state summary but does NOT automatically trigger a new digest. Digests are manual rituals reserved for logical session ends or major milestones.
+4. **Manual Milestone Ritual**: The `/swt:flow status` command provides a state summary but does NOT automatically trigger a new digest. Digests are manual rituals reserved for logical session ends or major milestones. **Technical Retrospective**: Every digest MUST include a high-fidelity "Technical Retrospective" section documenting ritual failures (unfilled templates, skipped gates), tooling friction (script failures, brittle regex), and roadblocks to ensure architectural hardening in the next session.
 5. **HARD STOP**: Inform the user and wait for explicit confirmation before starting any implementation or planning work.
 
 ### 3. Ephemeral Artifact Enforcement (Scenario C)
