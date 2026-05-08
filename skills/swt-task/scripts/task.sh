@@ -127,24 +127,34 @@ function validate_artifacts {
 }
 
 function list_tasks {
-    local filter=$1
-    echo -e "Timestamp\tPhase\tStatus\tObjective"
-    echo -e "---------\t-----\t------\t---------"
+    local filter=""
+    local classify=false
+    local priority=false
+    
+    # Parse arguments
+    while [[ "$#" -gt 0 ]]; do
+        case $1 in
+            --open) filter="--open" ;;
+            --done) filter="--done" ;;
+            --abandoned) filter="--abandoned" ;;
+            --classify|-c) classify=true ;;
+            --priority|-p) priority=true ;;
+            *) # Ignore unknown
+               ;;
+        esac
+        shift
+    done
+
+    # Create temporary file to store task data for sorting/grouping
+    local task_data=$(mktemp)
     
     for f in .tasks/*.md; do
         [ -e "$f" ] || continue
         local ts=$(basename "$f" | cut -d'_' -f1)
         local phase=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$f" | head -n 1)
         local status=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$f" | head -n 1)
-        local objective=$(grep -oP '^## Objective\s*\n\K.*' "$f" | head -n 1)
-        # Fallback for objective if the newline grep fails or Core Concept is used
-        if [ -z "$objective" ]; then
-            objective=$(sed -n '/^## \(Objective\|Core Concept\)/,/^## /p' "$f" | grep -v '^## ' | grep -v '^$' | head -n 1)
-        fi
-        # Truncate objective for display
-        objective=$(echo "$objective" | cut -c1-60 | sed 's/[[:space:]]*$//')
-        [ ${#objective} -ge 60 ] && objective="${objective}..."
-
+        
+        # Filtering
         if [ "$filter" == "--open" ]; then
             if [[ "$status" == "done" ]] || [[ "$status" == "abandoned" ]]; then continue; fi
         elif [ "$filter" == "--done" ]; then
@@ -152,9 +162,59 @@ function list_tasks {
         elif [ "$filter" == "--abandoned" ]; then
             if [[ "$status" != "abandoned" ]]; then continue; fi
         fi
+
+        local category=$(grep -oP '^\*\*?Category\*\*?:\s*\K\S+' "$f" | head -n 1)
+        category=${category:-uncategorized}
+        local prio_str=$(grep -oP '^\*\*?Priority\*\*?:\s*\K\S+' "$f" | head -n 1)
+        prio_str=${prio_str:-medium}
         
-        printf "%s\t%s\t%s\t%s\n" "$ts" "$phase" "$status" "$objective"
+        # Map priority to numeric for sorting
+        local prio_num=2
+        case $prio_str in
+            critical) prio_num=4 ;;
+            high) prio_num=3 ;;
+            medium) prio_num=2 ;;
+            low) prio_num=1 ;;
+        esac
+
+        local objective=$(grep -oP '^## Objective\s*\n\K.*' "$f" | head -n 1)
+        if [ -z "$objective" ]; then
+            objective=$(sed -n '/^## \(Objective\|Core Concept\)/,/^## /p' "$f" | grep -v '^## ' | grep -v '^$' | head -n 1)
+        fi
+        objective=$(echo "$objective" | tr '\t' ' ' | cut -c1-60 | sed 's/[[:space:]]*$//')
+        [ ${#objective} -ge 60 ] && objective="${objective}..."
+        
+        echo -e "$category\t$prio_num\t$ts\t$phase\t$status\t$objective" >> "$task_data"
     done
+
+    if [ "$classify" = true ]; then
+        # Grouped by Category, then Priority, then Timestamp
+        local last_cat=""
+        sort -k1,1 -k2,2rn -k3,3 "$task_data" | while IFS=$'\t' read -r cat p_num ts phase stat obj; do
+            if [ "$cat" != "$last_cat" ]; then
+                [ -n "$last_cat" ] && echo ""
+                local cat_display=$(echo "$cat" | sed 's/\b\(.\)/\u\1/g')
+                echo "📂 $cat_display"
+                last_cat=$cat
+            fi
+            printf "  %s\t%s\t%s\t%s\n" "$ts" "$phase" "$stat" "$obj"
+        done
+    elif [ "$priority" = true ]; then
+        # Sorted by Priority, then Timestamp
+        echo -e "Timestamp\tPhase\tStatus\tObjective"
+        echo -e "---------\t-----\t------\t---------"
+        sort -k2,2rn -k3,3 "$task_data" | while IFS=$'\t' read -r cat p_num ts phase stat obj; do
+            printf "%s\t%s\t%s\t%s\n" "$ts" "$phase" "$stat" "$obj"
+        done
+    else
+        # Default: Flat / Chronological
+        echo -e "Timestamp\tPhase\tStatus\tObjective"
+        echo -e "---------\t-----\t------\t---------"
+        sort -k3,3 "$task_data" | while IFS=$'\t' read -r cat p_num ts phase stat obj; do
+            printf "%s\t%s\t%s\t%s\n" "$ts" "$phase" "$stat" "$obj"
+        done
+    fi
+    rm -f "$task_data"
 }
 
 function sync_task_to_internal {
@@ -1066,7 +1126,8 @@ if [ "$CMD" == "update" ]; then
 fi
 
 if [ "$CMD" == "list" ]; then
-    list_tasks "$2"
+    shift
+    list_tasks "$@"
     exit 0
 fi
 
