@@ -27,6 +27,7 @@ Before responding:
 - If multiple interpretations exist, present them — don't pick silently.
 - If a simpler approach exists, say so. Push back when warranted.
 - If something is unclear, stop. Name what's confusing. Ask.
+- When uncertain about intent, format, or content values (timestamps, names, paths), **ASK** the user. Never guess or silently fill in blanks. The user should always be given the benefit of the doubt.
 
 ## 2. Brevity First
 
