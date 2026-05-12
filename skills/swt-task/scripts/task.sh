@@ -800,11 +800,13 @@ if [ "$CMD" == "abandon" ]; then
         exit 1
     fi
     DATE_STR=$(date +"%Y-%m-%d %H:%M:%S")
-    sed -i "s/^\*\*Status\*\*:.*/**Status**: abandoned/" "$FILE"
-    sed -i "s/^\*\*Completed\*\*:.*/**Completed**: $DATE_STR/" "$FILE"
+    invoke_twin "$FILE" --set-meta "Status" "abandoned" --set-meta "Completed" "$DATE_STR"
     
     mkdir -p .tasks/archive
     mv "$FILE" .tasks/archive/
+    if [ -f "${FILE}.json" ]; then
+        mv "${FILE}.json" .tasks/archive/
+    fi
     echo "Task abandoned: $FILE"
     unmount_task
     exit 0
