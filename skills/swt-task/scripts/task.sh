@@ -199,37 +199,52 @@ function list_tasks {
                 echo "📂 $cat_display"
                 last_cat=$cat
             fi
-            printf "  %s\t%s\t%s\t%s\n" "$ts" "$phase" "$stat" "$obj"
+            printf "  %-15s %-3s %-10s %s\n" "$ts" "$phase" "$stat" "$obj"
             if [ "$summary" = true ]; then
                 local task_file=$(ls .tasks/${ts}_*.md 2>/dev/null | head -n 1)
                 if [ -n "$task_file" ] && [ -f "$task_file" ]; then
-                    sed -n '/^## What This Task Covers/,/^## /p' "$task_file" | grep -v '^## ' | grep -v '^$' | head -n 3 | sed 's/^/    | /'
+                    local sum_content=$(sed -n '/^## What This Task Covers/,/^## /p' "$task_file" | grep -v '^## ' | grep -v '^$' | head -n 3)
+                    if [ -n "$sum_content" ]; then
+                        echo "    ↳ Summary:"
+                        echo "$sum_content" | sed 's/^/      | /'
+                        echo ""
+                    fi
                 fi
             fi
         done
     elif [ "$priority" = true ]; then
         # Sorted by Priority, then Timestamp
-        echo -e "Timestamp\tPhase\tStatus\tObjective"
-        echo -e "---------\t-----\t------\t---------"
+        printf "%-15s %-3s %-10s %s\n" "Timestamp" "Ph" "Status" "Objective"
+        printf "%-15s %-3s %-10s %s\n" "---------------" "---" "----------" "---------"
         sort -k2,2rn -k3,3 "$task_data" | while IFS=$'\t' read -r cat p_num ts phase stat obj; do
-            printf "%s\t%s\t%s\t%s\n" "$ts" "$phase" "$stat" "$obj"
+            printf "%-15s %-3s %-10s %s\n" "$ts" "$phase" "$stat" "$obj"
             if [ "$summary" = true ]; then
                 local task_file=$(ls .tasks/${ts}_*.md 2>/dev/null | head -n 1)
                 if [ -n "$task_file" ] && [ -f "$task_file" ]; then
-                    sed -n '/^## What This Task Covers/,/^## /p' "$task_file" | grep -v '^## ' | grep -v '^$' | head -n 3 | sed 's/^/  | /'
+                    local sum_content=$(sed -n '/^## What This Task Covers/,/^## /p' "$task_file" | grep -v '^## ' | grep -v '^$' | head -n 3)
+                    if [ -n "$sum_content" ]; then
+                        echo "  ↳ Summary:"
+                        echo "$sum_content" | sed 's/^/    | /'
+                        echo ""
+                    fi
                 fi
             fi
         done
     else
         # Default: Flat / Chronological
-        echo -e "Timestamp\tPhase\tStatus\tObjective"
-        echo -e "---------\t-----\t------\t---------"
+        printf "%-15s %-3s %-10s %s\n" "Timestamp" "Ph" "Status" "Objective"
+        printf "%-15s %-3s %-10s %s\n" "---------------" "---" "----------" "---------"
         sort -k3,3 "$task_data" | while IFS=$'\t' read -r cat p_num ts phase stat obj; do
-            printf "%s\t%s\t%s\t%s\n" "$ts" "$phase" "$stat" "$obj"
+            printf "%-15s %-3s %-10s %s\n" "$ts" "$phase" "$stat" "$obj"
             if [ "$summary" = true ]; then
                 local task_file=$(ls .tasks/${ts}_*.md 2>/dev/null | head -n 1)
                 if [ -n "$task_file" ] && [ -f "$task_file" ]; then
-                    sed -n '/^## What This Task Covers/,/^## /p' "$task_file" | grep -v '^## ' | grep -v '^$' | head -n 3 | sed 's/^/  | /'
+                    local sum_content=$(sed -n '/^## What This Task Covers/,/^## /p' "$task_file" | grep -v '^## ' | grep -v '^$' | head -n 3)
+                    if [ -n "$sum_content" ]; then
+                        echo "  ↳ Summary:"
+                        echo "$sum_content" | sed 's/^/    | /'
+                        echo ""
+                    fi
                 fi
             fi
         done
