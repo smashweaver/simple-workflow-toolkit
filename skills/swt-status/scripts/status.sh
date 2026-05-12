@@ -68,6 +68,14 @@ else
     echo ""
 fi
 
+# 1.3 Tactical Roadmap
+if [ -f "$ROOT_DIR/protocol.md" ]; then
+    echo "--- Tactical Roadmap ---"
+    # Extract the Execution Loop section and filter for checklist items
+    sed -n '/## 2. Gate 3: Execution Loop/,/##/p' "$ROOT_DIR/protocol.md" | grep -E '^\s*-\s*\[[ xX]\]'
+    echo ""
+fi
+
 # 1.5 Graphify Status
 if [ -f "$ROOT_DIR/skills/swt-graphify/scripts/graphify.sh" ]; then
     bash "$ROOT_DIR/skills/swt-graphify/scripts/graphify.sh" status

@@ -138,7 +138,7 @@ Refer to **`skills/swt-flow/SKILL.md`** for detailed definitions and constraints
 1. **Orientation Protocol**: Session start and context restoration.
 2. **Brainstorm Loop (Phase 0)**: Ideation and Scenario A/B/C trade-offs.
 3. **Planning & Analysis Loops (Phases 1–3)**: Artifact generation and Gate 2 approval.
-4. **Execution Loop (Phases 5–7)**: Surgical implementation and the "Light Bulb" reset mechanism.
+4. **Execution Loop (Phases 5–7)**: Surgical implementation, "Light Bulb" reset, and mandatory **Tactical Visibility** via `/swt:flow status`.
 5. **Refinement Loop (Phase 8)**: Post-MVP polishing and Gate 4 review.
 6. **The Commit Loop (Gate 5)**: Diff-First, Draft-and-Approve finality.
 

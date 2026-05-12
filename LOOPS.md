@@ -100,6 +100,8 @@ The ideation cycle where the agent acts as a **Senior Advisor**. It requires a S
 ### 4. Execution Loop (Phases 5–7)
 The implementation cycle where surgical edits are made. It is governed by the `protocol.md` (Tactical Roadmap) and `task.md` (Live Checklist). Automated tests are run via `swt.sh test` to provide physical evidence of correctness.
 
+> 📊 **Tactical Visibility**: To ensure **HITL-friendly automation**, the `protocol.md` roadmap is automatically surfaced in the `/swt:flow status` report. Agents are mandated to run a status check after every tactical chunk update to verify alignment with the user.
+
 ### 5. Light Bulb Iteration Loop (Reset Mechanism)
 A critical "Fail-Safe" that triggers if requirements or understanding change mid-implementation.
 1.  **Update Task**: Log new ideas.

@@ -33,6 +33,7 @@ function show_help {
     echo "  test-fail         - Verify test failure (TDD ritual)"
     echo "  sync              - Sync root task.md checklist"
     echo "  sync-docs         - Re-sync Spec/Plan after changes"
+    echo "  sync-roadmap      - Persist protocol.md progress to task"
     echo "  scaffold <type>   - Manually generate artifacts"
     echo ""
     echo "Lifecycle & Hygiene:"
@@ -189,7 +190,7 @@ case $CMD in
     archive) shift; delegate "skills/swt-task/scripts/task.sh" list --done "$@" ;;
 
     # Ritual Enforcement
-    validate|sync|sync-docs|scaffold) shift;
+    validate|sync|sync-docs|scaffold|sync-roadmap) shift;
         RESOLVED=$(resolve_task_path "$1")
         if [ $? -ne 0 ]; then echo "❌ Error: No active task context."; exit 1; fi
         [ -n "$1" ] && [ -f "$ROOT_DIR/.tasks/$1.md" ] && shift

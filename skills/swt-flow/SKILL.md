@@ -37,6 +37,7 @@ The workflow is not linear; it is a recursive state machine governed by five nam
    - **Gate 2 (Architecture Loop)**: A **HARD STOP** at Phase 4. You MUST obtain a "GO" before touching source code.
 3. **Execution Loop (Phases 5-7)**:
    - **Constraint**: Surgical edits only. Verified by `test` ritual logs.
+   - **Tactical Visibility**: You MUST run `/swt:flow status` after updating `protocol.md` to verify tactical alignment with the user.
    - **Reset (Light Bulb Loop)**: If requirements change, you MUST run `/swt:flow sync-docs` to reset to Phase 1 and re-approve the plan.
 4. **Refinement Loop (Phase 8)**:
    - **Gate 4 (Refinement Loop)**: After MVP is verified, you enter a "Polishing" cycle. Wait for the user to append items or signal closure. Do NOT rush to commit.

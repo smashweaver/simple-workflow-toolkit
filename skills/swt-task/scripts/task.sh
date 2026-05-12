@@ -217,6 +217,24 @@ function list_tasks {
     rm -f "$task_data"
 }
 
+function sync_roadmap {
+    local internal_file=$1
+    if [ ! -f "protocol.md" ] || [ ! -f "$internal_file" ]; then return 0; fi
+    
+    echo "🔄 Ingesting tactical progress from protocol.md..."
+    # Extract the Execution Loop section and filter for checklist items
+    local roadmap=$(sed -n '/## 2. Gate 3: Execution Loop/,/##/p' "protocol.md" | grep -E '^\s*-\s*\[[ xX/]\]' || true)
+    
+    if [ -n "$roadmap" ]; then
+        if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
+            python3 "$ROOT_DIR/skills/swt-task/scripts/crow.py" "$internal_file" --patch "Tactical Roadmap" "$roadmap"
+            echo "✅ Internal tactical roadmap synchronized."
+        else
+            echo "⚠️  crow.py not found. Roadmap synchronization skipped."
+        fi
+    fi
+}
+
 function sync_task_to_internal {
     local internal_file=$1
     if [ ! -f "task.md" ] || [ ! -f "$internal_file" ]; then return 0; fi
@@ -528,6 +546,20 @@ if [ "$CMD" == "sync" ]; then
         exit 1
     fi
     sync_task_md "$FILE"
+    exit 0
+fi
+
+if [ "$CMD" == "sync-roadmap" ]; then
+    FILE=$2
+    if [ -z "$FILE" ]; then
+        if [ -f "task.ctx" ]; then
+            FILE=$(cat task.ctx | tr -d '[:space:]')
+        else
+            echo "Usage: swt.sh sync-roadmap <task_file>"
+            exit 1
+        fi
+    fi
+    sync_roadmap "$FILE"
     exit 0
 fi
 
