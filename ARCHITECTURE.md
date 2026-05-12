@@ -71,7 +71,9 @@ The toolkit's documentation is divided into three distinct layers to prevent "Go
 
 ## 4. Recursive Workflow Rationale
 
-Unlike standard linear workflows, SWT assumes that **understanding is iterative**. The recursive state machine in `AGENTS.md` explicitly models the "Light Bulb Reset" where implementation findings force a loop back to planning. This architecture ensures that agents never "ghost" changes into the codebase without re-aligning the documentation (Specs/Plans) first.
+Unlike standard linear workflows, SWT assumes that **understanding is iterative**. The recursive state machine is physically baked into the **`swt:flow`** skill instructions, explicitly modeling the "Light Bulb Reset" where implementation findings force a loop back to planning. 
+
+This architecture ensures that agents never "ghost" changes into the codebase without re-aligning the documentation (Specs/Plans) first. By consolidating these rules into the orchestrator, we eliminate documentation drift and ensure the **Senior Advisor** persona is consistently enforced.
 
 Every skill directory contains a `SKILL.md` file with a YAML frontmatter block. This block identifies the skill's name and its parent in the inheritance hierarchy.
 

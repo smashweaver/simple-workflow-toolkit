@@ -56,9 +56,11 @@ Base behavioral guidelines for all AI agent reasoning. **All other SWT skills in
 
 ## 🛠️ Core Management Skills
 
-### `/swt:flow` — Unified Orchestrator
+### `/swt:flow` — Loop-Aware Orchestrator
 
-The primary "Command Center" for the toolkit. It unifies all specialized skills under a developer-aligned interface.
+The primary "Command Center" for the toolkit. It unifies all specialized skills under a developer-aligned interface and enforces the **Recursive State Machine** defined in its instructions.
+
+**Persona**: Senior Advisor (Phases 0-4, 8) / Implementer (Phases 5-7).
 
 **Key Commands**:
 | Command | Purpose | Skill |

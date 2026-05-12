@@ -64,9 +64,9 @@ swt/
 
 Unlike a traditional linter, this suite operates at the **agent behavior level**. It defines the boundaries of AI collaboration through a **Recursive State Machine**, ensuring the agent remains a **Senior Advisor and Co-pilot** while the user maintains final oversight and execution control. 
 
-Every session follows a structured plan-approve-implement workflow that explicitly models the "Light Bulb" iteration loop, preventing agent drift and loop jumping.
+Every session follows a structured plan-approve-implement workflow that explicitly models the "Light Bulb" iteration loop. These loops are physically baked into the **`swt-flow`** orchestrator to prevent agent drift and "loop jumping."
 
-→ **[See AGENTS.md](./AGENTS.md)** for the full recursive methodology.
+→ **[See skills/swt-flow/SKILL.md](./skills/swt-flow/SKILL.md)** for the full recursive methodology.
 
 ## Architecture & Inheritance
 
