@@ -1,6 +1,7 @@
 # Implementation Plan - {{TASK_NAME}}
 **Spec**: {{SPEC_LINK}}
 
+## Objective
 {{OBJECTIVE}}
 
 ## User Review Required

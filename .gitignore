@@ -44,9 +44,13 @@ sample_walkthrough.md
 sample_task.md
 
 # Planning Mode root artifacts
-/implementation_plan.md
+/task.md.json
+/protocol.md.json
+/implementation_plan.md.json
 /protocol.md
+/implementation_plan.md
 /walkthrough.md
 /task.md
 .tests/
 swt-skills-audit.json
+skills/swt-task/scripts/__pycache__/twin.cpython-312.pyc

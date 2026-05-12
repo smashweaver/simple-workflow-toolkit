@@ -2,6 +2,8 @@
 
 This document defines the core principles and behavioral protocols for AI coding agents participating in this repository. It is the source methodology for the full **Simple Workflow Toolkit (SWT)** skill suite.
 
+> **Pinned**: This repo uses `uv` for Python execution. Always prefix Python commands with `uv run` (e.g., `uv run python3 skills/swt-task/scripts/twin.py`).
+
 ## 1. Core Principles
 
 1.  **Plan First**: Never start implementation without a detailed, peer-reviewed plan.
@@ -13,6 +15,14 @@ This document defines the core principles and behavioral protocols for AI coding
 13. **Exclusive Gateway**: You are FORBIDDEN from manually editing the `Phase` header in task files. All phase transitions MUST be executed via `/swt:flow phase <N> <task_file>`. The `validate` script reads the historical breadcrumb logs and physically blocks execution if the header was manually forged (e.g. Header Phase != Latest Ritual Log) or phases were skipped.
 14. **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `/swt:flow audit`. Validation includes checks for Phase Forgery and Phantom Artifacts.
 9.  **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation. **Mandatory Repopulation**: When an artifact is reset/re-scaffolded (e.g. via `/swt:flow sync-docs`), the agent MUST immediately re-populate it with the current technical context to maintain continuity.
+
+    **Failure definitions** (any of the following is a Born Complete violation):
+    - **Naked Template**: A task file containing `{{placeholder}}`, `[placeholder]`, `*`, or empty template sections at the moment of presentation to the user.
+    - **Empty Spec**: A spec file created by the pipeline where template sections (Problem Statement, Goals, etc.) contain only `*` after synthesis.
+    - **Orphan Flood**: A spec where non-mapped task sections outnumber filled template sections, indicating no crosswalk was applied.
+    - **Silent Default**: Any template tag silently replaced with `*` without warning the user.
+    
+    **Self-correction**: If any of these failures are detected, the agent MUST halt, log the violation in the task's `Jailbreak Patterns Observed` section, and re-populate the artifact before proceeding.
 10. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1), `protocol.md` (Phase 1), and `task.md` (Phase 5). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
 11. **Task Separation of Concerns**: The root `task.md` artifact is an ephemeral "Live Checklist" for human and cross-agent verification. The `protocol.md` is an ephemeral "Tactical Roadmap" for execution. The internal `.tasks/<timestamp>_task.md` remains the persistent "Source of Truth" for ritual metadata and state tracking. Root artifacts are automatically removed upon task completion.
 

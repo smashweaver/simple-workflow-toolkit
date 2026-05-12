@@ -11,6 +11,23 @@ from datetime import datetime
 from markdown_it import MarkdownIt
 
 class GlobalTwin:
+    SECTION_CROSSWALK = {
+        "Objective": "1_PROBLEM_STATEMENT",
+        "Goals": "2_GOALS",
+        "Explored Alternatives": "3_PROPOSED_SOLUTION",
+        "User Stories": "4_USER_STORIES",
+        "Success Criteria": "8_SUCCESS_CRITERIA",
+        "MVP Definition": "12_MVP_DEFINITION",
+    }
+
+    META_CROSSWALK = {
+        "Task": ["TASK_NAME", "TASK_TITLE"],
+        "Version": ["VERSION"],
+        "Status": ["STATUS"],
+        "Linked Task": ["LINKED_TASK"],
+        "Spec": ["SPEC_LINK", "SPEC_FILE"],
+    }
+
     def __init__(self, md_path, template_path=None):
         self.md_path = md_path
         self.json_path = f"{md_path}.json"
@@ -40,6 +57,11 @@ class GlobalTwin:
         # Search preamble (before first ##)
         for line in lines:
             if line.startswith("## "): break
+            # Capture # Task: Title as meta key "Task"
+            title_match = re.match(r'^#\s+Task:\s*(.*)', line)
+            if title_match:
+                self.state["meta"]["Task"] = title_match.group(1).strip()
+                continue
             match = re.match(r'^\*\*?([^*:]+)\*\*?:\s*(.*)', line)
             if match:
                 key = match.group(1).strip()
@@ -106,10 +128,27 @@ class GlobalTwin:
         output = template_content
         
         # 1. Inject Metadata
+        # Apply sensible defaults for common spec fields if missing
+        all_aliases = set()
+        for k in self.state["meta"]:
+            all_aliases.add(k)
+            if k in self.META_CROSSWALK:
+                all_aliases.update(self.META_CROSSWALK[k])
+        if "VERSION" not in all_aliases:
+            self.state["meta"]["Version"] = "1.0"
+        if "LINKED_TASK" not in all_aliases:
+            spec_val = self.state["meta"].get("Spec", "")
+            if spec_val:
+                self.state["meta"]["Linked Task"] = spec_val
         # We replace {{Key}} or {{ Key }} with the value from meta
         for k, v in self.state["meta"].items():
             pattern = re.compile(r'\{\{\s*' + re.escape(k) + r'\s*\}\}')
             output = pattern.sub(v, output)
+            # Also try crosswalk aliases (e.g. Task → TASK_NAME, TASK_TITLE)
+            if k in self.META_CROSSWALK:
+                for alias in self.META_CROSSWALK[k]:
+                    alias_pattern = re.compile(r'\{\{\s*' + re.escape(alias) + r'\s*\}\}')
+                    output = alias_pattern.sub(v, output)
             # Also handle the header Task Title if needed
             if k == "Task":
                 output = re.sub(r'# Task:\s*.*', f'# Task: {v}', output)
@@ -119,8 +158,9 @@ class GlobalTwin:
         processed_sections = set()
         
         def clean_tag(name):
-            # Strip punctuation and replace spaces with underscores
-            tag = re.sub(r'[^a-zA-Z0-9\s]', '', name)
+            # Strip punctuation, normalize whitespace, replace spaces with underscores
+            tag = re.sub(r'[^a-zA-Z0-9\s]', ' ', name)
+            tag = re.sub(r'\s+', ' ', tag).strip()
             return tag.upper().replace(' ', '_')
 
         for name, content in self.state["sections"].items():
@@ -134,6 +174,11 @@ class GlobalTwin:
             elif tag_clean in output:
                 output = output.replace(tag_clean, content)
                 processed_sections.add(name)
+            elif name in self.SECTION_CROSSWALK:
+                tag_crosswalk = f"{{{{{self.SECTION_CROSSWALK[name]}}}}}"
+                if tag_crosswalk in output:
+                    output = output.replace(tag_crosswalk, content)
+                    processed_sections.add(name)
 
         for name, items in self.state["checklists"].items():
             tag_exact = f"{{{{{name.upper().replace(' ', '_')}}}}}"
@@ -147,18 +192,27 @@ class GlobalTwin:
             elif tag_clean in output:
                 output = output.replace(tag_clean, checklist_md)
                 processed_sections.add(name)
+            elif name in self.SECTION_CROSSWALK:
+                tag_crosswalk = f"{{{{{self.SECTION_CROSSWALK[name]}}}}}"
+                if tag_crosswalk in output:
+                    output = output.replace(tag_crosswalk, checklist_md)
+                    processed_sections.add(name)
 
-        # Cleanup: remove any remaining {{TAGS}} that weren't filled
+        # Warn about remaining unfilled template tags (don't silently replace)
+        unfilled = re.findall(r'\{\{.*?\}\}', output)
+        if unfilled:
+            for tag in set(unfilled):
+                print(f"⚠️  Unfilled template tag: {tag}")
         output = re.sub(r'\{\{.*?\}\}', '*', output)
 
-        # 3. Append Orphaned Sections (Preserve manual edits not in template)
+        existing_headers = set(re.findall(r'^##\s+(.+)$', output, re.MULTILINE))
         orphans = []
         for name, content in self.state["sections"].items():
-            if name not in processed_sections:
+            if name not in processed_sections and name not in existing_headers:
                 orphans.append(f"## {name}\n{content}")
         
         for name, items in self.state["checklists"].items():
-            if name not in processed_sections:
+            if name not in processed_sections and name not in existing_headers:
                 checklist_md = "\n".join([f"- [{item['status']}] {item['text']}" for item in items])
                 orphans.append(f"## {name}\n{checklist_md}")
 
@@ -216,8 +270,11 @@ if __name__ == "__main__":
     if os.path.exists(twin.json_path):
         twin.load_state()
 
-    # 2. Harvest from Markdown (Manual edits/Initial creation)
-    if args.harvest or (not os.path.exists(twin.json_path) and os.path.exists(args.file)):
+    # 2. Harvest from Markdown (ALWAYS harvest existing MD to capture manual edits)
+    # Always harvest before synthesis to preserve any direct MD edits
+    if os.path.exists(twin.md_path):
+        twin.harvest()
+    elif args.harvest or (not os.path.exists(twin.json_path) and os.path.exists(args.file)):
         twin.harvest()
 
     # 2. Merge with external state if provided
@@ -268,3 +325,6 @@ if __name__ == "__main__":
     # 6. Synthesize if requested
     if args.synthesize:
         twin.synthesize()
+        # Always persist sidecar after synthesis so re-synthesis can merge
+        twin.state["updated_at"] = datetime.now().isoformat()
+        twin.save_state()

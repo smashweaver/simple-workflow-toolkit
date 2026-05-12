@@ -937,6 +937,11 @@ if [ "$CMD" == "phase" ]; then
 
     echo "Transitioned $FILE to Phase $PHASE_NUM. Ritual logged."
     sync_task_md "$FILE"
+    # Sync companion artifact mtimes to prevent false staleness on ritual-only changes
+    spec_file=$(grep -oP '^\*\*?Spec\*\*?:\s*\K\S+' "$FILE" | head -n 1)
+    [ -n "$spec_file" ] && [ -f "$spec_file" ] && touch -r "$FILE" "$spec_file"
+    [ -f "implementation_plan.md" ] && touch -r "$FILE" "implementation_plan.md"
+    [ -f "protocol.md" ] && touch -r "$FILE" "protocol.md"
     exit 0
 fi
 

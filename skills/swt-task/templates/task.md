@@ -1,3 +1,3 @@
-# Task Checklist: {{Task Name}}
+# Task Checklist: {{TASK_NAME}}
 
 {{CHECKLIST_ITEMS}}
