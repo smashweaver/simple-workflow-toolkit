@@ -382,3 +382,14 @@ The toolkit supports a mandatory "Test-First" workflow for high-stakes projects.
 3. **Harness**: The `swt.json` file provides the platform-agnostic commands necessary for the agent to run these checks.
 
 
+
+## 13. The Global Twin Protocol (State-as-Source)
+
+To eliminate document destruction and ensure total idempotency, all SWT-managed documents follow the **Global Twin** protocol. This transforms documentation from "string patching" to "state management."
+
+1. **The Twin Relationship**: Every managed Markdown file (`filename.md`) has an authoritative sidecar (`filename.md.json`). The JSON is the **Source of Truth**; the Markdown is a convenience projection.
+2. **The 3-Step Lifecycle**:
+   - **Harvest**: Ingest the current Markdown projection into the JSON sidecar to capture manual human edits.
+   - **Modify**: Programmatic changes (agent logic, checklist updates, status shifts) are applied directly to the JSON object.
+   - **Synthesize**: Re-render the Markdown projection from the JSON state using a standard template. Any human-added sections not found in the template MUST be preserved and appended to the end of the document.
+3. **Mandatory Sync**: All core commands (`graduate`, `phase`, `sync-docs`) MUST invoke the Global Twin loop. String patching via `sed` or `grep` on managed documents is strictly FORBIDDEN.

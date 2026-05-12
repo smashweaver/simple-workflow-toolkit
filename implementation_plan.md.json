@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "template": null,
+  "meta": {
+    "Spec": "*"
+  },
+  "sections": {
+    "User Review Required": "> [!IMPORTANT]\n> *",
+    "Open Questions": "- *",
+    "Proposed Changes": "### *\n\n#### [MODIFY] [file_basename](file:///absolute/path/to/file)\n- *\n\n#### [NEW] [file_basename](file:///absolute/path/to/file)\n- *",
+    "Verification Plan": "### Automated Tests\n- *\n\n### Manual Verification\n- *"
+  },
+  "checklists": {
+    "Manual Verification Notes": [
+      {
+        "status": " ",
+        "text": "This section was added manually and should survive sync-docs."
+      }
+    ]
+  },
+  "updated_at": "2026-05-12T09:47:46.764015"
+}

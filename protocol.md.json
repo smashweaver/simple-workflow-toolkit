@@ -1,0 +1,58 @@
+{
+  "version": "1.0",
+  "template": null,
+  "meta": {
+    "Spec": "*"
+  },
+  "sections": {
+    "1. Mission Briefing": "[Summarize the current execution goal and desired outcome]",
+    "4. Finality Ritual": "1. Verify Phase 8 (Review & Refine) is complete.\n2. Run `git add .` and verify staged changes.\n3. Initiate the `/swt:flow commit` ritual."
+  },
+  "checklists": {
+    "2. Gate 3: Execution Loop (Tactical Chunks)": [
+      {
+        "status": " ",
+        "text": "**Chunk 1**: [Description]"
+      },
+      {
+        "status": " ",
+        "text": "**Chunk 2**: [Description]"
+      },
+      {
+        "status": " ",
+        "text": "**Chunk 3**: [Description]"
+      },
+      {
+        "status": " ",
+        "text": "**Chunk 4**: [Description]"
+      },
+      {
+        "status": " ",
+        "text": "**Chunk 5**: [Description]"
+      }
+    ],
+    "3. Commit Discipline Gut Check (MANDATORY)": [
+      {
+        "status": " ",
+        "text": "**Title Format**: MUST follow `<type>(<scope>): <summary>` (e.g., `feat(ui): add button`)."
+      },
+      {
+        "status": " ",
+        "text": "**Zero Structural Noise**: NO dots (`.`), slashes (`/`), or file extensions in bullets. Focus on **impact**."
+      },
+      {
+        "status": " ",
+        "text": "**Bullet Syntax**: Use `*` for all bullets (NOT `-`)."
+      },
+      {
+        "status": " ",
+        "text": "**Punctuation Discipline**: No terminal periods at the end of the summary or bullet points."
+      },
+      {
+        "status": " ",
+        "text": "**Visual Structure**: Mandatory empty line between the header and the first bullet point."
+      }
+    ]
+  },
+  "updated_at": "2026-05-12T09:47:47.036761"
+}

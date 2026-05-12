@@ -86,3 +86,20 @@ inherits: "swt:think"
 ```
 
 This allows for future automated tooling to verify that all skills in the ecosystem are correctly following the base reasoning protocols.
+
+## 5. State-as-Source Architecture (Global Twin)
+
+To ensure document structural integrity and total idempotency, SWT employs a **Global Twin** architecture. This separates the **State** (authoritative JSON) from the **View** ( Markdown projection).
+
+### 1. The Twin Engine (`twin.py`)
+- **Engine**: A centralized Python parser and renderer that handles all programmatic document updates.
+- **Sidecars**: Every Markdown file (`.md`) has a hidden side-by-side JSON twin (`.md.json`).
+- **Bidirectional Sync**: 
+  - **Harvesting**: Captures manual human edits from the Markdown projection.
+  - **Synthesis**: Re-renders the Markdown from the state using standardized templates.
+
+### 2. Implementation Integrity
+This architecture eliminates the risk of "destructive scaffolding" during re-syncs. If a document section exists in the state but is not found in the target template, it is automatically appended to an Appendix, ensuring zero content loss.
+
+### 3. Workflow Integration
+Core commands (`new`, `graduate`, `phase`, `sync-docs`) are physically bound to this loop, preventing agents from bypassing state management through direct file string manipulation.

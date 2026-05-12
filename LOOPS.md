@@ -116,3 +116,10 @@ The finality sequence governing the move from code to history.
 *   **Draft-and-Approve**: The agent drafts `commit.draft` and `commit.task`.
 *   **Self-Correction Loop**: The draft is passed through a hard shell gate (`lint.sh`). If it fails (e.g., contains file paths or jargon), the agent must autonomously self-correct (up to 3 attempts).
 *   **Zero-Leeway Hygiene**: Upon approval, the task is closed, and all ephemeral artifacts are physically purged from the workspace.
+
+### 8. The Global Twin Protocol (Internal State Loop)
+A foundational technical cycle that runs inside every programmatic document update. It ensures that the agent never "forgets" manual human edits or implementation progress.
+1.  **Harvest**: Extract current document content into JSON.
+2.  **Modify State**: Update metadata and checklists in memory.
+3.  **Synthesize**: Re-project the document from state using standard templates.
+

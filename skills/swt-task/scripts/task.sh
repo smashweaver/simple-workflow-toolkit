@@ -38,6 +38,7 @@ function unmount_task {
     done
 
     rm -f "$root_dir/task.ctx" "$root_dir/task.md" "$root_dir/protocol.md" "$root_dir/implementation_plan.md"
+    rm -f "$root_dir/task.md.json" "$root_dir/protocol.md.json" "$root_dir/implementation_plan.md.json"
     rm -f "$root_dir/commit.draft" "$root_dir/commit.task" "$root_dir/commit.diff"
     # Debris Sweep
     rm -f "$root_dir"/.*.tmp
@@ -124,6 +125,21 @@ function validate_artifacts {
         fi
     fi
     return 0
+}
+
+function invoke_twin() {
+    local file=$1
+    shift
+    local twin_script="$ROOT_DIR/skills/swt-task/scripts/twin.py"
+    
+    if [ ! -f "$twin_script" ]; then
+        echo "⚠️ Global Twin engine not found. Falling back to legacy patching."
+        return 1
+    fi
+
+    # The --harvest flag ensures we ingest current root state before applying mods
+    python3 "$twin_script" "$file" --harvest "$@" --synthesize
+    return $?
 }
 
 function list_tasks {
@@ -337,13 +353,26 @@ function scaffold_artifact {
         return 0
     fi
     
-    local title=$(grep -m 1 "^# Task:" "$task_file" | sed 's/^# Task:[[:space:]]*//')
-    local spec_link=$(grep -m 1 "^\*\*Spec\*\*:" "$task_file" | sed 's/^\*\*Spec\*\*:[[:space:]]*//')
+    # If sidecar exists, use it for synthesis to preserve content
+    if [ -f "${target_path}" ]; then
+        echo "🔄 Harvesting current $target_path state..."
+        python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$target_path" --harvest
+    fi
+
+    if [ -f "${task_file}.json" ]; then
+        echo "🔄 Merging Task state and synthesizing $target_path..."
+        # We pass task state as the merging input to the existing artifact state
+        python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$target_path" --state "${task_file}.json" --template "$template_path" --out "$target_path" --synthesize
+    else
+        # Legacy fallback
+        local title=$(grep -m 1 "^# Task:" "$task_file" | sed 's/^# Task:[[:space:]]*//')
+        local spec_link=$(grep -m 1 "^\*\*Spec\*\*:" "$task_file" | sed 's/^\*\*Spec\*\*:[[:space:]]*//')
+        
+        sed "s|{{Task Name}}|$title|g" "$template_path" | \
+        sed "s|{{Spec Link}}|$spec_link|g" > "$target_path"
+    fi
     
-    sed "s|{{Task Name}}|$title|g" "$template_path" | \
-    sed "s|{{Spec Link}}|$spec_link|g" > "$target_path"
-    
-    echo "✨ Scaffolded $target_path from template."
+    echo "✨ Scaffolded $target_path."
 }
 
 function run_tests {
@@ -426,35 +455,17 @@ if [ "$CMD" == "new" ]; then
     SAFE_NAME=$(echo "$ARG" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/-/g' -e 's/-\+/-/g' -e 's/^-//' -e 's/-$//')
     FILENAME=".tasks/${TIMESTAMP}_${SAFE_NAME}.md"
     
-    cat <<EOF > "$FILENAME"
-# Task: $ARG
-**Created**: $DATE_STR
-**Updated**: —
-**Completed**: —
-**Status**: pending
-**Priority**: medium          <!-- low | medium | high | critical -->
-**Type**: feature           <!-- feature | bugfix | refactor | chore | docs -->
-**Category**: feature         <!-- feature | infrastructure | maintenance | bug | docs | research -->
-**Stack**: shared             <!-- frontend | backend | shared -->
-**Phase**: 1                  <!-- current active phase (0–8) -->
-**Blocked By**: —             <!-- task filename or n/a -->
+    template_path="$ROOT_DIR/skills/swt-task/templates/task.md"
 
-## Core Concept
-$ARG
+    # Initialize via Global Twin
+    invoke_twin "$FILENAME" --template "$template_path" \
+        --set-meta "Task" "$ARG" \
+        --set-meta "Created" "$DATE_STR" \
+        --set-meta "Status" "pending" \
+        --set-meta "Phase" "1" \
+        --set-section "Core Concept" "$ARG" \
+        --set-item "Checklist" "Phase 1: Plan" "/"
 
-## Checklist
-- [/] Phase 1: Plan
-- [ ] Phase 2: Analyze
-- [ ] Phase 3: Risk Assessment
-- [ ] Phase 4: Approval
-- [ ] Phase 5: Implement
-- [ ] Phase 6: Document
-- [ ] Phase 7: Test
-- [ ] Phase 8: Review & Refine
-## Ritual Logs
-
-## Commit Reference
-EOF
     log_ritual "phase 1" "$FILENAME"
     echo "Created task: $FILENAME"
     sync_task_md "$FILENAME"
@@ -508,59 +519,15 @@ if [ "$CMD" == "brainstorm" ]; then
     FILENAME="${TASK_ROOT}/${TIMESTAMP}_${SAFE_NAME}.md"
 
     template_path="$ROOT_DIR/skills/swt-task/templates/brainstorm.md"
-    if [ -f "$template_path" ]; then
-        cp "$template_path" "$FILENAME"
-        sed -i "s|{{Task Title}}|$ARG|g" "$FILENAME"
-        sed -i "s|{{DATE}}|$DATE_STR|g" "$FILENAME"
-        sed -i "s|{{ARG}}|$ARG|g" "$FILENAME"
-        # Handle UPLINK_CONTEXT which might contain newlines
-        if [ -n "$UPLINK_CONTEXT" ]; then
-            echo "$UPLINK_CONTEXT" > .uplink.tmp
-            sed -i "s|{{UPLINK_CONTEXT}}|$UPLINK_CONTEXT|g" "$FILENAME" 2>/dev/null || {
-                sed -i "/{{UPLINK_CONTEXT}}/{r .uplink.tmp
-d}" "$FILENAME"
-            }
-            rm .uplink.tmp
-        else
-            sed -i "s|{{UPLINK_CONTEXT}}||g" "$FILENAME"
-        fi
-    else
-        cat <<EOF > "$FILENAME"
-# Task: $ARG
-**Created**: $DATE_STR
-**Updated**: —
-**Completed**: —
-**Status**: ideating
-**Priority**: medium          <!-- low | medium | high | critical -->
-**Type**: brainstorm          <!-- feature | bugfix | refactor | chore | docs -->
-**Stack**: shared             <!-- frontend | backend | shared -->
-**Phase**: 0                  <!-- current active phase (0–8) -->
-**Blocked By**: —             <!-- task filename or n/a -->
-
-> **Covers**: [High-level summary of what this brainstorm entails]
-
-## What This Task Covers
-1. **[Core Area 1]**
-   - [Detail or requirement]
-2. **[Core Area 2]**
-   - [Detail or requirement]
-
-## Objective
-$ARG
-
-## Explored Alternatives
-- **Scenario A (Discipline)**: {{Methodology/Rule change only}}
-- **Scenario B (Automation)**: {{Helper scripts/Templates}}
-- **Scenario C (Enforcement)**: {{Hard gates/Physical blocks}}
-- **User Suggestion**: {{Explicitly log user ideas here or mark N/A}}
-
-## Notes
-$UPLINK_CONTEXT
-
-## Commit Reference
-
-EOF
-    fi
+    
+    # Initialize via Global Twin
+    invoke_twin "$FILENAME" --template "$template_path" \
+        --set-meta "Task" "$ARG" \
+        --set-meta "Created" "$DATE_STR" \
+        --set-meta "Status" "ideating" \
+        --set-meta "Phase" "0" \
+        --set-section "Objective" "$ARG" \
+        --set-section "Notes" "$UPLINK_CONTEXT"
 
     echo "Created brainstorm task: $FILENAME"
     sync_task_md "$FILENAME"
@@ -641,73 +608,23 @@ if [ "$CMD" == "graduate" ]; then
         exit 1
     fi
 
-    # 1. Update status to pending and phase to 1
-    if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
-        uv run "$ROOT_DIR/skills/swt-task/scripts/crow.py" "$FILE" --meta "Status" "pending" --meta "Phase" "1"
-    else
-        sed -i -E "s/^\*\*Status\*\*:\s*ideating/**Status**: pending/" "$FILE"
-        sed -i -E "s/^\*\*Phase\*\*:\s*0/**Phase**: 1/" "$FILE"
-    fi
+    # 1. Update status to pending and phase to 1 via Global Twin
+    invoke_twin "$FILE" --set-meta "Status" "pending" --set-meta "Phase" "1" --set-item "Checklist" "Phase 1: Plan" "/"
     
     # 2. Add Ritual Log
     log_ritual "phase 1" "$FILE"
 
-    # 3. Scaffold Spec
+    # 3. Scaffold Spec via Global Twin
     SLUG=$(basename "$FILE" .md | sed 's/^[0-9]*_//')
     TIMESTAMP=$(date +%Y%m%d%H%M%S)
     SPEC_FILE=".specs/${TIMESTAMP}_${SLUG}.md"
     
-    # Extract content from task file
-    # Support standardized headers for CORE extraction
-    CORE=$(sed -n '/^## \(What This Task Covers\|Objective\|Core Concept\)/,/^## /p' "$FILE" | grep -v "^## " | grep -v '^$' | head -10)
-    ALT=$(sed -n '/^## Explored Alternatives/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
-    GOALS=$(sed -n '/^## Goals/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
-    STORIES=$(sed -n '/^## User Stories/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
-    CRITERIA=$(sed -n '/^## Success Criteria/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
-    MVP=$(sed -n '/^## MVP Definition/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
-    NOTES=$(sed -n '/^## Notes/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -20)
-
-    template_path="$ROOT_DIR/skills/swt-task/templates/spec.md"
-    if [ -f "$template_path" ]; then
-        cp "$template_path" "$SPEC_FILE"
-        sed -i "s|{{Task Slug}}|$SLUG|g" "$SPEC_FILE"
-        sed -i "s|{{Task File}}|$FILE|g" "$SPEC_FILE"
-        
-        # Inject multiline content
-        inject_section() {
-            local tag=$1
-            local content=$2
-            local file=$3
-            if [ -n "$content" ]; then
-                echo "$content" > .content.tmp
-                sed -i "|$tag|{r .content.tmp
-d}" "$file"
-                rm .content.tmp
-            else
-                sed -i "s|$tag|*|g" "$file"
-            fi
-        }
-
-        # Use crow.py for surgical patching if available
-        if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
-            uv run "$ROOT_DIR/skills/swt-task/scripts/crow.py" "$SPEC_FILE" \
-                --patch "1. Problem Statement" "$CORE" \
-                --patch "2. Goals" "$GOALS" \
-                --patch "3. Proposed Solution" "$ALT" \
-                --patch "4. User Stories" "$STORIES" \
-                --patch "8. Success Criteria" "$CRITERIA" \
-                --patch "12. MVP Definition" "$MVP" \
-                --patch "6. Implementation Plan" "$NOTES"
-        else
-            # Legacy fallback
-            inject_section "{{PROBLEM_STATEMENT}}" "$CORE" "$SPEC_FILE"
-            inject_section "{{GOALS}}" "$GOALS" "$SPEC_FILE"
-            inject_section "{{PROPOSED_SOLUTION}}" "$ALT" "$SPEC_FILE"
-            inject_section "{{USER_STORIES}}" "$STORIES" "$SPEC_FILE"
-            inject_section "{{SUCCESS_CRITERIA}}" "$CRITERIA" "$SPEC_FILE"
-            inject_section "{{MVP}}" "$MVP" "$SPEC_FILE"
-            inject_section "{{NOTES}}" "$NOTES" "$SPEC_FILE"
-        fi
+    spec_template="$ROOT_DIR/skills/swt-task/templates/spec.md"
+    
+    if [ -f "$spec_template" ]; then
+        # Map task sections to spec sections via Global Twin synthesis
+        # We use the task's JSON state as the input for the spec synthesis
+        python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$FILE" --state "${FILE}.json" --template "$spec_template" --out "$SPEC_FILE" --synthesize
 
         echo "Graduated $FILE to Phase 1. Spec created: $SPEC_FILE"
         xdg-open "$SPEC_FILE" &
@@ -716,30 +633,9 @@ d}" "$file"
         scaffold_artifact "implementation_plan" "$FILE"
         scaffold_artifact "protocol" "$FILE"
         
-        # Add Spec link to task header (below Phase)
-        if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
-            uv run "$ROOT_DIR/skills/swt-task/scripts/crow.py" "$FILE" --meta "Spec" "$SPEC_FILE"
-        else
-            sed -i -E "/^\*\*Phase\*\*:/a **Spec**: $SPEC_FILE" "$FILE"
-        fi
-        
-        # Append standard checklist if missing
-        if ! grep -q "## Checklist" "$FILE"; then
-            cat <<EOF >> "$FILE"
-
-## Checklist
-- [ ] Phase 1: Plan
-- [ ] Phase 2: Analyze
-- [ ] Phase 3: Risk Assessment
-- [ ] Phase 4: Approval
-- [ ] Phase 5: Implement
-- [ ] Phase 6: Document
-- [ ] Phase 7: Test
-- [ ] Phase 8: Review & Refine
-EOF
-        fi
+        # Add Spec link to task header via Global Twin
+        invoke_twin "$FILE" --set-meta "Spec" "$SPEC_FILE"
     else
-        echo -e "\n## Verification Checklist\n- [ ] ..." >> "$FILE"
         echo "Graduated $FILE to Phase 1 (Lite path)."
     fi
 
@@ -754,10 +650,11 @@ if [ "$CMD" == "sync-docs" ]; then
         exit 1
     fi
     
-    # 1. Re-run metadata extraction and Spec update
-    echo "🔄 Re-syncing Spec from Task..."
-    # Reuse graduate logic for metadata injection
-    SLUG=$(basename "$FILE" .md | sed 's/^[0-9]*_//')
+    # 1. Harvest latest Task state
+    python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$FILE" --harvest
+
+    # 2. Re-sync Spec from Task state
+    echo "🔄 Re-syncing Spec from Task via Global Twin..."
     SPEC_FILE=$(grep -oP '^\*\*?Spec\*\*?:\s*\K\S+' "$FILE" | head -n 1)
     
     if [ -z "$SPEC_FILE" ] || [ ! -f "$SPEC_FILE" ]; then
@@ -765,77 +662,26 @@ if [ "$CMD" == "sync-docs" ]; then
         exit 1
     fi
 
-    # Extract current content
-    CORE=$(sed -n '/^## \(What This Task Covers\|Objective\|Core Concept\)/,/^## /p' "$FILE" | grep -v "^## " | grep -v '^$' | head -10)
-    ALT=$(sed -n '/^## Explored Alternatives/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
-    GOALS=$(sed -n '/^## Goals/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
-    STORIES=$(sed -n '/^## User Stories/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
-    CRITERIA=$(sed -n '/^## Success Criteria/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
-    MVP=$(sed -n '/^## MVP Definition/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -15)
-    NOTES=$(sed -n '/^## Notes/,/^## /p' "$FILE" | grep -v '^## ' | grep -v '^$' | head -20)
+    spec_template="$ROOT_DIR/skills/swt-task/templates/spec.md"
+    # We use the task's state to re-synthesize the spec, preserving spec's own sidecar if it exists
+    python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$FILE" --state "${FILE}.json" --template "$spec_template" --out "$SPEC_FILE" --synthesize
+    echo "✅ Spec synchronized: $SPEC_FILE"
 
-    # Re-inject into existing Spec (patching the slots)
-    if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
-        uv run "$ROOT_DIR/skills/swt-task/scripts/crow.py" "$SPEC_FILE" \
-            --patch "1. Problem Statement" "$CORE" \
-            --patch "2. Goals" "$GOALS" \
-            --patch "3. Proposed Solution" "$ALT" \
-            --patch "4. User Stories" "$STORIES" \
-            --patch "8. Success Criteria" "$CRITERIA" \
-            --patch "12. MVP Definition" "$MVP" \
-            --patch "6. Implementation Plan" "$NOTES"
-        echo "✅ Spec updated surgically: $SPEC_FILE"
-    else
-        # Legacy re-scaffold logic
-        template_path="$ROOT_DIR/skills/swt-task/templates/spec.md"
-        if [ -f "$template_path" ]; then
-            cp "$template_path" "$SPEC_FILE"
-            sed -i "s|{{Task Slug}}|$SLUG|g" "$SPEC_FILE"
-            sed -i "s|{{Task File}}|$FILE|g" "$SPEC_FILE"
-            
-            inject_section() {
-                local tag=$1; local content=$2; local file=$3
-                if [ -n "$content" ]; then
-                    echo "$content" > .content.tmp
-                    sed -i "/$tag/{r .content.tmp
-    d}" "$file"
-                    rm .content.tmp
-                else
-                    sed -i "s|$tag|*|g" "$file"
-                fi
-            }
-
-            inject_section "{{PROBLEM_STATEMENT}}" "$CORE" "$SPEC_FILE"
-            inject_section "{{GOALS}}" "$GOALS" "$SPEC_FILE"
-            inject_section "{{PROPOSED_SOLUTION}}" "$ALT" "$SPEC_FILE"
-            inject_section "{{USER_STORIES}}" "$STORIES" "$SPEC_FILE"
-            inject_section "{{SUCCESS_CRITERIA}}" "$CRITERIA" "$SPEC_FILE"
-            inject_section "{{MVP}}" "$MVP" "$SPEC_FILE"
-            inject_section "{{NOTES}}" "$NOTES" "$SPEC_FILE"
-            echo "✅ Spec updated (destructive fallback): $SPEC_FILE"
-        fi
-    fi
-
-    # 2. Re-sync Implementation Plan and Protocol
+    # 3. Re-sync Implementation Plan and Protocol
     echo "🔄 Re-syncing Implementation Plan and Protocol..."
     scaffold_artifact "implementation_plan" "$FILE" --force
     scaffold_artifact "protocol" "$FILE" --force
     
-    # 3. Physically reset Task to Phase 1
+    # 4. Physically reset Task to Phase 1 via Global Twin
     echo "🔄 Resetting Task to Phase 1 due to objective change..."
-    if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
-        uv run "$ROOT_DIR/skills/swt-task/scripts/crow.py" "$FILE" --meta "Phase" "1"
-    else
-        sed -i -E "s/^\*\*Phase\*\*:\s*[0-8]/**Phase**: 1/" "$FILE"
-    fi
-    sed -i "s/- \[[x /]\] Phase [0-8]/- [ ] Phase [0-8]/g" "$FILE"
-    sed -i "s/- \[ \] Phase 1/- [\/] Phase 1/" "$FILE"
+    invoke_twin "$FILE" --set-meta "Phase" "1" --set-item "Checklist" "Phase 1: Plan" "/"
+
     log_ritual "phase 1" "$FILE" "(Reset via sync-downstream)"
 
-    # 4. Re-sync task.md
+    # 5. Re-sync task.md
     sync_task_md "$FILE"
     
-    echo "✨ Downstream artifacts synchronized. Task reset to Phase 1. Review and Approval (Gate 2) required."
+    echo "✨ Downstream artifacts synchronized via Global Twin. Task reset to Phase 1."
     xdg-open "$SPEC_FILE" &
     exit 0
 fi
@@ -875,21 +721,17 @@ if [ "$CMD" == "close" ]; then
     fi
 
     DATE_STR=$(date +"%Y-%m-%d %H:%M:%S")
-    sed -i -E "s|^\*\*Completed\*\*:\s*—|**Completed**: $DATE_STR|" "$FILE"
-    sed -i -E "s/^\*\*Status\*\*:\s*.*/\*\*Status\*\*: done/" "$FILE"
-    sed -i -E "s/^\*\*Completed\*\*:\s*.*/\*\*Completed\*\*: $DATE_STR/" "$FILE"
-    sed -i "s/- \[[ /]\] Phase 8/- [x] Phase 8/" "$FILE"
+    invoke_twin "$FILE" --set-meta "Completed" "$DATE_STR" --set-meta "Status" "done" --set-item "Checklist" "Phase 8: Review & Refine" "x"
     
-    # Insert commit hash into ## Commit Reference section
-    if grep -q "## Commit Reference" "$FILE"; then
-        sed -i "/^## Commit Reference$/a $HASH" "$FILE"
-    else
-        echo -e "\n## Commit Reference\n$HASH" >> "$FILE"
-    fi
+    # Insert commit hash into ## Commit Reference section via Global Twin
+    invoke_twin "$FILE" --set-section "Commit Reference" "$HASH"
     
-    # Move to archive
+    # Move to archive (including sidecar)
     mkdir -p .tasks/archive
     mv "$FILE" .tasks/archive/
+    if [ -f "${FILE}.json" ]; then
+        mv "${FILE}.json" .tasks/archive/
+    fi
     echo "✅ Task closed: $FILE (Commit: $HASH)"
     unmount_task
     exit 0
