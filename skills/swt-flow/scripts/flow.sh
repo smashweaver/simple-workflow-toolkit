@@ -71,6 +71,17 @@ while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.gi
     ROOT_DIR=$(dirname "$ROOT_DIR")
 done
 
+# --- Implementation Visibility Interlock ---
+VISIBILITY_LOCK="$ROOT_DIR/.visibility_lock"
+SWT_CONFIG="$ROOT_DIR/swt.json"
+
+if [ -f "$VISIBILITY_LOCK" ] && [ "$CMD" != "status" ] && [ "$CMD" != "pulse" ] && [ "$CMD" != "unmount" ]; then
+    echo "🛑 VISIBILITY LOCK ACTIVE: You must verify implementation progress."
+    echo "👉 Run '/swt:flow status' to surface the updated tactical roadmap before proceeding."
+    exit 1
+fi
+# ------------------------------------------
+
 function open_browser() {
     local target=$1
     if [ -z "$target" ]; then return 1; fi
@@ -259,3 +270,27 @@ case $CMD in
         exit 1
         ;;
 esac
+
+# --- Post-Command Interlock Management ---
+if [ "$CMD" == "status" ] || [ "$CMD" == "pulse" ]; then
+    rm -f "$VISIBILITY_LOCK"
+elif [ -f "$ROOT_DIR/task.ctx" ]; then
+    # Check if we should lock (Phase 5 + Config enabled + Git dirty)
+    INTERLOCK_ENABLED=$(python3 -c "import json; print(json.load(open('$SWT_CONFIG')).get('ritual_gates', {}).get('visibility_interlock', True))" 2>/dev/null || echo "True")
+    
+    if [ "$INTERLOCK_ENABLED" == "True" ]; then
+        RESOLVED_TASK=$(resolve_task_path)
+        if [ -f "$RESOLVED_TASK" ]; then
+            PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$RESOLVED_TASK" | head -n 1)
+            if [ "$PHASE" -eq 5 ]; then
+                # Check for uncommitted source changes
+                if ! git diff --quiet -- "skills/" "*.md" "*.sh" "*.json"; then
+                    touch "$VISIBILITY_LOCK"
+                    echo "🔒 Visibility Lock engaged: Uncommitted changes detected."
+                fi
+            fi
+        fi
+    fi
+fi
+# ----------------------------------------
+
