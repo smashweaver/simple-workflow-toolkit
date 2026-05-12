@@ -40,6 +40,16 @@ Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot
 *   **Checklist Discipline**: Every phase requires explicit approval before moving to the next.
 *   **Discovery Pointers**: This project uses `GEMINI.md` and `CLAUDE.md` as discovery pointers. These files shim directly to this `AGENTS.md` source of truth. Always verify their presence after an `/swt:flow setup` or `/swt:flow link` operation.
 
+## Graphify (Structural Awareness)
+
+This project has graphify installed. Run `/swt:flow graph-init` to build a knowledge graph.
+
+Graphify makes the architecture navigable — agents query it in Phase 2 to find "Affected Concepts" before touching code, and again in Phase 8 to validate structural changes.
+
+Key commands:
+- `/swt:flow graph-init` — full deep scan (detect → AST → semantic → merge → label → export)
+- `/swt:flow graph-up` — incremental update preserving existing semantic nodes
+
 ### 3.1 Recursive State Machine
 
 The workflow is a recursive state machine governed by five named iteration loops (Brainstorm, Planning, Execution, Refinement, Commit). 

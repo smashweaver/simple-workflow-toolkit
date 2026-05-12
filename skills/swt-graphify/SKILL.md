@@ -40,8 +40,9 @@ If the binary is missing, `/swt:graphify` will report an error and provide insta
 - `/swt:graphify uninstall` -> Full cleanup: removes artifacts and states.
 - `/swt:graphify on | off` -> Explicitly enable/disable structural rituals.
 - `/swt:graphify status` -> Check current state, engine presence, and artifact presence.
-- `/swt:graphify init` -> Perform a full project build (deep scan).
-- `/swt:graphify update` -> Incremental update of the graph.
+- `/swt:graphify init` / `full` -> Perform a **full pipeline build**: detect → AST → semantic doc extraction → merge → build → community labeling → HTML export. Replaces `graphify .` which no longer exists in current versions.
+- `/swt:graphify up` -> **Incremental update** with GlobalTwin rehydration: preserves existing semantic nodes while merging new code AST and doc extraction.
+- `/swt:graphify update` -> Incremental update of the graph (native engine).
 - `/swt:graphify query "<question>"` -> Semantic search of the codebase.
 - `/swt:graphify explain "<node>"` -> Structural breakdown of a component.
 

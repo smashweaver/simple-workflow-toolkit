@@ -52,13 +52,16 @@ get_state() {
 
 # --- Command Router ---
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SKILL_DIR="$(dirname "$SCRIPT_DIR")"
+
 case $COMMAND in
     verify)
         echo "Verifying Graphify engine..."
         if command -v graphify &> /dev/null; then
             echo "✅ Graphify engine found: $(which graphify)"
-            if graphify --version &> /dev/null; then
-                echo "Version: $(graphify --version)"
+            if graphify --help &> /dev/null; then
+                echo "Available"
             fi
             set_state "enabled"
         else
@@ -69,10 +72,17 @@ case $COMMAND in
         fi
         ;;
     
-    init)
+    init|full)
         check_engine
-        echo "Initializing knowledge graph..."
-        graphify .
+        echo "Running full graph pipeline..."
+        bash "$SCRIPT_DIR/pipeline.sh" full "$ROOT_DIR"
+        set_state "enabled"
+        ;;
+
+    up)
+        check_engine
+        echo "Running incremental graph update..."
+        bash "$SCRIPT_DIR/pipeline.sh" up "$ROOT_DIR"
         set_state "enabled"
         ;;
 
@@ -129,7 +139,7 @@ case $COMMAND in
         ;;
 
     *)
-        echo "Usage: $0 {verify|init|on|off|status|query|explain|update|path}"
+        echo "Usage: $0 {verify|init|full|up|on|off|status|query|explain|update|path}"
         exit 1
         ;;
 esac
