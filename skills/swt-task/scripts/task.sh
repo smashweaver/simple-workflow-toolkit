@@ -327,6 +327,31 @@ function sync_task_to_internal {
     rm -f .checklist.tmp
 }
 
+function check_substance {
+    local file=$1
+    if [ ! -f "$file" ]; then return 1; fi
+
+    # 1. Template Marker Audit
+    if grep -q "{{" "$file"; then
+        echo "🛑 NAKED TEMPLATE JAILBREAK: Document contains unpopulated '{{' markers."
+        grep -n "{{" "$file" | sed 's/^/   /'
+        return 1
+    fi
+
+    # 2. Substance Density Check (Minimum 100 chars in Notes + Objective)
+    local obj_count=$(sed -n '/^## Objective/,/^## /p' "$file" | grep -v "^## " | tr -d '\n' | wc -c)
+    local notes_count=$(sed -n '/^## Notes/,/^## /p' "$file" | grep -v "^## " | tr -d '\n' | wc -c)
+    local total_substance=$((obj_count + notes_count))
+    
+    if [ "$total_substance" -lt 100 ]; then
+        echo "🛑 THIN BRAINSTORM JAILBREAK: Task substance insufficient for graduation ($total_substance/100 chars)."
+        echo "👉 Fill ## Notes with technical findings and trade-off analysis before proceeding."
+        return 1
+    fi
+
+    return 0
+}
+
 function sync_task_md {
     local file=$1
     if [ ! -f "$file" ]; then return 1; fi
@@ -617,6 +642,13 @@ if [ "$CMD" == "graduate" ]; then
     if [ "$PHASE" -ne 0 ]; then
         echo "Error: Task is already in Phase $PHASE. Only Phase 0 tasks can be graduated."
         exit 1
+    fi
+
+    # 0. Substance Check (Born Complete Enforcement)
+    if [ "$SWT_MODE" != "yolo" ]; then
+        if ! check_substance "$FILE"; then
+            exit 1
+        fi
     fi
 
     # 0. Sandbox Check (Safety Interlock)
