@@ -194,13 +194,15 @@ if __name__ == "__main__":
         twin.md_path = args.out
         twin.json_path = f"{args.out}.json"
     
-    # 1. Load existing sidecar state if it exists
+    # 1. Initial State Load (Sidecar first)
     if os.path.exists(twin.json_path):
         twin.load_state()
-    elif args.harvest or (os.path.exists(args.file) and not args.synthesize):
+
+    # 2. Harvest from Markdown (Manual edits/Initial creation)
+    if args.harvest or (not os.path.exists(twin.json_path) and os.path.exists(args.file)):
         twin.harvest()
 
-    # 2. Merge with external state if provided
+    # 3. Merge with external state if provided
     if args.state and os.path.exists(args.state):
         with open(args.state, 'r') as f:
             new_state = json.load(f)
@@ -208,7 +210,7 @@ if __name__ == "__main__":
             twin.state["sections"].update(new_state.get("sections", {}))
             twin.state["checklists"].update(new_state.get("checklists", {}))
 
-    # 3. Apply modifications via CLI flags
+    # 4. Apply modifications via CLI flags
     if args.set_meta:
         for k, v in args.set_meta:
             twin.state["meta"][k] = v
@@ -232,10 +234,11 @@ if __name__ == "__main__":
             if not found:
                 twin.state["checklists"][lst].append({"text": txt, "status": stat})
 
-    # 3. Persist State
+    # 5. Finalize Sidecar State
     if args.harvest or args.set_meta or args.set_section or args.set_item:
+        twin.state["updated_at"] = datetime.now().isoformat()
         twin.save_state()
     
-    # 4. Synthesize if requested
+    # 6. Synthesize if requested
     if args.synthesize:
         twin.synthesize()
