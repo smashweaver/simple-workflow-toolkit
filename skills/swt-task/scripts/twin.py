@@ -202,11 +202,19 @@ if __name__ == "__main__":
     if args.harvest or (not os.path.exists(twin.json_path) and os.path.exists(args.file)):
         twin.harvest()
 
-    # 3. Merge with external state if provided
+    # 2. Merge with external state if provided
     if args.state and os.path.exists(args.state):
         with open(args.state, 'r') as f:
             new_state = json.load(f)
-            twin.state["meta"].update(new_state.get("meta", {}))
+
+            # Protected Fields (Do not overwrite target identity)
+            protected = ["Status", "Phase", "Version", "Linked Task", "Created", "Completed"]
+
+            for k, v in new_state.get("meta", {}).items():
+                if k not in protected or k not in twin.state["meta"]:
+                    twin.state["meta"][k] = v
+
+            # Merge sections and checklists
             twin.state["sections"].update(new_state.get("sections", {}))
             twin.state["checklists"].update(new_state.get("checklists", {}))
 
