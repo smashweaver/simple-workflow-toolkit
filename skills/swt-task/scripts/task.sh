@@ -352,6 +352,41 @@ function check_substance {
     return 0
 }
 
+function check_phase_transition {
+    local file=$1
+    local new_phase=$2
+    
+    if [ "$SWT_MODE" == "yolo" ]; then return 0; fi
+
+    local current_phase=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$file" | head -n 1)
+    
+    # 1. Sequential Enforcement
+    local phase_order=$(python3 -c "import json; print(json.load(open('$SWT_CONFIG')).get('ritual_gates', {}).get('phase_order_enforcement', True))" 2>/dev/null || echo "True")
+    
+    if [ "$phase_order" == "True" ]; then
+        if [ "$new_phase" -gt "$((current_phase + 1))" ]; then
+            echo "🛑 LOOP JUMP DETECTED: Cannot jump from Phase $current_phase to Phase $new_phase."
+            echo "👉 You MUST transition through all intermediate phases and log their rituals."
+            return 1
+        fi
+    fi
+
+    # 2. Phase 5 Approval Gate (The Golden Gate)
+    local hitl_approval=$(python3 -c "import json; print(json.load(open('$SWT_CONFIG')).get('ritual_gates', {}).get('hitl_approval', True))" 2>/dev/null || echo "True")
+    
+    if [ "$new_phase" -eq 5 ] && [ "$hitl_approval" == "True" ]; then
+        # Check if user has explicitly approved implementation in the task or spec
+        if ! grep -q "GATE 2: APPROVED" "$file"; then
+            echo "🛑 GATE 2 LOCKED: Implementation (Phase 5) requires explicit user approval."
+            echo "👉 The user MUST append 'GATE 2: APPROVED' to the task or spec before proceeding."
+            return 1
+        fi
+        echo "🔓 GATE 2 UNLOCKED: Implementation authorized."
+    fi
+
+    return 0
+}
+
 function sync_task_md {
     local file=$1
     if [ ! -f "$file" ]; then return 1; fi
@@ -874,16 +909,13 @@ if [ "$CMD" == "phase" ]; then
         exit 1
     fi
 
-    # 1. Update Phase header
-    if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
-        uv run "$ROOT_DIR/skills/swt-task/scripts/crow.py" "$FILE" --meta "Phase" "$PHASE_NUM"
-    else
-        sed -i -E "s/^\*\*?Phase\*\*?:\s*[0-8]/**Phase**: $PHASE_NUM/" "$FILE"
+    # 0. Phase Transition Guard (Physical Cage)
+    if ! check_phase_transition "$FILE" "$PHASE_NUM"; then
+        exit 1
     fi
 
-    # 2. Update Checklist (mark current phase as in-progress [/])
-    # First, reset any other in-progress phases if appropriate (optional)
-    sed -i "s/- \[[ /]\] Phase $PHASE_NUM/- [\/] Phase $PHASE_NUM/" "$FILE"
+    # 1. Update Phase header via Global Twin
+    invoke_twin "$FILE" --set-meta "Phase" "$PHASE_NUM" --set-item "Checklist" "Phase $PHASE_NUM" "/"
 
     # 3. Add Ritual Log (with State Verification Signature)
     log_ritual "phase $PHASE_NUM" "$FILE" "(State Verified)"

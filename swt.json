@@ -6,6 +6,8 @@
   "ritual_gates": {
     "hard_sandbox": true,
     "visibility_interlock": true,
-    "ballmer_heartbeat": true
+    "ballmer_heartbeat": true,
+    "phase_order_enforcement": true,
+    "hitl_approval": true
   }
 }
