@@ -1,31 +1,25 @@
-# Implementation Plan - {{Task Name}}
-**Spec**: {{Spec Link}}
+# Implementation Plan - {{TASK_NAME}}
+**Spec**: {{SPEC_LINK}}
 
-{{Brief description of the problem and what the change accomplishes.}}
+{{OBJECTIVE}}
 
 ## User Review Required
 
 > [!IMPORTANT]
-> {{Document anything that requires user review or feedback, for example, breaking changes or significant design decisions.}}
+> {{USER_REVIEW_REQUIRED}}
 
 ## Open Questions
 
-- {{Clarifying or design questions for the user that will impact the implementation plan.}}
+{{OPEN_QUESTIONS}}
 
 ## Proposed Changes
 
-### {{Component Name}}
-
-#### [MODIFY] [file_basename](file:///absolute/path/to/file)
-- {{Summary of what will change in this component.}}
-
-#### [NEW] [file_basename](file:///absolute/path/to/file)
-- {{Creation detail.}}
+{{PROPOSED_CHANGES}}
 
 ## Verification Plan
 
 ### Automated Tests
-- {{Exact commands you'll run, browser tests using the browser tool, etc.}}
+{{AUTOMATED_TESTS}}
 
 ### Manual Verification
-- {{Summary of how you will verify that your changes have the desired effects.}}
+{{MANUAL_VERIFICATION}}

@@ -117,17 +117,35 @@ class GlobalTwin:
         # 2. Inject Sections and Checklists
         # Templates use {{SECTION_NAME}} or similar tags. 
         processed_sections = set()
+        
+        def clean_tag(name):
+            # Strip punctuation and replace spaces with underscores
+            tag = re.sub(r'[^a-zA-Z0-9\s]', '', name)
+            return tag.upper().replace(' ', '_')
+
         for name, content in self.state["sections"].items():
-            tag = f"{{{{{name.upper().replace(' ', '_')}}}}}"
-            if tag in output:
-                output = output.replace(tag, content)
+            # Try both exact match and cleaned match
+            tag_exact = f"{{{{{name.upper().replace(' ', '_')}}}}}"
+            tag_clean = f"{{{{{clean_tag(name)}}}}}"
+            
+            if tag_exact in output:
+                output = output.replace(tag_exact, content)
+                processed_sections.add(name)
+            elif tag_clean in output:
+                output = output.replace(tag_clean, content)
                 processed_sections.add(name)
 
         for name, items in self.state["checklists"].items():
-            tag = f"{{{{{name.upper().replace(' ', '_')}}}}}"
+            tag_exact = f"{{{{{name.upper().replace(' ', '_')}}}}}"
+            tag_clean = f"{{{{{clean_tag(name)}}}}}"
+            
             checklist_md = "\n".join([f"- [{item['status']}] {item['text']}" for item in items])
-            if tag in output:
-                output = output.replace(tag, checklist_md)
+            
+            if tag_exact in output:
+                output = output.replace(tag_exact, checklist_md)
+                processed_sections.add(name)
+            elif tag_clean in output:
+                output = output.replace(tag_clean, checklist_md)
                 processed_sections.add(name)
 
         # Cleanup: remove any remaining {{TAGS}} that weren't filled

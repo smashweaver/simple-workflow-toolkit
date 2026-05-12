@@ -1,57 +1,40 @@
-# Spec: {{Task Slug}}
-**Version**: 0.1
-**Status**: draft
-**Linked Task**: {{Task File}}
+# Spec: {{TASK_NAME}}
+**Version**: {{VERSION}}
+**Status**: {{STATUS}}
+**Linked Task**: {{LINKED_TASK}}
 
 ## 1. Problem Statement
-
-{{PROBLEM_STATEMENT}}
+{{1_PROBLEM_STATEMENT}}
 
 ## 2. Goals
-
-{{GOALS}}
+{{2_GOALS}}
 
 ## 3. Proposed Solution
-
-{{PROPOSED_SOLUTION}}
+{{3_PROPOSED_SOLUTION}}
 
 ## 4. User Stories
-
-{{USER_STORIES}}
+{{4_USER_STORIES}}
 
 ## 5. Non-Functional Requirements
-
-- Performance: [e.g. Minimal overhead]
-- Security: [e.g. Validates all inputs]
-- Maintainability: [e.g. Self-documenting code]
+{{5_NON_FUNCTIONAL_REQUIREMENTS}}
 
 ## 6. Implementation Plan
-
-{{NOTES}}
+{{6_IMPLEMENTATION_PLAN}}
 
 ## 7. Risks & Mitigations
-
-| Risk | Mitigation |
-|---|---|
-| [Description of risk] | [How to prevent or handle it] |
+{{7_RISKS_MITIGATIONS}}
 
 ## 8. Success Criteria
-
-{{SUCCESS_CRITERIA}}
+{{8_SUCCESS_CRITERIA}}
 
 ## 9. Out of Scope
-
-- [What this task specifically avoids]
+{{9_OUT_OF_SCOPE}}
 
 ## 10. Open Questions
-
-- [Unresolved design or implementation details]
+{{10_OPEN_QUESTIONS}}
 
 ## 11. References
-
-- Task file: `{{Task File}}`
-- [Link to related documentation or issues]
+{{11_REFERENCES}}
 
 ## 12. MVP Definition
-
-{{MVP}}
+{{12_MVP_DEFINITION}}
