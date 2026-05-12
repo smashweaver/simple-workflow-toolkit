@@ -718,6 +718,10 @@ if [ "$CMD" == "graduate" ]; then
         
         # Add Spec link to task header via Global Twin
         invoke_twin "$FILE" --set-meta "Spec" "$SPEC_FILE"
+        
+        if [ "$SWT_MODE" != "yolo" ] && [ "$SWT_BALLMER" == "True" ]; then
+            echo "🎉 GRADUATION VERIFIED: $BALLMER_CHANT"
+        fi
     else
         echo "Graduated $FILE to Phase 1 (Lite path)."
     fi
@@ -919,6 +923,10 @@ if [ "$CMD" == "phase" ]; then
 
     # 3. Add Ritual Log (with State Verification Signature)
     log_ritual "phase $PHASE_NUM" "$FILE" "(State Verified)"
+
+    if [ "$SWT_MODE" != "yolo" ] && [ "$SWT_BALLMER" == "True" ]; then
+        echo "🎉 RITUAL VERIFIED: $BALLMER_CHANT"
+    fi
 
 
 
