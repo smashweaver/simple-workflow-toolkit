@@ -130,6 +130,7 @@ function list_tasks {
     local filter=""
     local classify=false
     local priority=false
+    local summary=false
     
     # Parse arguments
     while [[ "$#" -gt 0 ]]; do
@@ -139,6 +140,7 @@ function list_tasks {
             --abandoned) filter="--abandoned" ;;
             --classify|-c) classify=true ;;
             --priority|-p) priority=true ;;
+            --summary|-s) summary=true ;;
             *) # Ignore unknown
                ;;
         esac
@@ -198,6 +200,12 @@ function list_tasks {
                 last_cat=$cat
             fi
             printf "  %s\t%s\t%s\t%s\n" "$ts" "$phase" "$stat" "$obj"
+            if [ "$summary" = true ]; then
+                local task_file=$(ls .tasks/${ts}_*.md 2>/dev/null | head -n 1)
+                if [ -n "$task_file" ] && [ -f "$task_file" ]; then
+                    sed -n '/^## What This Task Covers/,/^## /p' "$task_file" | grep -v '^## ' | grep -v '^$' | head -n 3 | sed 's/^/    | /'
+                fi
+            fi
         done
     elif [ "$priority" = true ]; then
         # Sorted by Priority, then Timestamp
@@ -205,6 +213,12 @@ function list_tasks {
         echo -e "---------\t-----\t------\t---------"
         sort -k2,2rn -k3,3 "$task_data" | while IFS=$'\t' read -r cat p_num ts phase stat obj; do
             printf "%s\t%s\t%s\t%s\n" "$ts" "$phase" "$stat" "$obj"
+            if [ "$summary" = true ]; then
+                local task_file=$(ls .tasks/${ts}_*.md 2>/dev/null | head -n 1)
+                if [ -n "$task_file" ] && [ -f "$task_file" ]; then
+                    sed -n '/^## What This Task Covers/,/^## /p' "$task_file" | grep -v '^## ' | grep -v '^$' | head -n 3 | sed 's/^/  | /'
+                fi
+            fi
         done
     else
         # Default: Flat / Chronological
@@ -212,6 +226,12 @@ function list_tasks {
         echo -e "---------\t-----\t------\t---------"
         sort -k3,3 "$task_data" | while IFS=$'\t' read -r cat p_num ts phase stat obj; do
             printf "%s\t%s\t%s\t%s\n" "$ts" "$phase" "$stat" "$obj"
+            if [ "$summary" = true ]; then
+                local task_file=$(ls .tasks/${ts}_*.md 2>/dev/null | head -n 1)
+                if [ -n "$task_file" ] && [ -f "$task_file" ]; then
+                    sed -n '/^## What This Task Covers/,/^## /p' "$task_file" | grep -v '^## ' | grep -v '^$' | head -n 3 | sed 's/^/  | /'
+                fi
+            fi
         done
     fi
     rm -f "$task_data"

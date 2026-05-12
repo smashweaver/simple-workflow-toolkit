@@ -22,7 +22,7 @@ function show_help {
     echo "  new <name>        - Create Implementation Task (Phase 1)"
     echo "  brainstorm <topic>- Create Ideation Task (Phase 0)"
     echo "  graduate          - Promote Phase 0 → 1 (+ Spec)"
-    echo "  backlog           - Show all open/active tasks (--classify, --priority)"
+    echo "  backlog           - Show all open/active tasks (--classify, --priority, --summary)"
     echo "  history           - Show complete project timeline (--classify, --priority)"
     echo "  archive           - Show only finished/abandoned tasks (--classify, --priority)"
     echo ""
