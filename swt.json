@@ -1,13 +1,2 @@
-{
-  "mode": "protocol",
-  "test_command": "grep -q 'function log_ritual' skills/swt-task/scripts/task.sh",
-  "test_dir": "skills/swt-task/scripts/",
-  "tdd_enforced": false,
-  "ritual_gates": {
-    "hard_sandbox": true,
-    "visibility_interlock": true,
-    "ballmer_heartbeat": true,
-    "phase_order_enforcement": true,
-    "hitl_approval": true
-  }
-}
+# Task: swt.json
+**mode**: protocol
