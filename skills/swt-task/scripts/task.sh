@@ -14,6 +14,22 @@ while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.gi
     ROOT_DIR=$(dirname "$ROOT_DIR")
 done
 
+# --- Steve Ballmer Heartbeat (Protocol Alignment) ---
+SWT_CONFIG="$ROOT_DIR/swt.json"
+SWT_MODE="protocol" # Default
+BALLMER_CHANT="PROTOCOL! PROTOCOL! PROTOCOL!"
+
+if [ -f "$SWT_CONFIG" ]; then
+    # Use python to extract mode safely
+    SWT_MODE=$(python3 -c "import json; print(json.load(open('$SWT_CONFIG')).get('mode', 'protocol'))" 2>/dev/null || echo "protocol")
+    SWT_BALLMER=$(python3 -c "import json; print(json.load(open('$SWT_CONFIG')).get('ritual_gates', {}).get('ballmer_heartbeat', True))" 2>/dev/null || echo "True")
+fi
+
+if [ "$SWT_MODE" != "yolo" ] && [ "$SWT_BALLMER" == "True" ] && [ "$CMD" != "ctx" ] && [ "$CMD" != "list" ]; then
+    echo "💓 Heartbeat: $BALLMER_CHANT"
+fi
+# --------------------------------------------------
+
 function log_ritual() {
     local type=$1
     local file=$2
