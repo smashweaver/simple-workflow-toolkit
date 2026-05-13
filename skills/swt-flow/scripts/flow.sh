@@ -35,6 +35,7 @@ function show_help {
     echo "  sync-docs         - Re-sync Spec/Plan after changes"
     echo "  sync-roadmap      - Persist protocol.md progress to task"
     echo "  scaffold <type>   - Manually generate artifacts"
+    echo "  audit             - Structural health check (Verdict)"
     echo ""
     echo "Lifecycle & Hygiene:"
     echo "  close <hash>      - Finalize task (hash required)"
@@ -219,6 +220,8 @@ case $CMD in
         RESOLVED=$(resolve_task_path "$1")
         if [ $? -ne 0 ]; then echo "❌ Error: No active task context."; exit 1; fi
         delegate "skills/swt-task/scripts/task.sh" "test" "$RESOLVED" --fail "$@" ;;
+
+    audit) shift; delegate "skills/swt-audit/scripts/audit.sh" "$@" ;;
 
     # Lifecycle & Hygiene
     close) shift;
