@@ -352,6 +352,13 @@ function check_substance {
     return 0
 }
 
+function get_substance() {
+    local file=$1
+    # Extract Objective and Notes sections, removing headers and empty lines
+    sed -n '/^## Objective/,/^## /p' "$file" | grep -v "^## " | sed '/^$/d'
+    sed -n '/^## Notes/,/^## /p' "$file" | grep -v "^## " | sed '/^$/d'
+}
+
 function check_phase_transition {
     local file=$1
     local new_phase=$2
@@ -1018,16 +1025,25 @@ if [ "$CMD" == "validate" ]; then
     fi
 
     # 4. Stale Artifact Detection (Dependency Chain)
-    if [ "$PHASE" -gt 0 ]; then
+    if [ "$PHASE" -gt 0 ] && [ "$PHASE" -lt 8 ]; then
         # Find companion spec
         spec=$(grep -oP '^\*\*?Spec\*\*?:\s*\K\S+' "$FILE" | head -n 1)
         if [ -n "$spec" ] && [ -f "$spec" ]; then
             task_time=$(stat -c %Y "$FILE")
             spec_time=$(stat -c %Y "$spec")
             if [ "$task_time" -gt $((spec_time + 60)) ]; then
-                echo "🛑 STALE SPEC DETECTED: Task objectives are newer than the Spec."
-                echo "   Loop back to re-sync: swt.sh sync-docs $FILE"
-                exit 1
+                # Perform Substance-Aware Check: Only fail if the core objectives have drifted
+                TASK_SUBSTANCE=$(get_substance "$FILE" | md5sum | cut -d' ' -f1)
+                SPEC_SUBSTANCE=$(get_substance "$spec" | md5sum | cut -d' ' -f1)
+                
+                if [ "$TASK_SUBSTANCE" != "$SPEC_SUBSTANCE" ]; then
+                    echo "🛑 STALE SPEC DETECTED: Task objectives have drifted from the Spec."
+                    echo "   Loop back to re-sync: swt.sh sync-docs $FILE"
+                    exit 1
+                fi
+                # Auto-heal the timestamp if substance is identical
+                touch -r "$FILE" "$spec"
+                echo "✅ Spec synchronization verified (Substance match)."
             fi
             
             if [ -f "implementation_plan.md" ]; then
