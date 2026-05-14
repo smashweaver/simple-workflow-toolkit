@@ -378,7 +378,7 @@ def sensor_commit_loop(phase: int, task_file: str | None) -> dict:
             content = Path(task_file).read_text()
             
             # 1. Guidelines Handshake (Scenario B)
-            if "<!-- RITUAL: commit guidelines read -->" not in content:
+            if "RITUAL: commit guidelines read" not in content:
                 result["warnings"].append(
                     "COMMIT GUIDELINES RITUAL MISSING: You must acknowledge the manual before drafting. "
                     "Run: 'cat skills/swt-commit/SKILL.md' and log 'RITUAL: commit guidelines read' in your task file."
@@ -398,6 +398,27 @@ def sensor_commit_loop(phase: int, task_file: str | None) -> dict:
                         result["status"] = "warn"
                 else:
                     result["findings"].append(f"Test ritual verified ✓ ({test_cmd})")
+
+            # 3. Physical Task Gate Check
+            hook_path = ROOT_DIR / ".git/hooks/pre-commit"
+            if not hook_path.exists():
+                result["warnings"].append(
+                    "PHYSICAL TASK GATE MISSING: The pre-commit hook is not installed. "
+                    "Run: /swt:flow setup to arm the gate."
+                )
+                if result["status"] not in ("error", "warn"):
+                    result["status"] = "warn"
+            else:
+                hook_content = hook_path.read_text()
+                if "SWT: Physical Gate" not in hook_content:
+                    result["warnings"].append(
+                        "PHYSICAL TASK GATE MISMATCH: A pre-commit hook exists but does not contain the SWT signature. "
+                        "Run: /swt:flow setup to re-arm the gate."
+                    )
+                    if result["status"] not in ("error", "warn"):
+                        result["status"] = "warn"
+                else:
+                    result["findings"].append("Physical task gate verified ✓")
         except Exception:
             pass
 

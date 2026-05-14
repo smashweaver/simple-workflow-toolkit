@@ -10,6 +10,10 @@ task.ctx
 .digests/
 
 # Specifications
+.specs/
+
+# Tasks
+.tasks/
 
 # OS
 .DS_Store

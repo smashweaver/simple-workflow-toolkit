@@ -35,7 +35,7 @@ echo ""
 # 1.25 Active Task Context
 if [ -f "$ROOT_DIR/skills/swt-flow/scripts/state.py" ]; then
     # Use state.py to show active context (Sensor 1 report)
-    uv run python3 "$ROOT_DIR/skills/swt-flow/scripts/state.py" | sed -n '/SWT State Report/,/✅ Phase\/Loop/p' | grep -v '✅ Phase/Loop' | grep -v '==='
+    uv run python3 "$ROOT_DIR/skills/swt-flow/scripts/state.py" | sed -n '/SWT State Report/,/===/p' | grep -v '==='
 else
     echo "--- Active Task Context ---"
     echo "Engine (state.py) not found."

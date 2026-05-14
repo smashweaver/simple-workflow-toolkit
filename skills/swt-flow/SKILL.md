@@ -106,10 +106,10 @@ The workflow is not linear; it is a recursive state machine governed by five nam
 | :--- | :--- | :--- |
 | **/swt:flow digest** | `swt:digest` | Daily session summary |
 | **/swt:flow milestone** | `swt:digest` | Full project roll-up |
-| **/swt:flow setup** | `swt:task` | Physical workspace setup (`.tasks/`, etc.) |
-| **/swt:flow symlink** | `swt:link` | Global dev setup (`--global --clear`) |
-| **/swt:flow link** | `swt:link` | Link skills into current project |
-| **/swt:flow link-dry** | `swt:link` | Preview symlink changes |
+| **/swt:flow setup** | `swt:task` | Project setup & physical task gate arming |
+| **/swt:flow install** | `swt:link` | Physical skill installation (Stable Mode) |
+| **/swt:flow install --global** | `swt:link` | Global physical installation (~/.agents) |
+| **/swt:flow install --only-clear** | `swt:link` | Standalone workspace liquidation |
 
 #### 6. Structural Awareness (The "Eyes")
 | **Facade Command** | **Skill** | **Purpose** |
