@@ -44,9 +44,9 @@ sample_walkthrough.md
 sample_task.md
 
 # Planning Mode root artifacts
-/task.md.json
-/protocol.md.json
-/implementation_plan.md.json
+/task.md.yaml
+/protocol.md.yaml
+/implementation_plan.md.yaml
 /protocol.md
 /implementation_plan.md
 /walkthrough.md
