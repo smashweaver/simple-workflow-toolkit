@@ -101,11 +101,11 @@ for skill_path in "$SKILLS_DIR"/*; do
             
             DEST_PATH="$target_dir/$SKILL_NAME"
             
-            # If target exists and is a symlink, remove it first to allow copy
-            if [[ -L "$DEST_PATH" ]]; then
-                echo "Removing existing symlink: $DEST_PATH"
+            # Always remove existing target to ensure a clean copy (no stale files)
+            if [[ -e "$DEST_PATH" ]]; then
+                echo "Removing existing installation: $DEST_PATH"
                 if [[ "$DRY_RUN" == "false" ]]; then
-                    rm "$DEST_PATH"
+                    rm -rf "$DEST_PATH"
                 fi
             fi
             

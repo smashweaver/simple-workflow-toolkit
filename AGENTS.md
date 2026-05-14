@@ -37,6 +37,7 @@ Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot
     2. **No active task**: Offer to create a Phase 0 brainstorm task.
     The agent must NEVER answer ad-hoc without offering task tracking first.
     Detection is lightweight — only trigger when the message clearly implies work.
+*   **Intent Verification Ritual**: Every non-trivial action MUST be preceded by a facade check (`/swt:flow status` or `/swt:flow state`) to ensure alignment with the user's strategic intent and the current task state. Never assume the context is fresh; verify it through the orchestrator before proposing or executing changes.
 *   **No Autonomous Structural Changes**: The agent is FORBIDDEN from executing structural changes (git init, mkdir for skeletons, major refactors) without a direct, verbal "Go" or "Approved" from the user in the chat history.
 *   **`swt:init` Pointer Rule**: When initializing a project, always use `/swt:flow setup` to create the mandatory `AGENTS.md` and its associated discovery pointers (`GEMINI.md`, `CLAUDE.md`).
 *   **Manual Consent Overrides System Flags**: Even if the agent generates a plan that is "auto-approved" by the system, it MUST halt and request manual confirmation for any structural modification.

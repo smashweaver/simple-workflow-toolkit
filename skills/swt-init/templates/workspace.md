@@ -38,11 +38,13 @@ Unless strictly authorized, the AI agent acts as a **Senior Advisor and Co-pilot
     2. **No active task**: Offer to create a Phase 0 brainstorm task.
     The agent must NEVER answer ad-hoc without offering task tracking first.
     Detection is lightweight — only trigger when the message clearly implies work.
+*   **Intent Verification Ritual**: Every non-trivial action MUST be preceded by a facade check (`/swt:flow status` or `/swt:flow state`) to ensure alignment with the user's strategic intent and the current task state. Never assume the context is fresh; verify it through the orchestrator before proposing or executing changes.
 *   **No Autonomous Structural Changes**: The agent is FORBIDDEN from executing structural changes (git init, mkdir for skeletons, major refactors) without a direct, verbal "Go" or "Approved" from the user in the chat history.
 *   **Manual Consent Overrides System Flags**: Even if the agent generates a plan that is "auto-approved" by the system, it MUST halt and request manual confirmation for any structural modification.
 *   **Locked Gate Protocol**: When a structural junction is reached, the agent must halt and state: *"I am at a Locked Gate. This change is structural. Do I have your approval to proceed?"*
 *   **Task-Centric Flow**: All work maps to an active task file in the **relevant sub-project's** `.tasks/`.
 *   **Checklist Discipline**: Every phase requires explicit approval before moving to the next.
+*   **Draft-and-Approve Commits**: NEVER execute a commit without first presenting `commit.draft` and obtaining verbal approval.
 *   **Sub-project Scoping**: At session start, always confirm which sub-project is in scope before proceeding.
 *   **Discovery Pointers**: This workspace uses `GEMINI.md` and `CLAUDE.md` as discovery pointers. These files shim directly to this `AGENTS.md` source of truth. Always verify their presence after an `/swt:flow setup` or `/swt:flow link` operation.
 
