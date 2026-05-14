@@ -55,7 +55,7 @@ graph LR
 ```
 
 ### Routing Logic
-- **Direct Delegation**: Commands like `link`, `status`, and `commit` are passed directly to the backing shell scripts in their respective skill folders.
+- **Direct Delegation**: Commands like `install`, `link`, `status`, and `commit` are passed directly to the backing shell scripts in their respective skill folders.
 - **Smart Search**: The `view-task` command uses a resolution helper to find task files in both active (`.tasks/`) and archived (`.tasks/archive/`) directories.
 - **Behavioral Guidance**: Skills like `init` that lack a backing shell script are handled via a guidance message that directs the agent's behavior.
 
@@ -87,19 +87,21 @@ inherits: "swt:think"
 
 This allows for future automated tooling to verify that all skills in the ecosystem are correctly following the base reasoning protocols.
 
-## 5. State-as-Source Architecture (Global Twin)
+## 5. State-as-Source Architecture (Sidecar Cluster)
 
-To ensure document structural integrity and total idempotency, SWT employs a **Global Twin** architecture. This separates the **State** (authoritative JSON) from the **View** ( Markdown projection).
+To ensure document structural integrity and total idempotency, SWT employs a **Global Twin** architecture. This separates the **Machine State** (authoritative YAML) from the **Markdown Projection** (human-readable view).
 
 ### 1. The Twin Engine (`twin.py`)
 - **Engine**: A centralized Python parser and renderer that handles all programmatic document updates.
-- **Sidecars**: Every Markdown file (`.md`) has a hidden side-by-side JSON twin (`.md.json`).
-- **Bidirectional Sync**: 
-  - **Harvesting**: Captures manual human edits from the Markdown projection.
-  - **Synthesis**: Re-renders the Markdown from the state using standardized templates.
+- **Sidecar Cluster**: Machine state is persisted in timestamped YAML files within the `.tasks/` directory, mirroring the task lifecycle.
+- **YAML Formatting**: Uses YAML block scalars (`|`) for prose sections, ensuring that multiline content and markdown syntax are preserved without escaping.
 
-### 2. Implementation Integrity
-This architecture eliminates the risk of "destructive scaffolding" during re-syncs. If a document section exists in the state but is not found in the target template, it is automatically appended to an Appendix, ensuring zero content loss.
+### 2. Bidirectional Sync
+- **Harvesting**: Captures manual human edits from the Markdown projection into the YAML state.
+- **Synthesis**: Re-renders the Markdown from the state using standardized templates.
+
+### 3. Implementation Integrity
+This architecture eliminates the risk of "destructive scaffolding" during re-syncs. By centralizing machine state in the Sidecar Cluster, the project root remains clean of ephemeral planning artifacts while maintaining a persistent audit trail of the entire task lifecycle.
 
 ### 3. Workflow Integration
 Core commands (`new`, `graduate`, `phase`, `sync-docs`) are physically bound to this loop, preventing agents from bypassing state management through direct file string manipulation.

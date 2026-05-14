@@ -144,9 +144,12 @@ When the type is **Workspace**, the agent must also perform these actions if the
 1. **Git Init**: Run `git init` to version the workspace meta-files.
 2. **.gitignore**: Create a `.gitignore` with:
    - `.tasks/` (unless tasks are intended to be shared via git)
+   - `.cache/` (mandatory hygiene)
    - Sub-project directory names (to prevent them being treated as submodules)
    - Common OS/IDE cruft (`.DS_Store`, `.vscode/`, etc.)
-3. **Task Directory**: `mkdir -p .tasks/` to store cross-project tasks.
+3. **Directory Scaffolding**: Create the required structural directories:
+   - `mkdir -p .tasks/` to store cross-project tasks.
+   - `mkdir -p .cache/` to store ephemeral artifacts.
 4. **README**: Create a `README.md` skeleton with the project name and purpose.
 
 ---

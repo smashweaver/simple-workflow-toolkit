@@ -46,6 +46,22 @@ function log_ritual() {
     fi
 }
 
+function get_artifact_path() {
+    local task_file=$1
+    local type=$2 # implementation_plan, protocol, walkthrough
+    local ts=$(basename "$task_file" | cut -d'_' -f1)
+    local dir=$(dirname "$task_file")
+    
+    local ext="md"
+    case "$type" in
+        implementation_plan) ext="plan.md" ;;
+        protocol) ext="tr.md" ;;
+        walkthrough) ext="walkthrough.md" ;;
+    esac
+    
+    echo "$dir/$ts.$ext"
+}
+
 function unmount_task {
     # Ensure we are in the root directory for cleanup
     local root_dir=$(pwd)
@@ -53,6 +69,16 @@ function unmount_task {
         root_dir=$(dirname "$root_dir")
     done
 
+    # Resolve active task for Sidecar cleanup
+    if [ -f "$root_dir/task.ctx" ]; then
+        local active_task=$(cat "$root_dir/task.ctx" | tr -d '[:space:]')
+        if [ -f "$active_task" ]; then
+            rm -f "$(get_artifact_path "$active_task" implementation_plan).yaml"
+            rm -f "$(get_artifact_path "$active_task" protocol).yaml"
+        fi
+    fi
+
+    # Legacy Root Cleanup
     rm -f "$root_dir/task.ctx" "$root_dir/task.md" "$root_dir/protocol.md" "$root_dir/implementation_plan.md"
     rm -f "$root_dir/task.md.yaml" "$root_dir/protocol.md.yaml" "$root_dir/implementation_plan.md.yaml"
     rm -f "$root_dir/commit.draft" "$root_dir/commit.task" "$root_dir/commit.diff"
@@ -107,36 +133,25 @@ function show_help {
 
 function validate_artifacts {
     local phase=$1
+    local task_file=$2
 
-    # Phantom Artifact Check
-    check_phantom() {
-        local name=$1
-        # Search common hidden jailbreak locations (relative to root)
-        local phantom=$(find . -maxdepth 3 \( -path "./.gemini*" -o -path "./.agents*" -o -path "./.claude*" \) -name "$name" 2>/dev/null | head -n 1)
-        if [ -n "$phantom" ] && [ ! -f "$name" ]; then
-            echo "🛑 PHANTOM ARTIFACT DETECTED: $name found in $phantom but missing from project root."
-            echo "   Move it to the root immediately to pass verification."
-            return 1
-        fi
-        return 0
-    }
+    # Sidecar Resolution
+    local sidecar_plan=$(get_artifact_path "$task_file" implementation_plan)
+    local sidecar_tr=$(get_artifact_path "$task_file" protocol)
 
     if [ "$phase" -ge 1 ] && [ "$phase" -lt 8 ]; then
-        if [ ! -f "implementation_plan.md" ]; then
-            check_phantom "implementation_plan.md"
-            echo "🛑 PROTOCOL VIOLATION: Phase $phase requires implementation_plan.md at the project root."
+        if [ ! -f "$sidecar_plan" ] && [ ! -f "implementation_plan.md" ]; then
+            echo "🛑 PROTOCOL VIOLATION: Phase $phase requires Implementation Plan."
+            echo "👉 Expected sidecar: $sidecar_plan"
+            echo "👉 Or legacy root: implementation_plan.md"
             return 1
         fi
     fi
     if [ "$phase" -ge 5 ]; then
-        if [ ! -f "task.md" ]; then
-            check_phantom "task.md"
-            echo "🛑 PROTOCOL VIOLATION: Phase $phase requires task.md at the project root."
-            return 1
-        fi
-        if [ ! -f "protocol.md" ]; then
-            check_phantom "protocol.md"
-            echo "🛑 PROTOCOL VIOLATION: Phase $phase requires protocol.md at the project root as an Execution Guard."
+        if [ ! -f "$sidecar_tr" ] && [ ! -f "protocol.md" ]; then
+            echo "🛑 PROTOCOL VIOLATION: Phase $phase requires Tactical Roadmap."
+            echo "👉 Expected sidecar: $sidecar_tr"
+            echo "👉 Or legacy root: protocol.md"
             return 1
         fi
     fi
@@ -286,11 +301,18 @@ function list_tasks {
 
 function sync_roadmap {
     local internal_file=$1
-    if [ ! -f "protocol.md" ] || [ ! -f "$internal_file" ]; then return 0; fi
+    local sidecar_tr=$(get_artifact_path "$internal_file" protocol)
+    local roadmap_source="protocol.md" # Default fallback
     
-    echo "🔄 Ingesting tactical progress from protocol.md..."
+    if [ -f "$sidecar_tr" ]; then
+        roadmap_source="$sidecar_tr"
+    elif [ ! -f "protocol.md" ]; then
+        return 0
+    fi
+    
+    echo "🔄 Ingesting tactical progress from $(basename "$roadmap_source")..."
     # Extract the Execution Loop section and filter for checklist items
-    local roadmap=$(sed -n '/## 2. Gate 3: Execution Loop/,/##/p' "protocol.md" | grep -E '^\s*-\s*\[[ xX/]\]' || true)
+    local roadmap=$(sed -n '/## 2. Gate 3: Execution Loop/,/##/p' "$roadmap_source" | grep -E '^\s*-\s*\[[ xX/]\]' || true)
     
     if [ -n "$roadmap" ]; then
         if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
@@ -395,27 +417,8 @@ function check_phase_transition {
 }
 
 function sync_task_md {
-    local file=$1
-    if [ ! -f "$file" ]; then return 1; fi
-    
-    local title=$(grep -m 1 "^# Task:" "$file" | sed 's/# Task: //')
-    local template_path="$ROOT_DIR/skills/swt-task/templates/task.md"
-    local items=$(sed -n '/## Checklist/,/##/p' "$file" | grep -v "##" | sed '/^$/d')
-
-    if [ -f "$template_path" ]; then
-        sed "s|{{Task Name}}|$title|g" "$template_path" > task.md
-        echo "$items" > .items.tmp
-        sed -i "/{{CHECKLIST_ITEMS}}/{r .items.tmp
-d}" task.md
-        rm .items.tmp
-    else
-        {
-            echo "# Task Checklist: $title"
-            echo ""
-            echo "$items"
-        } > task.md
-    fi
-    echo "✅ task.md synced from $(basename "$file")"
+    # DEPRECATED: Root task.md is no longer part of the ritual.
+    return 0
 }
 
 function scaffold_artifact {
@@ -424,8 +427,15 @@ function scaffold_artifact {
     local force=$3
     
     local template_path="$ROOT_DIR/skills/swt-task/templates/${type}.md"
-    local target_path="${type}.md"
+    local target_path=$(get_artifact_path "$task_file" "$type")
     
+    # Fallback for legacy support
+    local legacy_path="${type}.md"
+    if [ -f "$legacy_path" ] && [ ! -f "$target_path" ]; then
+        echo "⚠️ Legacy root artifact detected: $legacy_path. Transitioning to sidecar..."
+        mv "$legacy_path" "$target_path"
+    fi
+
     if [ ! -f "$template_path" ]; then
         echo "❌ Error: Template not found for type: $type"
         return 1
@@ -511,6 +521,8 @@ fi
 if [ "$CMD" == "init" ]; then
     mkdir -p .tasks/archive
     mkdir -p .specs
+    mkdir -p .digests
+    mkdir -p .cache
     
     # Initialize .gitignore if it exists, otherwise create it
     if [ ! -f .gitignore ]; then
@@ -518,7 +530,7 @@ if [ "$CMD" == "init" ]; then
     fi
     
     # Add SWT ignores if they don't exist
-    for ignore in ".digests/" ".tasks/*.tmp" "task.ctx" "implementation_plan.md" "task.md" "protocol.md" "commit.diff" "commit.draft" "commit.task"; do
+    for ignore in ".digests/" ".cache/" ".tasks/*.md.yaml" ".tasks/*.plan.md" ".tasks/*.tr.md" ".tasks/*.walkthrough.md" "task.ctx" "commit.diff" "commit.draft" "commit.task"; do
         if ! grep -q "^$ignore" .gitignore; then
             echo "$ignore" >> .gitignore
         fi
@@ -938,7 +950,7 @@ if [ "$CMD" == "phase" ]; then
 
 
     # 4. Ephemeral Artifact Audit (Scenario C: Enforcement)
-    if ! validate_artifacts "$PHASE_NUM"; then
+    if ! validate_artifacts "$PHASE_NUM" "$FILE"; then
         exit 1
     fi
 
@@ -947,6 +959,12 @@ if [ "$CMD" == "phase" ]; then
     # Sync companion artifact mtimes to prevent false staleness on ritual-only changes
     spec_file=$(grep -oP '^\*\*?Spec\*\*?:\s*\K\S+' "$FILE" | head -n 1)
     [ -n "$spec_file" ] && [ -f "$spec_file" ] && touch -r "$FILE" "$spec_file"
+    
+    sidecar_plan=$(get_artifact_path "$FILE" implementation_plan)
+    sidecar_tr=$(get_artifact_path "$FILE" protocol)
+    [ -f "$sidecar_plan" ] && touch -r "$FILE" "$sidecar_plan"
+    [ -f "$sidecar_tr" ] && touch -r "$FILE" "$sidecar_tr"
+    # Legacy Fallback
     [ -f "implementation_plan.md" ] && touch -r "$FILE" "implementation_plan.md"
     [ -f "protocol.md" ] && touch -r "$FILE" "protocol.md"
     exit 0
@@ -1046,8 +1064,12 @@ if [ "$CMD" == "validate" ]; then
                 echo "✅ Spec synchronization verified (Substance match)."
             fi
             
-            if [ -f "implementation_plan.md" ]; then
-                plan_time=$(stat -c %Y "implementation_plan.md")
+            local sidecar_plan=$(get_artifact_path "$FILE" implementation_plan)
+            local plan_source="implementation_plan.md"
+            if [ -f "$sidecar_plan" ]; then plan_source="$sidecar_plan"; fi
+
+            if [ -f "$plan_source" ]; then
+                plan_time=$(stat -c %Y "$plan_source")
                 if [ "$spec_time" -gt $((plan_time + 60)) ]; then
                     echo "🛑 STALE PLAN DETECTED: Spec is newer than the Implementation Plan."
                     echo "   Loop back to re-sync: swt.sh sync-docs $FILE"
@@ -1088,7 +1110,7 @@ if [ "$CMD" == "validate" ]; then
             fi
 
             # Check staleness: Latest code edit must be older than the test log
-            last_code_edit=$(find "$ROOT_DIR" -maxdepth 5 -type f -not -path '*/.*' -not -path '*/node_modules*' -not -path '*/demo*' -not -path "$ROOT_DIR/task.md" -not -path "$ROOT_DIR/implementation_plan.md" -printf '%T@ %p\n' | sort -rn | head -n 1 | cut -d' ' -f1 | cut -d. -f1)
+            last_code_edit=$(find "$ROOT_DIR" -maxdepth 5 -type f -not -path '*/.*' -not -path '*/node_modules*' -not -path '*/demo*' -printf '%T@ %p\n' | sort -rn | head -n 1 | cut -d' ' -f1 | cut -d. -f1)
             last_test_time=$(stat -c %Y "$log_path")
 
             if [ "$last_code_edit" -gt "$last_test_time" ]; then
@@ -1100,7 +1122,7 @@ if [ "$CMD" == "validate" ]; then
     fi
 
     # 6. Artifact Audit
-    if ! validate_artifacts "$PHASE"; then
+    if ! validate_artifacts "$PHASE" "$FILE"; then
         exit 1
     fi
 

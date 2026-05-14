@@ -2,32 +2,30 @@
 name: "swt:link"
 inherits: "swt:think"
 description: >
-  Universal skill linker for SWT. Use when the user says "link my skills", 
-  "setup dogfooding", or "install SWT into this project". It symlinks all 
-  available SWT skills into .agents/ and .claude/ discovery paths. 
-  Supports an optional path argument.
+  Universal skill installer/linker for SWT. Supports both symlinking (Developer Mode) 
+  and physical copying (Stable Mode) of skills into .agents/ and .claude/ discovery paths.
 user-invocable: true
 allowed-tools:
   - Bash
 ---
 
-# /swt:link — Universal Skill Linker
+# /swt:link & /swt:install — Universal Skill Management
 
-This skill automates the symlinking of SWT skills into multiple AI agent discovery paths. This is the primary tool for both **toolkit development (dogfooding)** and **project-level installation**.
+These skills automate the installation of SWT skills into multiple AI agent discovery paths. 
 
-## Usage
+## Commands
 
-### 1. Link in Current Directory
-Use this to set up the current project with the latest SWT skills.
-> *"link my skills"* or *"/swt:link"*
+### 1. /swt:flow install (Physical Copy)
+Use this for **Stable Mode**. It copies all skills physically into the discovery paths. This is recommended for general use to prevent "bleeding edge" development changes from affecting your environment.
+> *"install my skills"* or *"/swt:flow install"*
 
-### 2. Link in Specified Path
-Use this to install/link SWT skills into a different directory.
-> *"link skills to /path/to/project"* or *"/swt:link /path/to/project"*
+### 2. /swt:flow link (Symlink)
+Use this for **Developer Mode (Dogfooding)**. It symlinks the skills, meaning any change to the source code is immediately live.
+> *"link my skills"* or *"/swt:flow link"*
 
-### 3. Global Dogfooding
-Link skills into your home directory (`~/.agents`, etc.) to make them available globally.
-> *"setup global dogfooding"* or *"/swt:link --global"*
+### 3. Global Scope
+Add `--global` to target your home directory (`~/.agents`, etc.).
+> *"/swt:flow install --global"* or *"/swt:flow link --global"*
 
 ---
 
@@ -52,5 +50,7 @@ The skill executes the `scripts/link.sh` utility located within the skill direct
 
 The agent will:
 1. Locate `SWT_HOME` (from environment or project root).
-2. Execute the linker script: `scripts/link.sh [flags] [path]`.
-3. Confirm the linked paths to the user.
+2. Execute the appropriate script:
+   - **Stable**: `scripts/install.sh [flags] [path]`
+   - **Dev**: `scripts/link.sh [flags] [path]`
+3. Confirm the installation paths to the user.

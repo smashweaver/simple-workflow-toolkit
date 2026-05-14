@@ -7,7 +7,7 @@ This document defines the core principles and behavioral protocols for AI coding
 ## 1. Core Principles
 
 1.  **Plan First**: Never start implementation without a detailed, peer-reviewed plan.
-2.  **Surgical Changes**: Touch only what you must. Avoid "cleaning up" adjacent code unless it's part of the task. **Mandatory Cleanup**: All temporary testing artifacts (temp tasks, scratch scripts, etc.) must be deleted before finalizing the task. Root planning artifacts (`implementation_plan.md`, `task.md`) are automatically cleaned up by `/swt:flow close`.
+2.  **Surgical Changes**: Touch only what you must. Avoid "cleaning up" adjacent code unless it's part of the task. **Mandatory Cleanup**: All temporary testing artifacts (temp tasks, scratch scripts, etc.) must be deleted before finalizing the task. Sidecar artifacts in `.tasks/` are persistent, but root-level ephemeral files are automatically cleaned up by `/swt:flow close`.
 3.  **Simplicity Over Specification**: No speculative features or premature abstractions.
 4.  **Verifiable Outcomes**: Every change must have a clear path to verification (tests or checklists).
 5.  **Gitignored Awareness**: Runtime directories (`.digests/`, `.tasks/`) are gitignored. Use `bash ls` + `read` for these — glob/search tools will return empty results.
@@ -23,8 +23,8 @@ This document defines the core principles and behavioral protocols for AI coding
     - **Silent Default**: Any template tag silently replaced with `*` without warning the user.
     
     **Self-correction**: If any of these failures are detected, the agent MUST halt, log the violation in the task's `Jailbreak Patterns Observed` section, and re-populate the artifact before proceeding.
-10. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1), `protocol.md` (Phase 1), and `task.md` (Phase 5). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
-11. **Task Separation of Concerns**: The root `task.md` artifact is an ephemeral "Live Checklist" for human and cross-agent verification. The `protocol.md` is an ephemeral "Tactical Roadmap" for execution. The internal `.tasks/<timestamp>_task.md` remains the persistent "Source of Truth" for ritual metadata and state tracking. Root artifacts are automatically removed upon task completion.
+10. **Planning Mode Artifacts**: You are MANDATED to generate standard sidecar artifacts in `.tasks/` during execution: `[TS].plan.md` (Phase 1), `[TS].tr.md` (Phase 1), and `[TS].walkthrough.md` (Phase 8). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
+11. **Task Separation of Concerns**: The internal `.tasks/[TS]_[slug].md` is the **Source of Truth** and the **Live Checklist**. The sidecar `[TS].tr.md` is the **Tactical Roadmap** for execution. Root artifacts (like `task.md`) are deprecated and no longer part of the ritual.
 12. **Facade-First Protocol**: If a `/swt:flow` command exists for a user directive (e.g., status, backlog), the agent MUST use it or reference it as the primary entry point. Agents are forbidden from bypassing the orchestration logic (e.g., running internal scripts directly) to ensure ritual logs and state sensors are correctly triggered.
 15. **Ephemeral Artifact Hygiene**: Agents MUST place all temporary or generated payload files (e.g., patch JSONs, data dumps) into the `.cache/` directory. Creating scratch files in the repository root or tracking them in the git index is strictly forbidden to prevent index pollution.
 
@@ -253,8 +253,8 @@ The workflow defines 5 named iteration loops:
 | Loop | Phase(s) | Description |
 |---|---|---|
 | **Brainstorm Loop** | 0 | Task file iteration cycle. Agent updates task with notes, jailbreak patterns, objective refinements. Two behaviors: (1) update current task if user prompt pertains to it, (2) offer new brainstorm task for unrelated issues. |
-| **Planning Loop** | 1 | Artifact generation + doc target identification. Agent scans repo for existing docs, cross-references against task scope, records targets in `implementation_plan.md`. Scaffolds `protocol.md` for tactical execution. User reviews/tweaks artifacts AND doc targets before Gate 2. |
-| **Analysis Loop** | 2-3 | Agent analyzes SPEC.md + `implementation_plan.md` (impact on components, state, performance, API), assesses risks, presents findings. Gate 2 HARD STOP — user approves before Phase 4. Phases 2 and 3 are separate. |
+| **Planning Loop** | 1 | Artifact generation + doc target identification. Agent scans repo for existing docs, cross-references against task scope, records targets in `[TS].plan.md`. Scaffolds `[TS].tr.md` for tactical execution. User reviews/tweaks artifacts AND doc targets before Gate 2. |
+| **Analysis Loop** | 2-3 | Agent analyzes SPEC.md + `[TS].plan.md` (impact on components, state, performance, API), assesses risks, presents findings. Gate 2 HARD STOP — user approves before Phase 4. Phases 2 and 3 are separate. |
 | **Document Refresh Protocol** | All | For all template-backed SWT documents: the agent MUST use the surgical `crow.py` patcher to update specific sections (identified by `## Header`) and metadata. Direct overwriting of documents is STRICTLY FORBIDDEN to ensure manual human edits are preserved. |
 | **Commit Loop** | 8 → Gate 5 | Agent invokes `/swt:flow commit` skill only — NEVER uses `git commit` directly. Draft-and-Approve protocol: agent drafts `commit.draft` → user fine-tunes → agent applies on approval. |
 
@@ -324,9 +324,9 @@ When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"
 ### 3. Ephemeral Artifact Enforcement (Scenario C)
 To prevent ritual bypasses, the toolkit enforces the presence of root artifacts during key phases. `/swt:flow audit` and `/swt:flow phase` will block execution if these files are missing from the project root. All artifacts are scaffolded from standard templates in `skills/swt-task/templates/`:
 
-- **Phase 1-8**: Requires `implementation_plan.md` at project root (auto-scaffolded by `graduate`).
-- **Phase 1-8**: Requires `protocol.md` at project root (auto-scaffolded by `graduate`). Tactical roadmap and Commit Gut Check.
-- **Phase 5-8**: Requires `task.md` at project root (auto-synced from task checklist).
+- **Phase 1-8**: Requires Implementation Plan sidecar (`[TS].plan.md`).
+- **Phase 1-8**: Requires Tactical Roadmap sidecar (`[TS].tr.md`).
+- **Phase 8**: Requires Walkthrough sidecar (`[TS].walkthrough.md`).
 - **Verification Proof**: Phase 8 (Review) requires a successful `Test Ritual Log` that is newer than the latest code change. Agents are physically blocked from proceeding to Review without proof of verification.
 
 > [!CAUTION]

@@ -74,7 +74,8 @@ The primary "Command Center" for the toolkit. It unifies all specialized skills 
 | `/swt:flow state` | Protocol-aware state report (Phase/Loop/Gate + 5 sensors) | `swt:flow` |
 | `/swt:flow commit` | Start commit ritual | `swt:commit` |
 | `/swt:flow digest` | Create session summary | `swt:digest` |
-| `/swt:flow symlink` | Global dev setup (--global --clear) | `swt:link` |
+| `/swt:flow install` | Physical skill installation (Stable) | `swt:link` |
+| `/swt:flow link` | Symlink skills globally (Dev) | `swt:link` |
 | `/swt:flow query` | Semantic structural search | `swt:graphify` |
 
 ---
@@ -111,14 +112,15 @@ Scaffolds an `AGENTS.md` file for any new project consuming SWT. Establishes sha
 
 ---
 
-### `/swt:link` — Skill Linker
+### `/swt:link` — Skill Installer & Linker
 
-Creates or refreshes symlinks to install SWT skills into agent discovery paths (`.claude/`, etc.).
+Manages the installation of SWT skills into agent discovery paths (`.agents/`, `.claude/`, etc.). Supports both symlinking (Developer Mode) and physical copying (Stable Mode).
 
 ```
-/swt:link              # Link into the current project
-/swt:link --global     # Link globally (~/.agents)
-/swt:link --clear      # Remove existing links first
+/swt:flow install        # Install physical copies (Stable Mode)
+/swt:flow link           # Create symlinks (Developer Mode)
+/swt:flow link --global  # Link globally (~/.agents)
+/swt:flow link --clear   # Remove existing links first
 ```
 
 ---

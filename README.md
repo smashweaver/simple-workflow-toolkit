@@ -17,14 +17,14 @@ export SWT_HOME="$HOME/tools/swt"
 Then link the skills into your project or globally using the orchestrator:
 
 ```bash
-# Setup the project (.tasks/, .specs/, etc.)
+# Setup the project (.tasks, .specs, etc.)
 /swt:flow setup
 
-# Link skills into current project
-/swt:flow link
+# Install physical copies (Stable Mode)
+/swt:flow install --global
 
-# Global install (all agents)
-/swt:flow link-global
+# Link skills into current project (Dev Mode)
+/swt:flow link
 ```
 
 ### Use in a session

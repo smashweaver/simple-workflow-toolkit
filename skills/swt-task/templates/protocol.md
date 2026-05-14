@@ -1,8 +1,7 @@
 # Tactical Roadmap: {{TASK_TITLE}}
 **Spec**: {{SPEC_FILE}}
 
-> This is an ephemeral execution protocol. It provides the tactical roadmap for implementation and ensures ritual compliance. 
-> **Mandatory Cleanup**: This file must be deleted before finalizing the task.
+> This is a persistent execution protocol. It provides the tactical roadmap for implementation and ensures ritual compliance. 
 
 ## 1. Mission Briefing
 {{1_MISSION_BRIEFING}}

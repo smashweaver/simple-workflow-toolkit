@@ -303,8 +303,18 @@ def sensor_substance_drift(task_file: str | None, phase: int) -> dict:
     return result
 
 
+def get_artifact_path(task_file: str, type: str) -> str:
+    path = Path(task_file)
+    ts = path.name.split('_')[0]
+    ext = "md"
+    if type == "implementation_plan": ext = "plan.md"
+    elif type == "protocol": ext = "tr.md"
+    elif type == "walkthrough": ext = "walkthrough.md"
+    return str(path.parent / f"{ts}.{ext}")
+
+
 # ── Sensor 4: Artifact Hygiene Recognizer ─────────────────────────────────────
-def sensor_artifact_hygiene(phase: int) -> dict:
+def sensor_artifact_hygiene(phase: int, task_file: str | None) -> dict:
     result = {"sensor": "Artifact Hygiene Recognizer", "status": "ok", "findings": [], "warnings": []}
     orphans = []
 
@@ -324,6 +334,7 @@ def sensor_artifact_hygiene(phase: int) -> dict:
 
     # Template Ghost scan
     ghosts = []
+    # Scan all .md files in .tasks and .specs
     for path in list((ROOT_DIR / ".tasks").glob("*.md")) + list((ROOT_DIR / ".specs").glob("*.md")):
         try:
             content = path.read_text()
@@ -331,7 +342,9 @@ def sensor_artifact_hygiene(phase: int) -> dict:
                 ghosts.append(str(path.relative_to(ROOT_DIR)))
         except Exception:
             pass
-    for root_md in ["task.md", "implementation_plan.md", "protocol.md"]:
+
+    # Legacy Root Artifact Check
+    for root_md in ["implementation_plan.md", "protocol.md"]:
         p = ROOT_DIR / root_md
         if p.exists() and "{{" in p.read_text():
             ghosts.append(root_md)
@@ -501,7 +514,7 @@ if __name__ == "__main__":
     s1 = sensor_phase_loop(task_file)
     s2 = sensor_twin_protocol(task_file)
     s3 = sensor_substance_drift(task_file, phase)
-    s4 = sensor_artifact_hygiene(phase)
+    s4 = sensor_artifact_hygiene(phase, task_file)
     s5 = sensor_commit_loop(phase, task_file)
 
     all_sensors = [s1, s2, s3, s4, s5]

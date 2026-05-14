@@ -5,7 +5,7 @@
 ## 1. Core Principles
 
 1.  **Plan First**: Never start implementation without a detailed, peer-reviewed plan.
-2.  **Surgical Changes**: Touch only what you must. Avoid "cleaning up" adjacent code unless it's part of the task. **Mandatory Cleanup**: All temporary testing artifacts (temp tasks, scratch scripts, etc.) must be deleted before finalizing the task.
+2.  **Surgical Changes**: Touch only what you must. Avoid "cleaning up" adjacent code unless it's part of the task. **Mandatory Cleanup**: All temporary testing artifacts (temp tasks, scratch scripts, etc.) must be deleted before finalizing the task. Sidecar artifacts in `.tasks/` are persistent, but root-level ephemeral files are automatically cleaned up by `/swt:flow close`.
 3.  **Simplicity Over Specification**: No speculative features or premature abstractions.
 4.  **Verifiable Outcomes**: Every change must have a clear path to verification (tests or checklists).
 5.  **Gitignored Awareness**: Runtime directories (`.digests/`, `.tasks/`) are gitignored. Use `bash ls` + `read` for these — glob/search tools will return empty results.
@@ -21,8 +21,8 @@
     - **Silent Default**: Any template tag silently replaced with `*` without warning the user.
 
     **Self-correction**: If detected, halt, log in `Jailbreak Patterns Observed`, and re-populate before proceeding.
-10. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1), `protocol.md` (Phase 1), and `task.md` (Phase 5). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
-11. **Task Separation of Concerns**: The root `task.md` artifact is an ephemeral "Live Checklist" for human and cross-agent verification. The `protocol.md` is an ephemeral "Tactical Roadmap" for execution. The internal `.tasks/<timestamp>_task.md` remains the persistent "Source of Truth" for ritual metadata and state tracking. Root artifacts are automatically removed upon task completion.
+10. **Planning Mode Artifacts**: You are MANDATED to generate standard sidecar artifacts in `.tasks/` during execution: `[TS].plan.md` (Phase 1), `[TS].tr.md` (Phase 1), and `[TS].walkthrough.md` (Phase 8). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
+11. **Task Separation of Concerns**: The internal `.tasks/[TS]_[slug].md` is the **Source of Truth** and the **Live Checklist**. The sidecar `[TS].tr.md` is the **Tactical Roadmap** for execution. Root artifacts (like `task.md`) are deprecated and no longer part of the ritual.
 12. **Facade-First Protocol**: If a `/swt:flow` command exists for a user directive (e.g., status, backlog), the agent MUST use it or reference it as the primary entry point. Agents are forbidden from bypassing the orchestration logic (e.g., running internal scripts directly) to ensure ritual logs and state sensors are correctly triggered.
 13. **Ephemeral Artifact Hygiene**: Agents MUST place all temporary or generated payload files (e.g., patch JSONs, data dumps) into the `.cache/` directory. Creating scratch files in the repository root or tracking them in the git index is strictly forbidden to prevent index pollution.
 

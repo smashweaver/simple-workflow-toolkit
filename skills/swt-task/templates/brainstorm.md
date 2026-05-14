@@ -70,8 +70,8 @@ What still needs to be answered before this can become a task?
 ## Artifact Phase Mapping
 | Artifact | Generated | Phase | Gate |
 |---|---|---|---|
-| `implementation_plan.md` | Phase 1 | Plan | HARD STOP |
-| `task.md` | Phase 5 | Implement | Checkpoint |
+| `[TS].plan.md` | Phase 1 | Plan | HARD STOP |
+| `[TS].tr.md` | Phase 1 | Plan | Roadmap |
 
 ## Jailbreak Patterns Observed
 | # | Agent | Phase | Violation | Detail |
