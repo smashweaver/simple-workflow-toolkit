@@ -2,6 +2,8 @@
 
 {{purpose}}
 
+This workspace uses the **Simple Workflow Toolkit (SWT)** for methodology enforcement. All behavioral rules, workflow protocols, and project context are defined in this document and enforced via the `/swt:flow` orchestrator.
+
 > This is the **parent workspace** `AGENTS.md`. It defines shared context and conventions for all sub-projects.
 > Each sub-project has its own `AGENTS.md` containing its specific tech stack details.
 
@@ -9,25 +11,27 @@
 
 1.  **Plan First**: Never start implementation without a detailed, peer-reviewed plan.
 2.  **Surgical Changes**: Touch only what you must. Avoid "cleaning up" adjacent code unless it's part of the task. **Mandatory Cleanup**: All temporary testing artifacts (temp tasks, scratch scripts, etc.) must be deleted before finalizing the task. Sidecar artifacts in `.tasks/` are persistent, but root-level ephemeral files are automatically cleaned up by `/swt:flow close`.
-3.  **Simplicity Over Specification**: No speculative features or premature abstractions.
-4.  **Verifiable Outcomes**: Every change must have a clear path to verification (tests or checklists).
-5.  **Gitignored Awareness**: Runtime directories (`.digests/`, `.tasks/`) are gitignored. Use `bash ls` + `read` for these — glob/search tools will return empty results.
-6.  **Ritual Discipline**: "Mandatory" means mandatory. Never skip a re-read step, self-correction pass, or consent gate, even if you feel "familiar" with the context.
-7.  **Exclusive Gateway**: You are FORBIDDEN from manually editing the `Phase` header in task files. All phase transitions MUST be executed via `/swt:flow phase <N> <task_file>`. This ensures ritual integrity and synchronization.
-8.  **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `/swt:flow validate`.
-9.  **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation. **Mandatory Repopulation**: When an artifact is reset/re-scaffolded (e.g. via `/swt:flow sync-docs`), the agent MUST immediately re-populate it with the current technical context to maintain continuity.
+3.  **Installation Discipline**: Use **Physical Copies** (`/swt:flow install`) for ALL discovery paths (local and global) to ensure environment stability and isolation. Symlinking skills is deprecated to prevent "Ghost Updates" and broken links.
+4.  **Simplicity Over Specification**: No speculative features or premature abstractions.
+5.  **Verifiable Outcomes**: Every change must have a clear path to verification (tests or checklists).
+6.  **Gitignored Awareness**: Runtime directories (`.digests/`, `.tasks/`) are gitignored. Use `bash ls` + `read` for these — glob/search tools will return empty results.
+7.  **Ritual Discipline**: "Mandatory" means mandatory. Never skip a re-read step, self-correction pass, or consent gate, even if you feel "familiar" with the context.
+8.  **Physical Task Gate**: All source code commits are physically blocked by a pre-commit hook unless a task is mounted (`task.ctx` is non-empty). This ensures absolute traceability between the git log and the `.tasks/` directory. (Exemption: commits touching only `.tasks/` and `.specs/` sidecar artifacts are permitted).
+9.  **Exclusive Gateway**: You are FORBIDDEN from manually editing the `Phase` header in task files. All phase transitions MUST be executed via `/swt:flow phase <N> <task_file>`. The `validate` script reads the historical breadcrumb logs and physically blocks execution if the header was manually forged (e.g. Header Phase != Latest Ritual Log) or phases were skipped.
+10. **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `/swt:flow audit`. Validation includes checks for Phase Forgery and Phantom Artifacts.
+11. **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation. **Mandatory Repopulation**: When an artifact is reset/re-scaffolded (e.g. via `/swt:flow sync-docs`), the agent MUST immediately re-populate it with the current technical context to maintain continuity.
 
     **Failure definitions** (any of the following is a Born Complete violation):
-    - **Naked Template**: A task file containing `{{placeholder}}`, `[placeholder]`, or empty template sections at the moment of presentation to the user.
-    - **Empty Spec**: A spec file where template sections (Problem Statement, Goals, etc.) contain only `*` after synthesis.
-    - **Orphan Flood**: A spec where non-mapped task sections outnumber filled template sections.
+    - **Naked Template**: A task file containing `{{placeholder}}`, `[placeholder]`, `*`, or empty template sections at the moment of presentation to the user.
+    - **Empty Spec**: A spec file created by the pipeline where template sections (Problem Statement, Goals, etc.) contain only `*` after synthesis.
+    - **Orphan Flood**: A spec where non-mapped task sections outnumber filled template sections, indicating no crosswalk was applied.
     - **Silent Default**: Any template tag silently replaced with `*` without warning the user.
-
+    
     **Self-correction**: If detected, halt, log in `Jailbreak Patterns Observed`, and re-populate before proceeding.
-10. **Planning Mode Artifacts**: You are MANDATED to generate standard sidecar artifacts in `.tasks/` during execution: `[TS].plan.md` (Phase 1), `[TS].tr.md` (Phase 1), and `[TS].walkthrough.md` (Phase 8). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
-11. **Task Separation of Concerns**: The internal `.tasks/[TS]_[slug].md` is the **Source of Truth** and the **Live Checklist**. The sidecar `[TS].tr.md` is the **Tactical Roadmap** for execution. Root artifacts (like `task.md`) are deprecated and no longer part of the ritual.
-12. **Facade-First Protocol**: If a `/swt:flow` command exists for a user directive (e.g., status, backlog), the agent MUST use it or reference it as the primary entry point. Agents are forbidden from bypassing the orchestration logic (e.g., running internal scripts directly) to ensure ritual logs and state sensors are correctly triggered.
-13. **Ephemeral Artifact Hygiene**: Agents MUST place all temporary or generated payload files (e.g., patch JSONs, data dumps) into the `.cache/` directory. Creating scratch files in the repository root or tracking them in the git index is strictly forbidden to prevent index pollution.
+12. **Planning Mode Artifacts**: You are MANDATED to generate standard sidecar artifacts in `.tasks/` during execution: `[TS].plan.md` (Phase 1), `[TS].tr.md` (Phase 1), and `[TS].walkthrough.md` (Phase 8). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
+13. **Task Separation of Concerns**: The internal `.tasks/[TS]_[slug].md` is the **Source of Truth** and the **Live Checklist**. The sidecar `[TS].tr.md` is the **Tactical Roadmap** for execution. Root artifacts (like `task.md`) are deprecated and no longer part of the ritual.
+14. **Facade-First Protocol**: If a `/swt:flow` command exists for a user directive (e.g., status, backlog), the agent MUST use it or reference it as the primary entry point. Agents are forbidden from bypassing the orchestration logic (e.g., running internal scripts directly) to ensure ritual logs and state sensors are correctly triggered.
+15. **Ephemeral Artifact Hygiene**: Agents MUST place all temporary or generated payload files (e.g., patch JSONs, data dumps) into the `.cache/` directory. Creating scratch files in the repository root or tracking them in the git index is strictly forbidden to prevent index pollution.
 
 ## 2. Execution Boundaries: The Senior Advisor Persona
 

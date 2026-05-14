@@ -535,6 +535,19 @@ if [ "$CMD" == "init" ]; then
             echo "$ignore" >> .gitignore
         fi
     done
+
+    # Install physical pre-commit hook if in a git repo
+    if [ -d .git ]; then
+        mkdir -p .git/hooks
+        HOOK_SOURCE="$ROOT_DIR/skills/swt-task/scripts/hooks/pre-commit"
+        HOOK_TARGET=".git/hooks/pre-commit"
+        
+        if [ -f "$HOOK_SOURCE" ]; then
+            cp "$HOOK_SOURCE" "$HOOK_TARGET"
+            chmod +x "$HOOK_TARGET"
+            echo "✅ Installed physical task gate: $HOOK_TARGET"
+        fi
+    fi
     
     echo "Initialized SWT workspace."
     exit 0

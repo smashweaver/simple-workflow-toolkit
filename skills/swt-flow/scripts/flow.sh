@@ -49,7 +49,7 @@ function show_help {
     echo "Environment & Continuity:"
     echo "  digest            - Daily session summary"
     echo "  milestone         - Full project roll-up"
-    echo "  setup             - Initialize project folders (.tasks, .specs)"
+    echo "  setup             - Initialize project folders & install task gate"
     echo "  install           - Standard physical skill installation (Stable Mode)"
     echo "  install --global  - Global physical installation (~/.agents)"
     echo "  install --only-clear - Standalone liquidation (Purge only)"

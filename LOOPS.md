@@ -87,7 +87,7 @@ stateDiagram-v2
 ## 📖 Loop Definitions
 
 ### 1. Orientation Protocol ([*] → P0)
-Every new session begins with this recovery cycle. The agent runs `/swt:flow status` to aggregate the latest digests and tasks, reads `task.ctx` to find the active context, and automatically opens relevant docs for the user.
+Every new session begins with this recovery cycle. The agent runs `/swt:flow status` to aggregate the latest digests and tasks, reads `task.ctx` to find the active context, and automatically opens relevant docs for the user. Every `/swt:flow` invocation is anchored by the **Ballmer Protocol Chant** (`💓 PROTOCOL! PROTOCOL! PROTOCOL!`) to reinforce methodology awareness.
 
 ### 2. Brainstorm Loop (Phase 0)
 The ideation cycle where the agent acts as a **Senior Advisor**. It requires a Scenario A/B/C trade-off analysis (Discipline vs. Automation vs. Enforcement) before the user provides the "Go" to graduate to implementation.
@@ -115,6 +115,7 @@ Occurs after the MVP is verified. The task enters a "Polishing" cycle at **Gate 
 The finality sequence governing the move from code to history.
 *   **Draft-and-Approve**: The agent drafts `commit.draft` and `commit.task`.
 *   **Self-Correction Loop**: The draft is passed through a hard shell gate (`lint.sh`). If it fails (e.g., contains file paths or jargon), the agent must autonomously self-correct (up to 3 attempts).
+*   **Physical Task Gate**: All commits are physically blocked by a pre-commit hook unless a valid task context is mounted. This ensures absolute traceability between repository state and the task lifecycle.
 *   **Zero-Leeway Hygiene**: Upon approval, the task is closed, and all ephemeral artifacts are physically purged from the workspace.
 
 ### 8. The Global Twin Protocol (Internal State Loop)
