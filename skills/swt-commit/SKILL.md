@@ -20,6 +20,7 @@ Before drafting any commit message, the agent MUST output the following validati
 
 > **Protocol Validation**:
 > - [x] Re-read `swt:commit/SKILL.md`
+> - [x] **Logged ritual**: `RITUAL: commit guidelines read` in task file
 > - [x] Task state validated (`skills/swt-task/scripts/task.sh validate <file>`)
 > - [x] Checked for red flags (no dots/slashes in bullets, no jargon)
 > - [x] Verified Phase 8 (Review & Refine) is closed

@@ -123,6 +123,7 @@ Run automated tests or provide a manual verification checklist. Zero tolerance f
 Verify that the MVP meets the objective. Polish the implementation based on user feedback during Gate 4. Refactor only if necessary for SOLID principles.
 *   **Iterative Development**: Phase 8 supports dynamic checklist items via `swt.sh update <file> --append "item text"`. The user may append fine-tuning items and "afterthoughts" without being forced into premature task closure.
 *   **Phase 8 Gate**: The agent must NOT push the user toward `close` during Phase 8. The loop continues as long as the user wants to refine. The agent periodically asks "Ready to close?" but the user always decides.
+*   **The Knowledge Handshake (MANDATORY)**: Before drafting the final commit, the agent MUST run `cat skills/swt-commit/SKILL.md` and log `RITUAL: commit guidelines read` in the task's Ritual Logs. This is physically enforced by the State Recognizer.
 *   **Structural Validation**: If `swt:graphify` is enabled, run `/swt:graphify update` and review the "Structural Diff" in `graphify-out/graph.html` to ensure no unexpected coupling or "God Nodes" were introduced.
 
 ### Gate 5: The Finality Loop (Commit Sequence)
@@ -234,6 +235,7 @@ Run automated tests or provide a manual verification checklist. Zero tolerance f
 Verify that the MVP meets the objective. Polish the implementation based on user feedback during Gate 4. Refactor only if necessary for SOLID principles.
 *   **Iterative Development**: Phase 8 supports dynamic checklist items via `swt.sh update <file> --append "item text"`. The user may append fine-tuning items and "afterthoughts" without being forced into premature task closure.
 *   **Phase 8 Gate**: The agent must NOT push the user toward `close` during Phase 8. The loop continues as long as the user wants to refine. The agent periodically asks "Ready to close?" but the user always decides.
+*   **The Knowledge Handshake (MANDATORY)**: Before drafting the final commit, the agent MUST run `cat skills/swt-commit/SKILL.md` and log `RITUAL: commit guidelines read` in the task's Ritual Logs. This is physically enforced by the State Recognizer.
 *   **Structural Validation**: If `swt:graphify` is enabled, run `/swt:graphify update` and review the "Structural Diff" in `graphify-out/graph.html` to ensure no unexpected coupling or "God Nodes" were introduced.
 
 ### Gate 5: The Finality Loop (Commit Sequence)

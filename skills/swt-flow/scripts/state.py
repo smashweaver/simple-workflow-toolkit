@@ -360,17 +360,31 @@ def sensor_commit_loop(phase: int, task_file: str | None) -> dict:
 
     # Check for Test Ritual (obeying swt.json)
     test_cmd = CONFIG.get("test_command")
-    if test_cmd and task_file:
+    if task_file:
         try:
             content = Path(task_file).read_text()
-            # Look for recent success log: RITUAL: test pass @ ...
-            if "RITUAL: test pass" not in content:
+            
+            # 1. Guidelines Handshake (Scenario B)
+            if "<!-- RITUAL: commit guidelines read -->" not in content:
                 result["warnings"].append(
-                    f"TEST RITUAL MISSING: You must run the test command ('{test_cmd}') via /swt:flow test before committing."
+                    "COMMIT GUIDELINES RITUAL MISSING: You must acknowledge the manual before drafting. "
+                    "Run: 'cat skills/swt-commit/SKILL.md' and log 'RITUAL: commit guidelines read' in your task file."
                 )
-                result["status"] = "warn"
+                result["status"] = "error"
             else:
-                result["findings"].append(f"Test ritual verified ✓ ({test_cmd})")
+                result["findings"].append("Commit guidelines ritual verified ✓")
+
+            # 2. Test Ritual
+            if test_cmd:
+                # Look for recent success log: RITUAL: test pass @ ...
+                if "RITUAL: test pass" not in content:
+                    result["warnings"].append(
+                        f"TEST RITUAL MISSING: You must run the test command ('{test_cmd}') via /swt:flow test before committing."
+                    )
+                    if result["status"] != "error":
+                        result["status"] = "warn"
+                else:
+                    result["findings"].append(f"Test ritual verified ✓ ({test_cmd})")
         except Exception:
             pass
 
@@ -378,7 +392,8 @@ def sensor_commit_loop(phase: int, task_file: str | None) -> dict:
         result["warnings"].append(
             "commit.draft not found. Generate via: ./skills/swt-commit/scripts/commit.sh --draft \"<message>\""
         )
-        result["status"] = "warn"
+        if result["status"] != "error":
+            result["status"] = "warn"
     else:
         content = commit_draft.read_text()
         # Check for metadata leaks

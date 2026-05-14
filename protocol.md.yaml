@@ -16,13 +16,21 @@ checklists:
     text: 'Phase 7: Test'
   - status: ' '
     text: 'Phase 8: Review & Refine'
+  - status: /
+    text: Phase 2
+  - status: /
+    text: Phase 3
+  - status: /
+    text: Phase 4
+  - status: /
+    text: Phase 5
   Goals:
   - status: ' '
-    text: 'Goal 1: Design the `status.py` (or shared `state.py`) aggregation interface.'
+    text: 'Goal 1: Update `state.py` to detect the guidelines ritual.'
   - status: ' '
-    text: 'Goal 2: Refactor `status.sh` to delegate heavy parsing to Python.'
+    text: 'Goal 2: Update `AGENTS.md` to reflect the new mandatory handshake.'
   - status: ' '
-    text: 'Goal 3: Verify that the new output matches the existing ergonomic format.'
+    text: 'Goal 3: Verify that missing logs correctly trigger a state error.'
   MVP Definition:
   - status: ' '
     text: '[Core feature A implemented and verified]'
@@ -40,11 +48,13 @@ meta:
   Category: research
   Completed: —
   Created: '*'
-  Phase: '1'
+  Linked Task: .specs/20260514094321_harden-commit-guidelines-ritual.md
+  Phase: '4'
   Priority: medium
+  Spec: .specs/20260514094321_harden-commit-guidelines-ritual.md
   Stack: shared
   Status: pending
-  Task: refactor status skill into hybrid engine
+  Task: harden-commit-guidelines-ritual
   Type: brainstorm
   Updated: —
   Version: '1.0'
@@ -57,31 +67,47 @@ sections:
 
     | `task.md` | Phase 5 | Implement | Checkpoint |'
   Commit Reference: ''
-  Explored Alternatives: '- **Scenario A (Discipline)**: Continue using Bash but mandate
-    strict regex patterns for headers. (High risk of drift).
+  Explored Alternatives: '- **Scenario A (Discipline)**: Verbal-only sign-off in chat.
+    (Unverifiable by GPS).
 
-    - **Scenario B (Automation)**: Create a standalone `status.py` in `skills/swt-status/scripts/`.
-    (Modular approach).
+    - **Scenario B (Automation)**: **The Ritual Handshake**. Check for `RITUAL: commit
+    guidelines read` in the task file. (Selected).
 
-    - **Scenario C (Enforcement)**: Merge `status` into `state.py` to create a single
-    "Universal Observer" skill. (Simplifies the skill tree).
+    - **Scenario C (Enforcement)**: Use a `.read` hidden file token. (Too complex
+    for the toolkit''s "Simple" philosophy).
 
-    - **User Suggestion**: N/A (Based on internal script audit).'
+    - **User Suggestion**: "state recognizer should really force agents to read swt-commit"
+    (Accepted).'
   Jailbreak Patterns Observed: '| # | Agent | Phase | Violation | Detail |
 
     |---|-------|-------|-----------|--------|
 
     | 1 | | | | |'
   Notes: '*'
-  Objective: Refactor the `status.sh` script into the Hybrid Model (Bash facade +
-    Python engine) to improve maintainability and strictly follow the `swt:code` guidelines.
-  Ritual Logs: ''
+  Objective: Harden the Commit Loop by forcing agents to acknowledge and read the
+    `swt-commit/SKILL.md` guidelines before drafting their final message.
+  Ritual Logs: '<!-- RITUAL: phase 3 @ 2026-05-14 09:48:33 (State Verified) -->
+
+    <!-- RITUAL: phase 2 @ 2026-05-14 09:48:32 (State Verified) -->
+
+    <!-- RITUAL: phase 1 @ 2026-05-14 09:46:41 (Reset via sync-downstream) -->
+
+    <!-- RITUAL: phase 5 @ 2026-05-14 09:44:55 (State Verified) -->
+
+    <!-- RITUAL: phase 4 @ 2026-05-14 09:44:44 (State Verified) -->
+
+    <!-- RITUAL: phase 3 @ 2026-05-14 09:44:11 (State Verified) -->
+
+    <!-- RITUAL: phase 2 @ 2026-05-14 09:44:10 (State Verified) -->
+
+    <!-- RITUAL: phase 1 @ 2026-05-14 09:43:21  -->'
   Unresolved Questions: What still needs to be answered before this can become a task?
-  What This Task Covers: "1. **Metadata Aggregation**\n   - Move the parsing of `.tasks/*.md`\
-    \ headers (Phase, Status, Category) from Bash to a Python engine.\n2. **Sorting\
-    \ and Grouping**\n   - Implement sorting by Category and Phase in Python for better\
-    \ reliability.\n3. **Redundancy Reduction**\n   - Eliminate redundant calls to\
-    \ `task.sh validate` by leveraging `state.py` logic."
+  What This Task Covers: "1. **Ritual Enforcement**\n   - Mandate a `RITUAL: commit\
+    \ guidelines read` log entry in Phase 8.\n2. **State Recognition**\n   - Update\
+    \ `state.py` to check for this ritual in `Sensor 5: Commit Loop Recognizer`.\n\
+    3. **Commit Blockage**\n   - Return an `error` status in the state report if the\
+    \ ritual is missing, physically blocking the graduation to \"Ready to Commit\"\
+    ."
 template: protocol.md
-updated_at: '2026-05-14T09:08:50.491187'
+updated_at: '2026-05-14T09:48:41.768771'
 version: '1.0'
