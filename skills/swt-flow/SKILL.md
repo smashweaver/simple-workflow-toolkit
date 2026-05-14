@@ -47,9 +47,10 @@ The workflow is not linear; it is a recursive state machine governed by five nam
 
 ## Behavioral Rules
 
-1. **Locked Gate Validation**: You MUST run `bash skills/swt-flow/scripts/flow.sh validate` before initiating any Phase 5 edits or proposing a Phase 8 review.
-2. **Mandatory Planning**: For non-trivial changes, you are mandated to generate root artifacts: `implementation_plan.md` (Phase 1), `protocol.md` (Phase 1), and `task.md` (Phase 5).
-3. **Staleness Awareness**: If the task file is newer than the Spec/Plan, you are in a "Stale State" and MUST loop back via `sync-docs`.
+1. **State-First Protocol**: You MUST run `/swt:flow state` at the start of every session and before any gate transition. The output is your authoritative position fix in the LOOPS.md state machine.
+2. **Locked Gate Validation**: You MUST run `bash skills/swt-flow/scripts/flow.sh validate` before initiating any Phase 5 edits or proposing a Phase 8 review.
+3. **Mandatory Planning**: For non-trivial changes, you are mandated to generate root artifacts: `implementation_plan.md` (Phase 1), `protocol.md` (Phase 1), and `task.md` (Phase 5).
+4. **Staleness Awareness**: If the task file is newer than the Spec/Plan, you are in a "Stale State" and MUST loop back via `sync-docs`. Use the Substance Drift Recognizer output from `state` to confirm real drift before looping back.
 
 ---
 
@@ -80,6 +81,7 @@ The workflow is not linear; it is a recursive state machine governed by five nam
 #### 3. Ritual Enforcement (The "Guards")
 | **Facade Command** | **Skill** | **Purpose** |
 | :--- | :--- | :--- |
+| **/swt:flow state** | `swt:flow` | Protocol-aware state report — Phase, Loop, Gate + all 5 sensors |
 | **/swt:flow validate** | `swt:task` | Deep ritual/protocol integrity check |
 | **/swt:flow phase <N>** | `swt:task` | Manual ritual phase transition |
 | **/swt:flow test** | `swt:task` | Run tests via `swt.json` harness |
@@ -87,6 +89,7 @@ The workflow is not linear; it is a recursive state machine governed by five nam
 | **/swt:flow sync** | `swt:task` | Sync root `task.md` live checklist |
 | **/swt:flow sync-docs** | `swt:task` | Re-sync Spec/Plan after changes |
 | **/swt:flow scaffold** | `swt:task` | Manually (re)generate artifacts |
+| **/swt:flow audit** | `swt:audit` | Structural health check (Verdict) |
 
 #### 4. Lifecycle & Hygiene (The "Maintenance")
 | **Facade Command** | **Skill** | **Purpose** |

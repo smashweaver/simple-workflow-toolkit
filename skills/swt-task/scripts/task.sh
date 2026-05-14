@@ -54,7 +54,7 @@ function unmount_task {
     done
 
     rm -f "$root_dir/task.ctx" "$root_dir/task.md" "$root_dir/protocol.md" "$root_dir/implementation_plan.md"
-    rm -f "$root_dir/task.md.json" "$root_dir/protocol.md.json" "$root_dir/implementation_plan.md.json"
+    rm -f "$root_dir/task.md.yaml" "$root_dir/protocol.md.yaml" "$root_dir/implementation_plan.md.yaml"
     rm -f "$root_dir/commit.draft" "$root_dir/commit.task" "$root_dir/commit.diff"
     # Debris Sweep
     rm -f "$root_dir"/.*.tmp
@@ -442,10 +442,10 @@ function scaffold_artifact {
         python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$target_path" --harvest
     fi
 
-    if [ -f "${task_file}.json" ]; then
+    if [ -f "${task_file}.yaml" ]; then
         echo "🔄 Merging Task state and synthesizing $target_path..."
         # We pass task state as the merging input to the existing artifact state
-        python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$target_path" --state "${task_file}.json" --template "$template_path" --out "$target_path" --synthesize
+        python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$target_path" --state "${task_file}.yaml" --template "$template_path" --out "$target_path" --synthesize
     else
         # Legacy fallback
         local title=$(grep -m 1 "^# Task:" "$task_file" | sed 's/^# Task:[[:space:]]*//')
@@ -714,7 +714,7 @@ if [ "$CMD" == "graduate" ]; then
     if [ -f "$spec_template" ]; then
         # Map task sections to spec sections via Global Twin synthesis
         # We use the task's JSON state as the input for the spec synthesis
-        python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$FILE" --state "${FILE}.json" --template "$spec_template" --out "$SPEC_FILE" --synthesize
+        python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$FILE" --state "${FILE}.yaml" --template "$spec_template" --out "$SPEC_FILE" --synthesize
 
         echo "Graduated $FILE to Phase 1. Spec created: $SPEC_FILE"
         xdg-open "$SPEC_FILE" &
@@ -758,7 +758,7 @@ if [ "$CMD" == "sync-docs" ]; then
 
     spec_template="$ROOT_DIR/skills/swt-task/templates/spec.md"
     # We use the task's state to re-synthesize the spec, preserving spec's own sidecar if it exists
-    python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$FILE" --state "${FILE}.json" --template "$spec_template" --out "$SPEC_FILE" --synthesize
+    python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$FILE" --state "${FILE}.yaml" --template "$spec_template" --out "$SPEC_FILE" --synthesize
     echo "✅ Spec synchronized: $SPEC_FILE"
 
     # 3. Re-sync Implementation Plan and Protocol
@@ -823,8 +823,8 @@ if [ "$CMD" == "close" ]; then
     # Move to archive (including sidecar)
     mkdir -p .tasks/archive
     mv "$FILE" .tasks/archive/
-    if [ -f "${FILE}.json" ]; then
-        mv "${FILE}.json" .tasks/archive/
+    if [ -f "${FILE}.yaml" ]; then
+        mv "${FILE}.yaml" .tasks/archive/
     fi
     echo "✅ Task closed: $FILE (Commit: $HASH)"
     unmount_task
@@ -898,8 +898,8 @@ if [ "$CMD" == "abandon" ]; then
     
     mkdir -p .tasks/archive
     mv "$FILE" .tasks/archive/
-    if [ -f "${FILE}.json" ]; then
-        mv "${FILE}.json" .tasks/archive/
+    if [ -f "${FILE}.yaml" ]; then
+        mv "${FILE}.yaml" .tasks/archive/
     fi
     echo "Task abandoned: $FILE"
     unmount_task

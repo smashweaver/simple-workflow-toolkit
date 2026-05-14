@@ -1,11 +1,11 @@
 # /// script
-# dependencies = ["markdown-it-py", "argparse", "jinja2"]
+# dependencies = ["markdown-it-py", "argparse", "jinja2", "pyyaml"]
 # ///
 
 import sys
 import os
 import argparse
-import json
+import yaml
 import re
 from datetime import datetime
 from markdown_it import MarkdownIt
@@ -30,6 +30,8 @@ class GlobalTwin:
 
     def __init__(self, md_path, template_path=None):
         self.md_path = md_path
+        self.yaml_path = f"{md_path}.yaml"
+        # Legacy: also check for old .json sidecar for migration awareness
         self.json_path = f"{md_path}.json"
         self.template_path = template_path
         self.md_parser = MarkdownIt()
@@ -103,16 +105,23 @@ class GlobalTwin:
         return self.state
 
     def save_state(self):
-        """Persists the current state to the sidecar JSON file."""
-        with open(self.json_path, 'w') as f:
-            json.dump(self.state, f, indent=2)
-        print(f"✅ State persisted: {self.json_path}")
+        """Persists the current state to the sidecar YAML file."""
+        with open(self.yaml_path, 'w') as f:
+            yaml.dump(self.state, f, default_flow_style=False, allow_unicode=True)
+        print(f"✅ State persisted: {self.yaml_path}")
 
     def load_state(self):
-        """Loads state from the sidecar JSON file."""
-        if os.path.exists(self.json_path):
+        """Loads state from the sidecar YAML file (falls back to legacy JSON)."""
+        if os.path.exists(self.yaml_path):
+            with open(self.yaml_path, 'r') as f:
+                self.state = yaml.safe_load(f) or self.state
+        elif os.path.exists(self.json_path):
+            # Legacy JSON fallback — migrate on load
+            import json
             with open(self.json_path, 'r') as f:
                 self.state = json.load(f)
+            print(f"⚠️  Legacy JSON sidecar detected. Migrating to YAML: {self.yaml_path}")
+            self.save_state()
         return self.state
 
     def synthesize(self, force_template=False):
@@ -264,10 +273,11 @@ if __name__ == "__main__":
     twin = GlobalTwin(args.file, template_path=args.template)
     if args.out:
         twin.md_path = args.out
+        twin.yaml_path = f"{args.out}.yaml"
         twin.json_path = f"{args.out}.json"
     
-    # 1. Initial State Load (Sidecar first)
-    if os.path.exists(twin.json_path):
+    # 1. Initial State Load (Sidecar first — YAML preferred, JSON legacy fallback)
+    if os.path.exists(twin.yaml_path) or os.path.exists(twin.json_path):
         twin.load_state()
 
     # 2. Harvest from Markdown (ALWAYS harvest existing MD to capture manual edits)
@@ -279,8 +289,13 @@ if __name__ == "__main__":
 
     # 2. Merge with external state if provided
     if args.state and os.path.exists(args.state):
+        import json as _json
         with open(args.state, 'r') as f:
-            new_state = json.load(f)
+            # Support both YAML and JSON state files
+            if args.state.endswith('.yaml'):
+                new_state = yaml.safe_load(f) or {}
+            else:
+                new_state = _json.load(f)
 
             # Protected Fields (Do not overwrite target identity)
             protected = ["Status", "Phase", "Version", "Linked Task", "Created", "Completed"]

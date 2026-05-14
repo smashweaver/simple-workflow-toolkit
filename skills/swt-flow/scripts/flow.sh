@@ -27,6 +27,7 @@ function show_help {
     echo "  archive           - Show only finished/abandoned tasks (--classify, --priority)"
     echo ""
     echo "Ritual Enforcement:"
+    echo "  state             - Protocol-aware state report (Phase/Loop/Gate + all sensors)"
     echo "  validate          - Deep ritual/protocol integrity check"
     echo "  phase <N>         - Manual ritual phase transition"
     echo "  test              - Run tests via swt.json harness"
@@ -221,7 +222,9 @@ case $CMD in
         if [ $? -ne 0 ]; then echo "❌ Error: No active task context."; exit 1; fi
         delegate "skills/swt-task/scripts/task.sh" "test" "$RESOLVED" --fail "$@" ;;
 
+    state) shift; uv run python3 "$ROOT_DIR/skills/swt-flow/scripts/state.py" "$@" ;;
     audit) shift; delegate "skills/swt-audit/scripts/audit.sh" "$@" ;;
+
 
     # Lifecycle & Hygiene
     close) shift;

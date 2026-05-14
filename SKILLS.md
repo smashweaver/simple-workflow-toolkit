@@ -71,6 +71,7 @@ The primary "Command Center" for the toolkit. It unifies all specialized skills 
 | `/swt:flow history` | Show complete project timeline (--classify, --priority) | `swt:task` |
 | `/swt:flow context` | Show current active task path | `swt:task` |
 | `/swt:flow audit` | Deep ritual integrity check | `swt:task` |
+| `/swt:flow state` | Protocol-aware state report (Phase/Loop/Gate + 5 sensors) | `swt:flow` |
 | `/swt:flow commit` | Start commit ritual | `swt:commit` |
 | `/swt:flow digest` | Create session summary | `swt:digest` |
 | `/swt:flow symlink` | Global dev setup (--global --clear) | `swt:link` |
