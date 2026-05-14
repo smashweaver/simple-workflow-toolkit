@@ -112,15 +112,18 @@ Scaffolds an `AGENTS.md` file for any new project consuming SWT. Establishes sha
 
 ---
 
-### `/swt:link` — Skill Installer & Linker
+### `/swt:link` — Skill Installer (Legacy/Dev Only)
 
-Manages the installation of SWT skills into agent discovery paths (`.agents/`, `.claude/`, etc.). Supports both symlinking (Developer Mode) and physical copying (Stable Mode).
+Manages the installation of SWT skills into agent discovery paths (`.agents/`, `.claude/`, etc.). Standardized on **Physical Mode** (Stable) for all environments.
 
-```
-/swt:flow install        # Install physical copies (Stable Mode)
-/swt:flow link           # Create symlinks (Developer Mode)
-/swt:flow link --global  # Link globally (~/.agents)
-/swt:flow link --clear   # Remove existing links first
+#### 🛡️ Standard Protocol
+- **Physical Copies Only**: Use `/swt:flow install` for both Local and Global scopes. This ensures every project has a stable, immutable snapshot of the toolkit.
+- **Symlinks Deprecated**: Symlinking is reserved for internal toolkit development and should be avoided in production or mission-critical workspaces.
+
+```bash
+/swt:flow install             # Standard physical installation (Local)
+/swt:flow install --global    # Standard physical installation (Global)
+/swt:flow install --only-clear # Standalone Liquidation (Purge only)
 ```
 
 ---

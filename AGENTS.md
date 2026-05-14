@@ -8,10 +8,11 @@ This document defines the core principles and behavioral protocols for AI coding
 
 1.  **Plan First**: Never start implementation without a detailed, peer-reviewed plan.
 2.  **Surgical Changes**: Touch only what you must. Avoid "cleaning up" adjacent code unless it's part of the task. **Mandatory Cleanup**: All temporary testing artifacts (temp tasks, scratch scripts, etc.) must be deleted before finalizing the task. Sidecar artifacts in `.tasks/` are persistent, but root-level ephemeral files are automatically cleaned up by `/swt:flow close`.
-3.  **Simplicity Over Specification**: No speculative features or premature abstractions.
-4.  **Verifiable Outcomes**: Every change must have a clear path to verification (tests or checklists).
-5.  **Gitignored Awareness**: Runtime directories (`.digests/`, `.tasks/`) are gitignored. Use `bash ls` + `read` for these — glob/search tools will return empty results.
-6.  **Ritual Discipline**: "Mandatory" means mandatory. Never skip a re-read step, self-correction pass, or consent gate, even if you feel "familiar" with the context.
+3.  **Installation Discipline**: Use **Physical Copies** (`/swt:flow install`) for ALL discovery paths (local and global) to ensure environment stability and isolation. Symlinking skills is deprecated to prevent "Ghost Updates" and broken links.
+4.  **Simplicity Over Specification**: No speculative features or premature abstractions.
+5.  **Verifiable Outcomes**: Every change must have a clear path to verification (tests or checklists).
+6.  **Gitignored Awareness**: Runtime directories (`.digests/`, `.tasks/`) are gitignored. Use `bash ls` + `read` for these — glob/search tools will return empty results.
+7.  **Ritual Discipline**: "Mandatory" means mandatory. Never skip a re-read step, self-correction pass, or consent gate, even if you feel "familiar" with the context.
 13. **Exclusive Gateway**: You are FORBIDDEN from manually editing the `Phase` header in task files. All phase transitions MUST be executed via `/swt:flow phase <N> <task_file>`. The `validate` script reads the historical breadcrumb logs and physically blocks execution if the header was manually forged (e.g. Header Phase != Latest Ritual Log) or phases were skipped.
 14. **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `/swt:flow audit`. Validation includes checks for Phase Forgery and Phantom Artifacts.
 9.  **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation. **Mandatory Repopulation**: When an artifact is reset/re-scaffolded (e.g. via `/swt:flow sync-docs`), the agent MUST immediately re-populate it with the current technical context to maintain continuity.

@@ -13,6 +13,7 @@ SKILLS_DIR="$SWT_HOME/skills"
 # Defaults
 SCOPE="local"
 CLEAR=false
+ONLY_CLEAR=false
 DRY_RUN=false
 TARGET_DIR_ARG=""
 
@@ -20,9 +21,10 @@ TARGET_DIR_ARG=""
 usage() {
     echo "Usage: $0 [options] [target_path]"
     echo "Options:"
-    echo "  --global    Link into home directory (~/.agents, etc.)"
-    echo "  --clear     Remove existing SWT symlinks before linking"
-    echo "  --dry-run   Show what would be done without making changes"
+    echo "  --global      Link into home directory (~/.agents, etc.)"
+    echo "  --clear       Remove existing SWT symlinks before linking"
+    echo "  --only-clear  Liquidation only: Clear SWT links and exit immediately"
+    echo "  --dry-run     Show what would be done without making changes"
     echo "  --help      Show this help message"
     echo ""
     echo "If target_path is provided, it will be used as the base for agent folders."
@@ -34,6 +36,7 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         --global) SCOPE="global" ;;
         --clear) CLEAR=true ;;
+        --only-clear) CLEAR=true; ONLY_CLEAR=true ;;
         --dry-run) DRY_RUN=true ;;
         --help) usage ;;
         -*) echo "Unknown option: $1"; usage ;;
@@ -63,6 +66,7 @@ echo "Source: $SKILLS_DIR"
 echo "Target Base: $BASE_DIR"
 echo "Scope: $SCOPE"
 [[ "$CLEAR" == "true" ]] && echo "Clear: enabled"
+[[ "$ONLY_CLEAR" == "true" ]] && echo "Mode: Liquidation Only"
 [[ "$DRY_RUN" == "true" ]] && echo "DRY RUN MODE"
 
 # 1. Clear existing SWT links if requested
@@ -83,6 +87,11 @@ if [[ "$CLEAR" == "true" ]]; then
             done
         fi
     done
+fi
+
+if [[ "$ONLY_CLEAR" == "true" ]]; then
+    echo "✨ Liquidation Complete. (Liquidation Only Mode)"
+    exit 0
 fi
 
 # 2. Create new symlinks

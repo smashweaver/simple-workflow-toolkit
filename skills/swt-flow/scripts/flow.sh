@@ -48,10 +48,9 @@ function show_help {
     echo "  digest            - Daily session summary"
     echo "  milestone         - Full project roll-up"
     echo "  setup             - Initialize project folders (.tasks, .specs)"
-    echo "  install           - Physical skill installation (Stable Mode)"
-    echo "  symlink           - Global dev setup (Symlinks --global --clear)"
-    echo "  link              - Symlink skills into current project (Dev Mode)"
-    echo "  link-dry          - Preview symlink changes"
+    echo "  install           - Standard physical skill installation (Stable Mode)"
+    echo "  install --global  - Global physical installation (~/.agents)"
+    echo "  install --only-clear - Standalone liquidation (Purge only)"
     echo ""
     echo "Structural Awareness (Graphify):"
     echo "  graph-init        - Full deep scan and graph build"
@@ -244,7 +243,10 @@ case $CMD in
     digest) shift; delegate "skills/swt-digest/scripts/digest.sh" "$@" ;;
     milestone) shift; delegate "skills/swt-digest/scripts/digest.sh" --milestone "$@" ;;
     setup) shift; delegate "skills/swt-task/scripts/task.sh" init "$@" ;;
+    # Environment Management (Standardized on Physical)
     install) shift; delegate "skills/swt-link/scripts/install.sh" "$@" ;;
+    
+    # Legacy Symlink Support (Development Only)
     symlink) shift; delegate "skills/swt-link/scripts/link.sh" --global --clear "$@" ;;
     link) shift; delegate "skills/swt-link/scripts/link.sh" "$@" ;;
     link-dry) shift; delegate "skills/swt-link/scripts/link.sh" --dry-run "$@" ;;
