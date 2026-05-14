@@ -16,6 +16,7 @@ import sys
 import subprocess
 import hashlib
 import argparse
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -46,6 +47,17 @@ VALID_NEXT = {
 
 ROOT_DIR = Path(__file__).resolve().parents[3]
 
+def load_swt_config() -> dict:
+    config_path = ROOT_DIR / "swt.json"
+    if config_path.exists():
+        try:
+            return json.loads(config_path.read_text())
+        except Exception:
+            return {}
+    return {}
+
+CONFIG = load_swt_config()
+
 
 def find_task_ctx() -> str | None:
     ctx = ROOT_DIR / "task.ctx"
@@ -61,7 +73,8 @@ def find_task_ctx() -> str | None:
 def read_phase(task_file: str) -> int:
     with open(task_file) as f:
         for line in f:
-            m = re.match(r'^\*\*Phase\*\*:\s*(\d+)', line)
+            # Flexible: catch "Phase: 1", "**Phase**: 1", etc.
+            m = re.match(r'^(?:\*\*)?Phase(?:\*\*)?:\s*(\d+)', line)
             if m:
                 return int(m.group(1))
     return -1
@@ -265,7 +278,7 @@ def sensor_artifact_hygiene(phase: int) -> dict:
 
 
 # ── Sensor 5: Commit Loop Recognizer ──────────────────────────────────────────
-def sensor_commit_loop(phase: int) -> dict:
+def sensor_commit_loop(phase: int, task_file: str | None) -> dict:
     result = {"sensor": "Commit Loop Recognizer", "status": "ok", "findings": [], "warnings": []}
 
     if phase != 8:
@@ -275,6 +288,22 @@ def sensor_commit_loop(phase: int) -> dict:
 
     commit_draft = ROOT_DIR / "commit.draft"
     commit_task = ROOT_DIR / "commit.task"
+
+    # Check for Test Ritual (obeying swt.json)
+    test_cmd = CONFIG.get("test_command")
+    if test_cmd and task_file:
+        try:
+            content = Path(task_file).read_text()
+            # Look for recent success log: RITUAL: test pass @ ...
+            if "RITUAL: test pass" not in content:
+                result["warnings"].append(
+                    f"TEST RITUAL MISSING: You must run the test command ('{test_cmd}') via /swt:flow test before committing."
+                )
+                result["status"] = "warn"
+            else:
+                result["findings"].append(f"Test ritual verified ✓ ({test_cmd})")
+        except Exception:
+            pass
 
     if not commit_draft.exists():
         result["warnings"].append(
@@ -353,9 +382,19 @@ if __name__ == "__main__":
     s2 = sensor_twin_protocol(task_file)
     s3 = sensor_substance_drift(task_file, phase)
     s4 = sensor_artifact_hygiene(phase)
-    s5 = sensor_commit_loop(phase)
+    s5 = sensor_commit_loop(phase, task_file)
 
     all_sensors = [s1, s2, s3, s4, s5]
+
+    # Respect ritual_gates from swt.json
+    gates = CONFIG.get("ritual_gates", {})
+    if not gates.get("phase_order_enforcement", True):
+        # Downgrade s1 warnings if enforcement is disabled
+        if s1["status"] == "warn": s1["status"] = "ok"
+    
+    if not gates.get("hitl_approval", True):
+        # Downgrade substance drift if HITL is disabled
+        if s3["status"] == "warn": s3["status"] = "ok"
 
     if args.sensor:
         all_sensors = [s for s in all_sensors if args.sensor.lower() in s["sensor"].lower()]
