@@ -16,7 +16,9 @@ allowed-tools:
 
 # swt:flow
 
-The director of the toolkit. This skill ensures that every session follows a disciplined, consent-gated workflow. It unifies all specialized skills under a single, discoverable interface.
+The director of the toolkit. This skill acts as the **Unified Facade** and is the strict, mandatory entry point for all user directives (e.g., status requests, backlog checks, task management). Agents MUST prioritize `/swt:flow` commands over invoking internal scripts or tools directly to ensure that all state sensors and ritual logs are properly triggered.
+
+It ensures that every session follows a disciplined, consent-gated workflow and unifies all specialized skills under a single, discoverable interface.
 
 ## 🎭 Persona: The Senior Advisor
 

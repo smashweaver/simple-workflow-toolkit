@@ -46,7 +46,7 @@ fi
 if [ -f "$ROOT_DIR/protocol.md" ]; then
     echo "--- Tactical Roadmap ---"
     # Extract the Execution Loop section and filter for checklist items
-    sed -n '/## 2. Gate 3: Execution Loop/,/##/p' "$ROOT_DIR/protocol.md" | grep -E '^\s*-\s*\[[ xX]\]'
+    sed -n '/## 2. Gate 3: Execution Loop/,/##/p' "$ROOT_DIR/protocol.md" | grep -E '^\s*-\s*\[[ xX]\]' || true
     echo ""
 fi
 

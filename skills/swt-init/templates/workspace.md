@@ -26,6 +26,8 @@
     **Self-correction**: If detected, halt, log in `Jailbreak Patterns Observed`, and re-populate before proceeding.
 10. **Planning Mode Artifacts**: You are MANDATED to generate standard root artifacts during execution: `implementation_plan.md` (Phase 1), `protocol.md` (Phase 1), and `task.md` (Phase 5). You MUST perform a **HARD STOP** immediately after creating or updating any of these artifacts to allow for cross-agent verification.
 11. **Task Separation of Concerns**: The root `task.md` artifact is an ephemeral "Live Checklist" for human and cross-agent verification. The `protocol.md` is an ephemeral "Tactical Roadmap" for execution. The internal `.tasks/<timestamp>_task.md` remains the persistent "Source of Truth" for ritual metadata and state tracking.
+12. **Facade-First Protocol**: If a `/swt:flow` command exists for a user directive (e.g., status, backlog), the agent MUST use it or reference it as the primary entry point. Agents are forbidden from bypassing the orchestration logic (e.g., running internal scripts directly) to ensure ritual logs and state sensors are correctly triggered.
+13. **Ephemeral Artifact Hygiene**: Agents MUST place all temporary or generated payload files (e.g., patch JSONs, data dumps) into the `.cache/` directory. Creating scratch files in the repository root or tracking them in the git index is strictly forbidden to prevent index pollution.
 
 ## 2. Execution Boundaries: The Senior Advisor Persona
 

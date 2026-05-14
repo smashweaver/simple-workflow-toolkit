@@ -298,9 +298,9 @@ Use one of these types:
    * New contributors onboard 40% faster with explicit examples
 ```
 
-### Don't use file references in bullet points
+### Don't use filenames or file references in bullet points
 
-When writing bullet points, focus on behavior, outcomes, and impact rather than pointing to specific files. This applies to all projects, whether the beneficiary is a human user, another developer, or an AI agent/toolkit.
+Filenames are bad in commit messages since the focus should strictly be on the effect of the diffs to the project repository. This applies to all projects, whether the beneficiary is a human user, another developer, or an AI agent/toolkit.
 
 ```
 ✅ * Task rules now discoverable from one place — agents no longer need to cross-reference /swt:flow

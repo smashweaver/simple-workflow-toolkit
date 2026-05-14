@@ -33,6 +33,7 @@ Thumbs.db
 .claude/
 .gemini/
 .opencode/
+.cache/
 demo/
 
 # Graphify artifacts
