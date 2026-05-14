@@ -99,6 +99,75 @@ def md5(text: str) -> str:
     return hashlib.md5(text.encode()).hexdigest()
 
 
+class TaskParser:
+    """Surgically extracts metadata and substance from a task file."""
+    def __init__(self, filepath: Path):
+        self.path = filepath
+        self.name = filepath.name
+        self.content = filepath.read_text() if filepath.exists() else ""
+        self.metadata = self._parse_metadata()
+
+    def _parse_metadata(self):
+        meta = {
+            "phase": -1,
+            "status": "unknown",
+            "priority": "low",
+            "type": "chore",
+            "category": "uncategorized",
+            "objective": ""
+        }
+        if not self.content:
+            return meta
+
+        # Extraction regexes
+        patterns = {
+            "phase": r'^(?:\*\*)?Phase(?:\*\*)?:\s*(\d+)',
+            "status": r'^(?:\*\*)?Status(?:\*\*)?:\s*(\S+)',
+            "priority": r'^(?:\*\*)?Priority(?:\*\*)?:\s*(\S+)',
+            "type": r'^(?:\*\*)?Type(?:\*\*)?:\s*(\S+)',
+            "category": r'^(?:\*\*)?Category(?:\*\*)?:\s*(\S+)',
+        }
+
+        for key, pattern in patterns.items():
+            m = re.search(pattern, self.content, re.MULTILINE)
+            if m:
+                val = m.group(1).strip()
+                meta[key] = int(val) if key == "phase" else val
+
+        # Extract Objective
+        m = re.search(r'^## Objective\s*\n(.*?)(?=\n## |\Z)', self.content, re.DOTALL | re.MULTILINE)
+        if m:
+            meta["objective"] = re.sub(r'\s+', ' ', m.group(1)).strip()
+        else:
+            # Fallback to Core Concept
+            m = re.search(r'^## Core Concept\s*\n(.*?)(?=\n## |\Z)', self.content, re.DOTALL | re.MULTILINE)
+            if m:
+                meta["objective"] = re.sub(r'\s+', ' ', m.group(1)).strip()
+
+        return meta
+
+
+def get_backlog() -> list[TaskParser]:
+    """Aggregates all active tasks from .tasks/"""
+    tasks = []
+    task_dir = ROOT_DIR / ".tasks"
+    if not task_dir.exists():
+        return []
+    
+    for f in task_dir.glob("*.md"):
+        try:
+            p = TaskParser(f)
+            # Only include active tasks (not done/abandoned)
+            if p.metadata["status"] not in ("done", "abandoned"):
+                tasks.append(p)
+        except Exception:
+            continue
+    
+    # Sort by Category, then Phase descending
+    tasks.sort(key=lambda t: (t.metadata["category"], -t.metadata["phase"]))
+    return tasks
+
+
 # ── Sensor 1: Phase / Loop Recognizer ─────────────────────────────────────────
 def sensor_phase_loop(task_file: str | None) -> dict:
     result = {"sensor": "Phase/Loop Recognizer", "status": "ok", "findings": [], "warnings": []}
@@ -328,10 +397,44 @@ def sensor_commit_loop(phase: int, task_file: str | None) -> dict:
 
 
 # ── Report Renderer ────────────────────────────────────────────────────────────
-def render_report(sensors: list[dict], phase: int, task_file: str | None, as_json: bool):
+def render_report(sensors: list[dict], phase: int, task_file: str | None, as_json: bool, show_backlog: bool = False, classify: bool = False):
     if as_json:
         import json
-        print(json.dumps({"phase": phase, "task": task_file, "sensors": sensors}, indent=2))
+        tasks = [t.metadata for t in get_backlog()] if show_backlog else []
+        print(json.dumps({"phase": phase, "task": task_file, "sensors": sensors, "backlog": tasks}, indent=2))
+        return
+
+    if show_backlog:
+        backlog = get_backlog()
+        if not backlog:
+            print("No active tasks found.")
+            return
+
+        # Low-Hanging Fruit
+        recs = [t for t in backlog if t.metadata["phase"] == 0 and t.metadata["type"] in ("docs", "chore", "refactor")][:3]
+        if recs:
+            print("💡 Recommendations (Low-Hanging Fruit)")
+            for r in recs:
+                # Pretty print name (remove timestamp and .md)
+                display_name = re.sub(r'^\d+_', '', r.path.name).replace('.md', '').replace('-', ' ').title()
+                print(f"  - {display_name} ({r.metadata['type']})")
+            print()
+
+        last_cat = None
+        for t in backlog:
+            cat = t.metadata["category"]
+            if classify and cat != last_cat:
+                print(f"{' ' if last_cat else ''}📂 {cat.title()}")
+                last_cat = cat
+            
+            print(f"Task: {t.path.name}")
+            print(f"  Status: {t.metadata['status']} | Phase: {t.metadata['phase']} | Priority: {t.metadata['priority']}")
+            print(f"  Goal: {t.metadata['objective']}")
+            
+            # Simple next step extraction
+            m = re.search(r'\[ \] (.*)', t.content)
+            if m:
+                print(f"  Next Step: {m.group(1).strip()}")
         return
 
     loop_sensor = next((s for s in sensors if s["sensor"] == "Phase/Loop Recognizer"), {})
@@ -373,6 +476,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="SWT Transition State Recognizer")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     parser.add_argument("--sensor", help="Run a single sensor by name")
+    parser.add_argument("--backlog", action="store_true", help="Report on the active task backlog")
+    parser.add_argument("--classify", action="store_true", help="Group backlog by category")
     args = parser.parse_args()
 
     task_file = find_task_ctx()
@@ -399,4 +504,4 @@ if __name__ == "__main__":
     if args.sensor:
         all_sensors = [s for s in all_sensors if args.sensor.lower() in s["sensor"].lower()]
 
-    render_report(all_sensors, phase, task_file, args.json)
+    render_report(all_sensors, phase, task_file, args.json, args.backlog, args.classify)

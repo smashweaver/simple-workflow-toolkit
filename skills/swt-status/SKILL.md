@@ -36,8 +36,8 @@ Aggregates project state and includes the last 5 git commits for additional cont
 ## Behavior
 1. **Workspace Discovery**: Walks up the tree to find the root `AGENTS.md` or `.git`.
 2. **Digest Retrieval**: Locates the newest `.md` in `.digests/` (or `.digests/archive/`).
-3. **Task Scanning**: Lists all files in `.tasks/` that are not `done` or `abandoned`.
-4. **Validation**: Executes `task.sh validate` for each active task.
+3. **Task Scanning**: Delegates to the `Universal Observer` engine (`state.py --backlog --classify`) to aggregate and sort all active tasks.
+4. **Validation**: Inherits the 5-sensor health checks from `state.py`.
 5. **Spec Discovery**: Lists the 3 most recently updated files in `.specs/`.
 6. **Git History (Optional)**: If `--git` is provided, displays the last 5 commits (`oneline`).
 

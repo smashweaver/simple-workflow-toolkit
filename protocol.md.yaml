@@ -1,0 +1,87 @@
+checklists:
+  Checklist:
+  - status: /
+    text: 'Phase 1: Plan'
+  - status: ' '
+    text: 'Phase 2: Analyze'
+  - status: ' '
+    text: 'Phase 3: Risk Assessment'
+  - status: ' '
+    text: 'Phase 4: Approval'
+  - status: ' '
+    text: 'Phase 5: Implement'
+  - status: ' '
+    text: 'Phase 6: Document'
+  - status: ' '
+    text: 'Phase 7: Test'
+  - status: ' '
+    text: 'Phase 8: Review & Refine'
+  Goals:
+  - status: ' '
+    text: 'Goal 1: Design the `status.py` (or shared `state.py`) aggregation interface.'
+  - status: ' '
+    text: 'Goal 2: Refactor `status.sh` to delegate heavy parsing to Python.'
+  - status: ' '
+    text: 'Goal 3: Verify that the new output matches the existing ergonomic format.'
+  MVP Definition:
+  - status: ' '
+    text: '[Core feature A implemented and verified]'
+  - status: ' '
+    text: '[Core feature B implemented and verified]'
+  - status: ' '
+    text: User confirms MVP works as expected
+  Success Criteria:
+  - status: ' '
+    text: '[Criterion 1]'
+  - status: ' '
+    text: '[Criterion 2]'
+meta:
+  Blocked By: —
+  Category: research
+  Completed: —
+  Created: '*'
+  Phase: '1'
+  Priority: medium
+  Stack: shared
+  Status: pending
+  Task: refactor status skill into hybrid engine
+  Type: brainstorm
+  Updated: —
+  Version: '1.0'
+sections:
+  Artifact Phase Mapping: '| Artifact | Generated | Phase | Gate |
+
+    |---|---|---|---|
+
+    | `implementation_plan.md` | Phase 1 | Plan | HARD STOP |
+
+    | `task.md` | Phase 5 | Implement | Checkpoint |'
+  Commit Reference: ''
+  Explored Alternatives: '- **Scenario A (Discipline)**: Continue using Bash but mandate
+    strict regex patterns for headers. (High risk of drift).
+
+    - **Scenario B (Automation)**: Create a standalone `status.py` in `skills/swt-status/scripts/`.
+    (Modular approach).
+
+    - **Scenario C (Enforcement)**: Merge `status` into `state.py` to create a single
+    "Universal Observer" skill. (Simplifies the skill tree).
+
+    - **User Suggestion**: N/A (Based on internal script audit).'
+  Jailbreak Patterns Observed: '| # | Agent | Phase | Violation | Detail |
+
+    |---|-------|-------|-----------|--------|
+
+    | 1 | | | | |'
+  Notes: '*'
+  Objective: Refactor the `status.sh` script into the Hybrid Model (Bash facade +
+    Python engine) to improve maintainability and strictly follow the `swt:code` guidelines.
+  Ritual Logs: ''
+  Unresolved Questions: What still needs to be answered before this can become a task?
+  What This Task Covers: "1. **Metadata Aggregation**\n   - Move the parsing of `.tasks/*.md`\
+    \ headers (Phase, Status, Category) from Bash to a Python engine.\n2. **Sorting\
+    \ and Grouping**\n   - Implement sorting by Category and Phase in Python for better\
+    \ reliability.\n3. **Redundancy Reduction**\n   - Eliminate redundant calls to\
+    \ `task.sh validate` by leveraging `state.py` logic."
+template: protocol.md
+updated_at: '2026-05-14T09:08:50.491187'
+version: '1.0'
