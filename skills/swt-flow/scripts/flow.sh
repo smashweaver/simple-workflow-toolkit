@@ -6,6 +6,8 @@ set -e
 
 CMD=${1:-""}
 
+echo "💓 PROTOCOL! PROTOCOL! PROTOCOL!"
+
 function show_help {
     echo "Usage: /swt:flow <command> [args]"
     echo ""
