@@ -1,4 +1,5 @@
 {
+  "_description": "See CONFIG.md for field definitions",
   "mode": "{{MODE}}",
   "test_command": "{{TEST_COMMAND}}",
   "ritual_gates": {

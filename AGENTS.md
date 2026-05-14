@@ -389,7 +389,7 @@ The toolkit supports a mandatory "Test-First" workflow for high-stakes projects.
    - **Global**: Add `## Ritual: TDD` to `AGENTS.md`.
    - **Tactical**: Add `**TDD**: enabled` to the task file header.
 2. **Enforcement**: When enabled, Phase 5 (Implement) is blocked until a `test fail` ritual is recorded. The agent MUST prove the test fails before applying implementation code.
-3. **Harness**: The `swt.json` file provides the platform-agnostic commands necessary for the agent to run these checks.
+3. **Harness**: The `swt.json` file provides the platform-agnostic commands necessary for the agent to run these checks. Detailed field definitions are available in [CONFIG.md](file:///home/jason/tools/swt/CONFIG.md).
 
 
 
