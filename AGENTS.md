@@ -15,7 +15,7 @@ This document defines the core principles and behavioral protocols for AI coding
 7.  **Ritual Discipline**: "Mandatory" means mandatory. Never skip a re-read step, self-correction pass, or consent gate, even if you feel "familiar" with the context.
 8.  **Physical Task Gate**: All source code commits are physically blocked by a pre-commit hook unless a task is mounted (`task.ctx` is non-empty). This ensures absolute traceability between the git log and the `.tasks/` directory. (Exemption: commits touching only `.tasks/` and `.specs/` sidecar artifacts are permitted).
 13. **Exclusive Gateway**: You are FORBIDDEN from manually editing the `Phase` header in task files. All phase transitions MUST be executed via `/swt:flow phase <N> <task_file>`. The `validate` script reads the historical breadcrumb logs and physically blocks execution if the header was manually forged (e.g. Header Phase != Latest Ritual Log) or phases were skipped.
-14. **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `/swt:flow audit`. Validation includes checks for Phase Forgery and Phantom Artifacts.
+14. **State Synchronization**: All implementation work must be tracked in the active `.tasks/` file. Agents are physically blocked from proceeding if the task file state (Phase N) does not match the current conversation context via `/swt:flow validate`. Validation includes checks for Phase Forgery and Phantom Artifacts.
 9.  **Born Complete**: You are FORBIDDEN from presenting a "naked" task template to the user. Every task MUST be populated with its Core Concept, Scenarios, and Notes immediately after creation. **Mandatory Repopulation**: When an artifact is reset/re-scaffolded (e.g. via `/swt:flow sync-docs`), the agent MUST immediately re-populate it with the current technical context to maintain continuity.
 
     **Failure definitions** (any of the following is a Born Complete violation):
@@ -268,7 +268,7 @@ If the Task objectives change after Phase 1 (e.g., a "Light Bulb Moment" during 
 1.  **Update Task**: Log the new ideas in the task file.
 2.  **Sync Downstream**: Run `/swt:flow sync-docs <file>` to propagate changes to the Spec and Implementation Plan. **Mandatory Reset**: This command physically resets the Task Phase to 1.
 3.  **Gate 2 Reset**: Treat the new Plan as unapproved. You MUST perform a **HARD STOP** and obtain user approval for the updated architecture before resuming implementation.
-4.  **Stale Enforcement**: The `/swt:flow audit` command will physically block execution if the Task is newer than the Spec or the Spec is newer than the Plan.
+4.  **Stale Enforcement**: The `/swt:flow validate` command will physically block execution if the Task is newer than the Spec or the Spec is newer than the Plan.
 
 ## 5. Workspaces & Projects
 
@@ -319,13 +319,13 @@ Before discussing any task or reviewing code, the agent MUST:
 ### 2. Context Restoration (On-Demand)
 When the user asks for a status update (*"whats up"*, *"where am I?"*, *"resume"*), the agent MUST:
 1. **Invoke the `/swt:flow status` command** to aggregate latest digest, tasks, and specs.
-2. **Execute Task Validation**: The status skill automatically runs `/swt:flow audit` for all active tasks.
+2. **Execute Task Validation**: The status skill automatically runs `/swt:flow validate` for all active tasks.
 3. **Summarize status** based on the aggregated report.
 4. **Manual Milestone Ritual**: The `/swt:flow status` command provides a state summary but does NOT automatically trigger a new digest. Digests are manual rituals reserved for logical session ends or major milestones. **Technical Retrospective**: Every digest MUST include a high-fidelity "Technical Retrospective" section documenting ritual failures (unfilled templates, skipped gates), tooling friction (script failures, brittle regex), and roadblocks to ensure architectural hardening in the next session.
 5. **HARD STOP**: Inform the user and wait for explicit confirmation before starting any implementation or planning work.
 
 ### 3. Ephemeral Artifact Enforcement (Scenario C)
-To prevent ritual bypasses, the toolkit enforces the presence of root artifacts during key phases. `/swt:flow audit` and `/swt:flow phase` will block execution if these files are missing from the project root. All artifacts are scaffolded from standard templates in `skills/swt-task/templates/`:
+To prevent ritual bypasses, the toolkit enforces the presence of root artifacts during key phases. `/swt:flow validate` and `/swt:flow phase` will block execution if these files are missing from the project root. All artifacts are scaffolded from standard templates in `skills/swt-task/templates/`:
 
 - **Phase 1-8**: Requires Implementation Plan sidecar (`[TS].plan.md`).
 - **Phase 1-8**: Requires Tactical Roadmap sidecar (`[TS].tr.md`).
@@ -333,7 +333,7 @@ To prevent ritual bypasses, the toolkit enforces the presence of root artifacts 
 - **Verification Proof**: Phase 8 (Review) requires a successful `Test Ritual Log` that is newer than the latest code change. Agents are physically blocked from proceeding to Review without proof of verification.
 
 > [!CAUTION]
-> **Phantom Artifacts**: If a required artifact is found in a hidden directory (e.g., `.gemini/`, `.agents/`, `.claude/`) but is missing from the root, `/swt:flow audit` will fail. You MUST move artifacts to the project root to pass verification.
+> **Phantom Artifacts**: If a required artifact is found in a hidden directory (e.g., `.gemini/`, `.agents/`, `.claude/`) but is missing from the root, `/swt:flow validate` will fail. You MUST move artifacts to the project root to pass verification.
 
 
 ## 9. Developing the Toolkit

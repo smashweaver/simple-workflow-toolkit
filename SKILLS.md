@@ -70,7 +70,8 @@ The primary "Command Center" for the toolkit. It unifies all specialized skills 
 | `/swt:flow backlog` | Show all open/active tasks (--classify, --priority) | `swt:task` |
 | `/swt:flow history` | Show complete project timeline (--classify, --priority) | `swt:task` |
 | `/swt:flow context` | Show current active task path | `swt:task` |
-| `/swt:flow audit` | Deep ritual integrity check | `swt:task` |
+| `/swt:flow validate` | Deep ritual integrity check | `swt:task` |
+| `/swt:flow audit` | Structural health check | `swt:audit` |
 | `/swt:flow state` | Protocol-aware state report (Phase/Loop/Gate + 5 sensors) | `swt:flow` |
 | `/swt:flow commit` | Start commit ritual | `swt:commit` |
 | `/swt:flow digest` | Create session summary | `swt:digest` |
@@ -93,7 +94,7 @@ Owns the full task lifecycle: creation, brainstorming, graduation, status tracki
 | `/swt:task graduate` | Promote a brainstorm task to Phase 1 (+ Spec) |
 | `/swt:task phase <N>` | Manual ritual phase transition (Signed Log) |
 | `/swt:task mount <file>` | Set active task context (`task.ctx`) |
-| `/swt:task audit` | Deep protocol and ritual integrity audit |
+| `/swt:task validate` | Deep protocol and ritual integrity audit |
 | `/swt:task list` | List tasks (--open, --done, --classify, --priority) |
 | `/swt:task close <hash>` | Finalize a task as done (hash required) |
 | `/swt:task bug` | Report toolkit friction to SWT core (Upstream) |
