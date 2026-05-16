@@ -37,6 +37,7 @@ function show_help {
     echo "  sync              - Sync root task.md checklist"
     echo "  sync-docs         - Re-sync Spec/Plan after changes"
     echo "  sync-roadmap      - Persist protocol.md progress to task"
+    echo "  update            - Append items to live checklist"
     echo "  scaffold <type>   - Manually generate artifacts"
     echo "  audit             - Structural health check (Verdict)"
     echo ""
@@ -198,17 +199,17 @@ case $CMD in
     graduate) shift;
         RESOLVED=$(resolve_task_path "$1")
         if [ $? -ne 0 ]; then echo "❌ Error: No active task context."; exit 1; fi
-        [ -n "$1" ] && [ -f "$ROOT_DIR/.tasks/$1.md" ] && shift
+        [ -n "$1" ] && { [ -f "$ROOT_DIR/.tasks/$1.md" ] || [ -f "$1" ]; } && shift
         delegate "skills/swt-task/scripts/task.sh" "graduate" "$RESOLVED" "$@" ;;
     backlog) shift; delegate "skills/swt-task/scripts/task.sh" list --open "$@" ;;
     history) shift; delegate "skills/swt-task/scripts/task.sh" list --all "$@" ;;
     archive) shift; delegate "skills/swt-task/scripts/task.sh" list --done "$@" ;;
 
     # Ritual Enforcement
-    validate|sync|sync-docs|scaffold|sync-roadmap) shift;
+    validate|sync|sync-docs|scaffold|sync-roadmap|update) shift;
         RESOLVED=$(resolve_task_path "$1")
         if [ $? -ne 0 ]; then echo "❌ Error: No active task context."; exit 1; fi
-        [ -n "$1" ] && [ -f "$ROOT_DIR/.tasks/$1.md" ] && shift
+        [ -n "$1" ] && { [ -f "$ROOT_DIR/.tasks/$1.md" ] || [ -f "$1" ]; } && shift
         delegate "skills/swt-task/scripts/task.sh" "$CMD" "$RESOLVED" "$@" ;;
     phase) shift;
         PHASE_NUM=$1; shift

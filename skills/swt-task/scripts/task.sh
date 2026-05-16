@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Universal AI Task Manager (swt.sh)
+# Universal AI Task Manager (/swt:flow)
 # Facilitates semantic agent interaction with a local .tasks/ directory
 
 set -e
@@ -111,24 +111,24 @@ function check_sandbox {
 
 function show_help {
     echo "Usage:"
-    echo "  swt.sh init              - Initialize .tasks/ directory and update .gitignore"
-    echo "  swt.sh new \"Final Feature Name\"  - Create a new timestamped task file"
-    echo "  swt.sh brainstorm \"Topic\"        - Create a Phase 0 ideation task"
-    echo "  swt.sh sync <file>        - Sync root task.md from internal task file"
-    echo "  swt.sh scaffold <type> <file> [--force] - Generate Plan artifact"
-    echo "  swt.sh phase <N> <file>    - Transition task to Phase N"
-    echo "  swt.sh validate <file>     - Verify ritual integrity and artifact state"
-    echo "  swt.sh list [--open|--done] - List tasks in the project"
-    echo "  swt.sh sync-downstream <file> - Sync Spec/Plan after objective changes"
-    echo "  swt.sh close <file> <hash> - Finalize task (status: done, checklist: complete)"
-    echo "  swt.sh mount <file>        - Set active task context (writes task.ctx)"
-    echo "  swt.sh unmount             - Clear active task context (removes task.ctx)"
-    echo "  swt.sh ctx set <file>      - [DEPRECATED] Use mount instead"
-    echo "  swt.sh ctx clear           - [DEPRECATED] Use unmount instead"
-    echo "  swt.sh ctx show            - Show current active task context"
-    echo "  swt.sh tidy                 - Move done/abandoned tasks to .tasks/archive/"
-    echo "  swt.sh abandon <file>      - Abandon task (status: abandoned, no commit hash)"
-    echo "  swt.sh test <file> [--fail] - Run tests via swt.json harness and log ritual"
+    echo "  /swt:flow setup              - Initialize .tasks/ directory and update .gitignore"
+    echo "  /swt:flow new \"Final Feature Name\"  - Create a new timestamped task file"
+    echo "  /swt:flow brainstorm \"Topic\"        - Create a Phase 0 ideation task"
+    echo "  /swt:flow sync <file>        - Sync root task.md from internal task file"
+    echo "  /swt:flow scaffold <type> <file> [--force] - Generate Plan artifact"
+    echo "  /swt:flow phase <N> <file>    - Transition task to Phase N"
+    echo "  /swt:flow validate <file>     - Verify ritual integrity and artifact state"
+    echo "  /swt:flow list [--open|--done] - List tasks in the project"
+    echo "  /swt:flow sync-docs <file> - Sync Spec/Plan after objective changes"
+    echo "  /swt:flow close <file> <hash> - Finalize task (status: done, checklist: complete)"
+    echo "  /swt:flow mount <file>        - Set active task context (writes task.ctx)"
+    echo "  /swt:flow unmount             - Clear active task context (removes task.ctx)"
+    echo "  /swt:flow ctx set <file>      - [DEPRECATED] Use mount instead"
+    echo "  /swt:flow ctx clear           - [DEPRECATED] Use unmount instead"
+    echo "  /swt:flow ctx show            - Show current active task context"
+    echo "  /swt:flow tidy                 - Move done/abandoned tasks to .tasks/archive/"
+    echo "  /swt:flow abandon <file>      - Abandon task (status: abandoned, no commit hash)"
+    echo "  /swt:flow test <file> [--fail] - Run tests via swt.json harness and log ritual"
 }
 
 function validate_artifacts {
@@ -474,7 +474,7 @@ function run_tests {
     if [ ! -f "$file" ]; then echo "❌ Error: Task file not found: $file"; exit 1; fi
     if [ ! -f "swt.json" ]; then
         echo "🛑 NO HARNESS DETECTED: swt.json is missing."
-        echo "   Please create a harness first: swt.sh scaffold swt.json $file"
+        echo "   Please create a harness first: /swt:flow scaffold swt.json $file"
         exit 1
     fi
 
@@ -555,7 +555,7 @@ fi
 
 if [ "$CMD" == "new" ]; then
     if [ -z "$ARG" ]; then
-        echo "Usage: swt.sh new \"Task Name\""
+        echo "Usage: /swt:flow new \"Task Name\""
         exit 1
     fi
     TIMESTAMP=$(date +"%Y%m%d%H%M%S")
@@ -582,7 +582,7 @@ fi
 
 if [ "$CMD" == "brainstorm" ]; then
     if [ -z "$ARG" ]; then
-        echo "Usage: swt.sh brainstorm \"Topic\" [--uplink]"
+        echo "Usage: /swt:flow brainstorm \"Topic\" [--uplink]"
         exit 1
     fi
 
@@ -616,7 +616,7 @@ if [ "$CMD" == "brainstorm" ]; then
 - **Source Task**: $(basename "$C_TASK")
 - **Source Phase**: $C_PHASE"
     elif [ ! -d ".tasks" ]; then
-        echo "Error: No .tasks/ directory found. Run 'swt.sh init' first."
+        echo "Error: No .tasks/ directory found. Run '/swt:flow setup' first."
         exit 1
     fi
 
@@ -652,7 +652,7 @@ fi
 if [ "$CMD" == "sync" ]; then
     FILE=$2
     if [ -z "$FILE" ]; then
-        echo "Usage: swt.sh sync <task_file>"
+        echo "Usage: /swt:flow sync <task_file>"
         exit 1
     fi
     sync_task_md "$FILE"
@@ -665,7 +665,7 @@ if [ "$CMD" == "sync-roadmap" ]; then
         if [ -f "task.ctx" ]; then
             FILE=$(cat task.ctx | tr -d '[:space:]')
         else
-            echo "Usage: swt.sh sync-roadmap <task_file>"
+            echo "Usage: /swt:flow sync-roadmap <task_file>"
             exit 1
         fi
     fi
@@ -677,7 +677,7 @@ if [ "$CMD" == "test" ]; then
     FILE=$2
     MODE=$3
     if [ -z "$FILE" ]; then
-        echo "Usage: swt.sh test <file> [--fail]"
+        echo "Usage: /swt:flow test <file> [--fail]"
         exit 1
     fi
     run_tests "$FILE" "$MODE"
@@ -689,7 +689,7 @@ if [ "$CMD" == "scaffold" ]; then
     FILE=$3
     FORCE=$4
     if [ -z "$TYPE" ] || [ -z "$FILE" ]; then
-        echo "Usage: swt.sh scaffold <type> <file> [--force]"
+        echo "Usage: /swt:flow scaffold <type> <file> [--force]"
         exit 1
     fi
     scaffold_artifact "$TYPE" "$FILE" "$FORCE"
@@ -699,7 +699,7 @@ fi
 if [ "$CMD" == "graduate" ]; then
     FILE=$2
     if [ -z "$FILE" ]; then
-        echo "Usage: swt.sh graduate <task_file>"
+        echo "Usage: /swt:flow graduate <task_file>"
         exit 1
     fi
 
@@ -765,7 +765,7 @@ fi
 if [ "$CMD" == "sync-docs" ]; then
     FILE=$2
     if [ -z "$FILE" ]; then
-        echo "Usage: swt.sh sync-docs <task_file>"
+        echo "Usage: /swt:flow sync-docs <task_file>"
         exit 1
     fi
     
@@ -809,7 +809,7 @@ if [ "$CMD" == "close" ]; then
     FILE=$2
     HASH=$3
     if [ -z "$FILE" ] || [ -z "$HASH" ]; then
-        echo "Usage: swt.sh close <task_file> <commit_hash>"
+        echo "Usage: /swt:flow close <task_file> <commit_hash>"
         exit 1
     fi
 
@@ -859,7 +859,7 @@ fi
 if [ "$CMD" == "mount" ]; then
     VAL=$2
     if [ -z "$VAL" ]; then
-        echo "Usage: swt.sh mount <file>"
+        echo "Usage: /swt:flow mount <file>"
         exit 1
     fi
     echo "$VAL" > task.ctx
@@ -894,7 +894,7 @@ if [ "$CMD" == "ctx" ]; then
             fi
             ;;
         *)
-            echo "Usage: swt.sh ctx [set <file>|clear|show] (Note: set/clear are deprecated)"
+            echo "Usage: /swt:flow ctx [set <file>|clear|show] (Note: set/clear are deprecated)"
             exit 1
             ;;
     esac
@@ -915,7 +915,7 @@ fi
 if [ "$CMD" == "abandon" ]; then
     FILE=$2
     if [ -z "$FILE" ]; then
-        echo "Usage: swt.sh abandon <task_file>"
+        echo "Usage: /swt:flow abandon <task_file>"
         exit 1
     fi
     DATE_STR=$(date +"%Y-%m-%d %H:%M:%S")
@@ -936,7 +936,7 @@ if [ "$CMD" == "phase" ]; then
     FILE=$3
 
     if [ -z "$PHASE_NUM" ] || [ -z "$FILE" ]; then
-        echo "Usage: swt.sh phase <N> <task_file>"
+        echo "Usage: /swt:flow phase <N> <task_file>"
         exit 1
     fi
 
@@ -1069,7 +1069,7 @@ if [ "$CMD" == "validate" ]; then
                 
                 if [ "$TASK_SUBSTANCE" != "$SPEC_SUBSTANCE" ]; then
                     echo "🛑 STALE SPEC DETECTED: Task objectives have drifted from the Spec."
-                    echo "   Loop back to re-sync: swt.sh sync-docs $FILE"
+                    echo "   Loop back to re-sync: /swt:flow sync-docs $FILE"
                     exit 1
                 fi
                 # Auto-heal the timestamp if substance is identical
@@ -1085,7 +1085,7 @@ if [ "$CMD" == "validate" ]; then
                 plan_time=$(stat -c %Y "$plan_source")
                 if [ "$spec_time" -gt $((plan_time + 60)) ]; then
                     echo "🛑 STALE PLAN DETECTED: Spec is newer than the Implementation Plan."
-                    echo "   Loop back to re-sync: swt.sh sync-docs $FILE"
+                    echo "   Loop back to re-sync: /swt:flow sync-docs $FILE"
                     exit 1
                 fi
             fi
@@ -1108,7 +1108,7 @@ if [ "$CMD" == "validate" ]; then
         if [ "$tdd_enforced" == "true" ] && [ "$PHASE" -ge 5 ]; then
             if [ -z "$latest_fail" ]; then
                 echo "🛑 TDD VIOLATION: No verified failure log found. Write a failing test first."
-                echo "   Run: swt.sh test $FILE --fail"
+                echo "   Run: /swt:flow test $FILE --fail"
                 exit 1
             fi
         fi
@@ -1128,7 +1128,7 @@ if [ "$CMD" == "validate" ]; then
 
             if [ "$last_code_edit" -gt "$last_test_time" ]; then
                 echo "🛑 STALE VERIFICATION: Code has changed since the last verified test pass."
-                echo "   Re-run tests: swt.sh test $FILE"
+                echo "   Re-run tests: /swt:flow test $FILE"
                 exit 1
             fi
         fi
@@ -1149,7 +1149,7 @@ if [ "$CMD" == "update" ]; then
     APPEND_TEXT=$4
 
     if [ -z "$FILE" ]; then
-        echo "Usage: swt.sh update <task_file> [--append \"item text\"]"
+        echo "Usage: /swt:flow update <task_file> [--append \"item text\"]"
         exit 1
     fi
 
@@ -1175,7 +1175,7 @@ if [ "$CMD" == "update" ]; then
         fi
         exit 0
     else
-        echo "Usage: swt.sh update <task_file> [--append \"item text\"]"
+        echo "Usage: /swt:flow update <task_file> [--append \"item text\"]"
         exit 1
     fi
 fi

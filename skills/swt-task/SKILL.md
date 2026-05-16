@@ -226,10 +226,10 @@ Promotes a brainstorm task to an implementation task when the user is ready to b
 - End of a productive Phase 0 ideation session with clear direction
 
 > 🛑 **Phase 0 Graduation Gate (MANDATORY)**
-> Before invoking `swt.sh graduate`, the agent MUST:
+> Before invoking `/swt:flow graduate`, the agent MUST:
 > 1. Perform a **HARD STOP** and ask the user: *"Are we ready to graduate to Phase 1?"*
 > 2. Wait for an explicit verbal **"Yes"** or **"Go"** from the user.
-> 3. Only then invoke `swt.sh graduate <task_file>`.
+> 3. Only then invoke `/swt:flow graduate <task_file>`.
 > 4. After graduation, present the link and **HARD STOP** again (Gate 1: Alignment Loop).
 
 **Steps:**
@@ -259,7 +259,7 @@ Updates the task checklist and phase field as phases complete.
 
 > 🛑 **Phase 8 Iterative Gate (MANDATORY)**
 > During Phase 8, the agent MUST NOT push the user toward `close`.
-> - Phase 8 is an **iterative loop** — the user may append fine-tuning items via `swt.sh update <file> --append "item text"`.
+> - Phase 8 is an **iterative loop** — the user may append fine-tuning items via `/swt:flow update <file> --append "item text"`.
 > - The agent periodically asks *"Ready to close?"* but the **user always decides** when Phase 8 ends.
 > - No auto-termination of Phase 8 — the loop continues as long as the user wants to refine.
 
@@ -571,7 +571,7 @@ All brainstorming tasks created via `swt:task brainstorm` follow a high-fidelity
 | Naming Rules | No change | — |
 | Name Confirmation Gate | No change | — |
 | Uplink Protocol | No change | — |
-| **Phase 0 Graduation Gate** | **New** | Agent MUST halt and ask for explicit verbal permission before running `swt.sh graduate` |
+| **Phase 0 Graduation Gate** | **New** | Agent MUST halt and ask for explicit verbal permission before running `/swt:flow graduate` |
 | **Phase 8 Iterative Gate** | **New** | Formally allows the user to keep a task open in Phase 8 for fine-tuning |
 | **Brainstorm Consistency Review** | **New** | Formalizes agent's self-review pass during Phase 0 |
 
