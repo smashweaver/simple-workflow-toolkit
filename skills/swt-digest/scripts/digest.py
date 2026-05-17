@@ -117,7 +117,12 @@ def main():
 
     # 6. Retrieve Parents (Older digests to archive)
     parents_list = []
-    parent_files = sorted(glob.glob(str(digest_root / "*_digest.md")))
+    parent_files = []
+    for d in [digest_root, digest_root / "archive"]:
+        if d.exists():
+            parent_files.extend(glob.glob(str(d / "*_digest.md")))
+    parent_files = sorted(list(set(parent_files)), key=lambda x: os.path.basename(x))
+    
     for p in parent_files:
         p_path = Path(p)
         if not p_path.name.startswith(yyyymmdd):
@@ -125,7 +130,7 @@ def main():
     
     # Take the last 5 parent digests
     parents_to_archive = parents_list[-5:]
-    parents_str = "\n".join([f"- {p.name}" for p in parents_to_archive]) if parents_to_archive else "*No parent digests.*"
+    parents_str = "\n".join([f"- [{p.name}]({p.relative_to(ROOT_DIR)})" for p in parents_to_archive]) if parents_to_archive else "*No parent digests.*"
 
     # 7. Formulate New Input Summary & Outcomes
     new_summary = ""
