@@ -210,6 +210,7 @@ Verify that the MVP meets the objective. Polish the implementation based on user
 ## 6. Commit Discipline
 
 > 🚫 **Forbidden:** Agents are STRICTLY FORBIDDEN from using standard `git commit -m` commands directly. All commits must go through the Draft-and-Approve protocol below.
+> 🚫 **Out-of-band/Bypass Commits:** The agent is strictly forbidden from executing out-of-band/bypass commits (using `--no-verify` or bypassing tasks) without first explicitly informing the user of the bypass and obtaining their direct, verbal confirmation in chat.
 > 💡 **Enforce Default:** Whenever prompted for a git commit or help with a git commit message, agents MUST default to invoking the `/swt:flow commit` skill.
 
 All commits follow the **Diff-First, Draft-and-Approve** protocol. There is a strict separation of concerns: `commit.draft` is ONLY for the human-readable, impact-focused commit message, while `commit.task` is ONLY for automation metadata (e.g., `Closes: .tasks/...`). Do not mix them.
