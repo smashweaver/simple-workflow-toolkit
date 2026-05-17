@@ -200,6 +200,7 @@ function list_tasks {
     
     for f in .tasks/*.md; do
         [ -e "$f" ] || continue
+        if [[ "$f" == *".plan.md" ]] || [[ "$f" == *".tr.md" ]] || [[ "$f" == *".walkthrough.md" ]]; then continue; fi
         local ts=$(basename "$f" | cut -d'_' -f1)
         local phase=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$f" | head -n 1)
         local status=$(grep -oP '^\*\*?Status\*\*?:\s*\K\S+' "$f" | head -n 1)
@@ -282,7 +283,7 @@ function list_tasks {
         # Default: Flat / Chronological
         printf "%-15s %-3s %-10s %s\n" "Timestamp" "Ph" "Status" "Objective"
         printf "%-15s %-3s %-10s %s\n" "---------------" "---" "----------" "---------"
-        sort -k3,3 "$task_data" | while IFS=$'\t' read -r cat p_num ts phase stat obj; do
+        sort -k2,2rn -k3,3 "$task_data" | while IFS=$'\t' read -r cat p_num ts phase stat obj; do
             printf "%-15s %-3s %-10s %s\n" "$ts" "$phase" "$stat" "$obj"
             if [ "$summary" = true ]; then
                 local task_file=$(ls .tasks/${ts}_*.md 2>/dev/null | head -n 1)

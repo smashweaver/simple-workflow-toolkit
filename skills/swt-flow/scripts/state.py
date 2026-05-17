@@ -159,6 +159,8 @@ def get_backlog() -> list[TaskParser]:
         return []
     
     for f in task_dir.glob("*.md"):
+        if f.name.endswith(".plan.md") or f.name.endswith(".tr.md") or f.name.endswith(".walkthrough.md"):
+            continue
         try:
             p = TaskParser(f)
             # Only include active tasks (not done/abandoned)
@@ -167,8 +169,15 @@ def get_backlog() -> list[TaskParser]:
         except Exception:
             continue
     
-    # Sort by Category, then Phase descending
-    tasks.sort(key=lambda t: (t.metadata["category"], -t.metadata["phase"]))
+    # Priority sorting mapping (lower index = higher priority)
+    prio_map = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+    
+    # Sort by Priority, Category, and Phase descending
+    tasks.sort(key=lambda t: (
+        prio_map.get(t.metadata.get("priority", "medium").lower().strip(), 4),
+        t.metadata.get("category", "uncategorized").lower(),
+        -t.metadata.get("phase", -1)
+    ))
     return tasks
 
 
