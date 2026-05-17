@@ -1,6 +1,6 @@
 {
   "mode": "protocol",
-  "test_command": "grep -q 'function log_ritual' skills/swt-task/scripts/task.sh",
+  "test_command": "uv run python3 -m unittest discover -s tests",
   "ritual_gates": {
     "ballmer_heartbeat": true,
     "phase_order_enforcement": true,

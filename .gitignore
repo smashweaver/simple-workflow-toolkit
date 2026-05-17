@@ -54,6 +54,7 @@ sample_task.md
 /implementation_plan.md
 /walkthrough.md
 /task.md
+/JAILBREAKS.md
 .tests/
 swt-skills-audit.json
 .tasks/*.md.yaml
