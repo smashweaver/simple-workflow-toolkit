@@ -56,9 +56,16 @@ sample_task.md
 /task.md
 .tests/
 swt-skills-audit.json
-skills/swt-task/scripts/__pycache__/twin.cpython-312.pyc
 .tasks/*.md.yaml
 .tasks/*.plan.md
 .tasks/*.tr.md
 .tasks/*.walkthrough.md
 .specs/*.md.yaml
+
+# Python caching
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+

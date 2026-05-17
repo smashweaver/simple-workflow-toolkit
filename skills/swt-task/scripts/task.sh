@@ -75,6 +75,7 @@ function unmount_task {
         if [ -f "$active_task" ]; then
             rm -f "$(get_artifact_path "$active_task" implementation_plan).yaml"
             rm -f "$(get_artifact_path "$active_task" protocol).yaml"
+            rm -f "${active_task}.yaml"
         fi
     fi
 
@@ -446,16 +447,10 @@ function scaffold_artifact {
         return 0
     fi
     
-    # If sidecar exists, use it for synthesis to preserve content
-    if [ -f "${target_path}" ]; then
-        echo "🔄 Harvesting current $target_path state..."
-        python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$target_path" --harvest
-    fi
-
-    if [ -f "${task_file}.yaml" ]; then
+    if [ -f "$task_file" ]; then
         echo "🔄 Merging Task state and synthesizing $target_path..."
         # We pass task state as the merging input to the existing artifact state
-        python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$target_path" --state "${task_file}.yaml" --template "$template_path" --out "$target_path" --synthesize
+        python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$target_path" --state "$task_file" --template "$template_path" --out "$target_path" --synthesize
     else
         # Legacy fallback
         local title=$(grep -m 1 "^# Task:" "$task_file" | sed 's/^# Task:[[:space:]]*//')
@@ -738,8 +733,7 @@ if [ "$CMD" == "graduate" ]; then
     
     if [ -f "$spec_template" ]; then
         # Map task sections to spec sections via Global Twin synthesis
-        # We use the task's JSON state as the input for the spec synthesis
-        python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$FILE" --state "${FILE}.yaml" --template "$spec_template" --out "$SPEC_FILE" --synthesize
+        python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$FILE" --state "$FILE" --template "$spec_template" --out "$SPEC_FILE" --synthesize
 
         echo "Graduated $FILE to Phase 1. Spec created: $SPEC_FILE"
         xdg-open "$SPEC_FILE" &
@@ -782,8 +776,8 @@ if [ "$CMD" == "sync-docs" ]; then
     fi
 
     spec_template="$ROOT_DIR/skills/swt-task/templates/spec.md"
-    # We use the task's state to re-synthesize the spec, preserving spec's own sidecar if it exists
-    python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$FILE" --state "${FILE}.yaml" --template "$spec_template" --out "$SPEC_FILE" --synthesize
+    # We use the task's state to re-synthesize the spec
+    python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$FILE" --state "$FILE" --template "$spec_template" --out "$SPEC_FILE" --synthesize
     echo "✅ Spec synchronized: $SPEC_FILE"
 
     # 3. Re-sync Implementation Plan and Protocol
@@ -1077,8 +1071,8 @@ if [ "$CMD" == "validate" ]; then
                 echo "✅ Spec synchronization verified (Substance match)."
             fi
             
-            local sidecar_plan=$(get_artifact_path "$FILE" implementation_plan)
-            local plan_source="implementation_plan.md"
+            sidecar_plan=$(get_artifact_path "$FILE" implementation_plan)
+            plan_source="implementation_plan.md"
             if [ -f "$sidecar_plan" ]; then plan_source="$sidecar_plan"; fi
 
             if [ -f "$plan_source" ]; then

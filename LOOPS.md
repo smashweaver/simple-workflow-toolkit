@@ -93,14 +93,14 @@ Every new session begins with this recovery cycle. The agent runs `/swt:flow sta
 The ideation cycle where the agent acts as a **Senior Advisor**. It requires a Scenario A/B/C trade-off analysis (Discipline vs. Automation vs. Enforcement) before the user provides the "Go" to graduate to implementation.
 
 ### 3. Planning & Analysis Loops (Phases 1–3)
-*   **Planning Loop**: Artifact generation (`implementation_plan.md`, `protocol.md`) and identifying documentation targets.
+*   **Planning Loop**: Artifact generation (`[TS].plan.md` [Implementation Plan], `[TS].tr.md` [Tactical Roadmap]) and identifying documentation targets.
 *   **Analysis Loop**: Assessing the impact on components, state management, performance, and API contracts.
 *   **Gate 2 (The Architecture Loop)**: A **HARD STOP** where the technical approach must be approved by the user.
 
 ### 4. Execution Loop (Phases 5–7)
-The implementation cycle where surgical edits are made. It is governed by the `protocol.md` (Tactical Roadmap) and `task.md` (Live Checklist). Automated tests are run via `swt.sh test` to provide physical evidence of correctness.
+The implementation cycle where surgical edits are made. It is governed by the `[TS].tr.md` (Tactical Roadmap) and `[TS]_[slug].md` (Live Checklist). Automated tests are run via `swt.sh test` to provide physical evidence of correctness.
 
-> 📊 **Tactical Visibility**: To ensure **HITL-friendly automation**, the `protocol.md` roadmap is automatically surfaced in the `/swt:flow status` report. Agents are mandated to run a status check after every tactical chunk update to verify alignment with the user.
+> 📊 **Tactical Visibility**: To ensure **HITL-friendly automation**, the `[TS].tr.md` roadmap is automatically surfaced in the `/swt:flow status` report. Agents are mandated to run a status check after every tactical chunk update to verify alignment with the user.
 
 ### 5. Light Bulb Iteration Loop (Reset Mechanism)
 A critical "Fail-Safe" that triggers if requirements or understanding change mid-implementation.

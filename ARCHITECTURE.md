@@ -23,6 +23,7 @@ graph TD
     Think --> Graphify["swt:graphify\n(Architecture)"]
     Think --> Digest["swt:digest\n(Summary)"]
     Think --> Mermaid["swt:mermaid\n(Diagrams)"]
+    Think --> Audit["swt:audit\n(Health Check)"]
     
     style Think fill:#f96,stroke:#333,stroke-width:4px
     style Flow fill:#bbf,stroke:#333,stroke-width:2px
@@ -44,6 +45,7 @@ graph LR
         Flow --> LinkSub["swt:link"]
         Flow --> GraphifySub["swt:graphify"]
         Flow --> InitSub["swt:init\n(Behavioral Guidance)"]
+        Flow --> AuditSub["swt:audit"]
     end
     
     subgraph "Contextual Skills"
@@ -87,21 +89,21 @@ inherits: "swt:think"
 
 This allows for future automated tooling to verify that all skills in the ecosystem are correctly following the base reasoning protocols.
 
-## 5. State-as-Source Architecture (Sidecar Cluster)
+## 5. Direct Markdown State Engine Architecture
 
-To ensure document structural integrity and total idempotency, SWT employs a **Global Twin** architecture. This separates the **Machine State** (authoritative YAML) from the **Markdown Projection** (human-readable view).
+To ensure document structural integrity and total idempotency, SWT employs a **Global Twin** architecture. This leverages the **Markdown AST** directly as the authoritative source of truth, eliminating the need for persistent disk-level sidecar files (.yaml or .json) inside system folders (.tasks/, .specs/, and .digests/).
 
 ### 1. The Twin Engine (`twin.py`)
 - **Engine**: A centralized Python parser and renderer that handles all programmatic document updates.
-- **Sidecar Cluster**: Machine state is persisted in timestamped YAML files within the `.tasks/` directory, mirroring the task lifecycle.
-- **YAML Formatting**: Uses YAML block scalars (`|`) for prose sections, ensuring that multiline content and markdown syntax are preserved without escaping.
+- **In-Memory State**: Machine state is parsed and managed in-memory directly from the Markdown AST, mirroring the task lifecycle without cluttering system directories with physical sidecars.
+- **AST Formatting**: Uses standard Markdown parsers to harvest sections and checklists, ensuring multiline content and markdown syntax are cleanly read and written.
 
 ### 2. Bidirectional Sync
-- **Harvesting**: Captures manual human edits from the Markdown projection into the YAML state.
-- **Synthesis**: Re-renders the Markdown from the state using standardized templates.
+- **Harvesting**: Captures manual human edits from the Markdown file into the in-memory state.
+- **Synthesis**: Re-renders the Markdown file from the in-memory state using standardized templates, preserving any human-added custom sections.
 
 ### 3. Implementation Integrity
-This architecture eliminates the risk of "destructive scaffolding" during re-syncs. By centralizing machine state in the Sidecar Cluster, the project root remains clean of ephemeral planning artifacts while maintaining a persistent audit trail of the entire task lifecycle.
+This architecture eliminates the risk of "destructive scaffolding" during re-syncs. By centralizing machine state in-memory directly from the Markdown AST, the system directories remain perfectly clean and sidecar-free, while maintaining absolute traceability of the entire task lifecycle.
 
-### 3. Workflow Integration
+### 4. Workflow Integration
 Core commands (`new`, `graduate`, `phase`, `sync-docs`) are physically bound to this loop, preventing agents from bypassing state management through direct file string manipulation.

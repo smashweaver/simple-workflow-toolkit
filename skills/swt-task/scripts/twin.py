@@ -75,7 +75,7 @@ class GlobalTwin:
         # 2. Harvest Sections and Checklists
         headers = []
         for i, token in enumerate(tokens):
-            if token.type == "heading_open" and token.tag == "h2":
+            if token.type == "heading_open" and token.tag in ("h2", "h3"):
                 header_text = tokens[i+1].content.strip()
                 headers.append({
                     "name": header_text,
@@ -104,24 +104,38 @@ class GlobalTwin:
 
         return self.state
 
+    def is_system_path(self):
+        """Checks if the path is in a system directory (.tasks/, .specs/, or .digests/)."""
+        norm = os.path.normpath(self.md_path)
+        parts = norm.split(os.sep)
+        return any(x in parts for x in (".tasks", ".specs", ".digests"))
+
     def save_state(self):
         """Persists the current state to the sidecar YAML file."""
+        if self.is_system_path():
+            return
         with open(self.yaml_path, 'w') as f:
             yaml.dump(self.state, f, default_flow_style=False, allow_unicode=True)
         print(f"✅ State persisted: {self.yaml_path}")
 
     def load_state(self):
-        """Loads state from the sidecar YAML file (falls back to legacy JSON)."""
+        """Loads state from the sidecar YAML file (migrates legacy JSON if present)."""
+        if self.is_system_path():
+            return self.state
         if os.path.exists(self.yaml_path):
             with open(self.yaml_path, 'r') as f:
                 self.state = yaml.safe_load(f) or self.state
         elif os.path.exists(self.json_path):
-            # Legacy JSON fallback — migrate on load
+            # Legacy JSON fallback — migrate on load and clean up JSON
             import json
-            with open(self.json_path, 'r') as f:
-                self.state = json.load(f)
-            print(f"⚠️  Legacy JSON sidecar detected. Migrating to YAML: {self.yaml_path}")
-            self.save_state()
+            try:
+                with open(self.json_path, 'r') as f:
+                    self.state = json.load(f)
+                print(f"⚠️  Legacy JSON sidecar detected. Migrating to YAML and deleting JSON: {self.yaml_path}")
+                self.save_state()
+                os.remove(self.json_path)
+            except Exception as e:
+                print(f"⚠️  Failed to migrate legacy JSON: {e}")
         return self.state
 
     def synthesize(self, force_template=False):
@@ -284,18 +298,23 @@ if __name__ == "__main__":
     # Always harvest before synthesis to preserve any direct MD edits
     if os.path.exists(twin.md_path):
         twin.harvest()
-    elif args.harvest or (not os.path.exists(twin.json_path) and os.path.exists(args.file)):
+    elif args.harvest or (not os.path.exists(twin.yaml_path) and os.path.exists(args.file)):
         twin.harvest()
 
     # 2. Merge with external state if provided
     if args.state and os.path.exists(args.state):
-        import json as _json
-        with open(args.state, 'r') as f:
-            # Support both YAML and JSON state files
-            if args.state.endswith('.yaml'):
-                new_state = yaml.safe_load(f) or {}
-            else:
-                new_state = _json.load(f)
+        if args.state.endswith('.md'):
+            temp_twin = GlobalTwin(args.state)
+            temp_twin.harvest()
+            new_state = temp_twin.state
+        else:
+            import json as _json
+            with open(args.state, 'r') as f:
+                # Support both YAML and JSON state files
+                if args.state.endswith('.yaml'):
+                    new_state = yaml.safe_load(f) or {}
+                else:
+                    new_state = _json.load(f)
 
             # Protected Fields (Do not overwrite target identity)
             protected = ["Status", "Phase", "Version", "Linked Task", "Created", "Completed"]

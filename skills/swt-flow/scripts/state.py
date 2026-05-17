@@ -204,18 +204,19 @@ def sensor_twin_protocol(task_file: str | None) -> dict:
         result["warnings"].append("No active task — skipping.")
         return result
 
+    # Bypass sidecar verification for system paths (.tasks, .specs, .digests)
+    norm = os.path.normpath(task_file)
+    parts = norm.split(os.sep)
+    if any(x in parts for x in (".tasks", ".specs", ".digests")):
+        result["findings"].append(f"Direct Markdown state verified. Sidecars bypassed for system folders.")
+        return result
+
     md_mtime = os.path.getmtime(task_file)
     yaml_path = f"{task_file}.yaml"
-    json_path = f"{task_file}.json"
 
     if os.path.exists(yaml_path):
         sidecar_mtime = os.path.getmtime(yaml_path)
         sidecar = yaml_path
-    elif os.path.exists(json_path):
-        sidecar_mtime = os.path.getmtime(json_path)
-        sidecar = json_path
-        result["warnings"].append(f"Legacy JSON sidecar in use: {json_path} — run --harvest to migrate.")
-        result["status"] = "warn"
     else:
         result["warnings"].append("No sidecar found. Run: twin.py <file> --harvest")
         result["status"] = "warn"

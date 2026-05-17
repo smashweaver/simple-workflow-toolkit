@@ -54,7 +54,8 @@ swt/
 │   ├── swt-graphify/       # Structural awareness (query, explain, path)
 │   ├── swt-commit/         # Diff-first, draft-and-approve workflow
 │   ├── swt-digest/         # Automated session summaries (milestone)
-│   └── swt-mermaid/        # Mermaid diagram syntax guard
+│   ├── swt-mermaid/        # Mermaid diagram syntax guard
+│   └── swt-audit/          # Structural health & workspace auditor
 ├── SKILLS.md               # Full Skills Catalog (usage guide)
 ├── ARCHITECTURE.md         # Structural Manifest (inheritance & patterns)
 └── AGENTS.md               # Internal development protocol (dogfooding)
@@ -106,4 +107,12 @@ If you are developing the toolkit itself, use the **`symlink`** shortcut to keep
 
 ```bash
 /swt:flow symlink      # System-wide dev setup (--global --clear)
+```
+
+### Running Tests
+
+To verify that the toolkit's parsing logic, AST compiler, state transition engines, and hygiene constraints are fully correct, run our unified unit and integration test suite:
+
+```bash
+uv run python3 -m unittest discover -s tests
 ```

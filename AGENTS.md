@@ -8,7 +8,7 @@ This document defines the core principles and behavioral protocols for AI coding
 
 1.  **Plan First**: Never start implementation without a detailed, peer-reviewed plan.
 2.  **Surgical Changes**: Touch only what you must. Avoid "cleaning up" adjacent code unless it's part of the task. **Mandatory Cleanup**: All temporary testing artifacts (temp tasks, scratch scripts, etc.) must be deleted before finalizing the task. Sidecar artifacts in `.tasks/` are persistent, but root-level ephemeral files are automatically cleaned up by `/swt:flow close`.
-3.  **Installation Discipline**: Use **Physical Copies** (`/swt:flow install`) for ALL discovery paths (local and global) to ensure environment stability and isolation. Symlinking skills is deprecated to prevent "Ghost Updates" and broken links.
+3.  **Installation Discipline**: Use **Physical Copies** (`/swt:flow install`) for ALL discovery paths (local and global) to ensure environment stability and isolation. Symlinking skills is deprecated to prevent "Ghost Updates" and broken links. **Development Guardrail**: When developing the Simple Workflow Toolkit (SWT) itself, agents are STRICTLY FORBIDDEN from modifying, updating, or overwriting active skills inside `.agents/` and `.claude/` folders during implementation. The active execution environments must remain pristine and unmodified, with all changes residing exclusively in primary repository folders (e.g. `skills/`) until finalized.
 4.  **Simplicity Over Specification**: No speculative features or premature abstractions.
 5.  **Verifiable Outcomes**: Every change must have a clear path to verification (tests or checklists).
 6.  **Gitignored Awareness**: Runtime directories (`.digests/`, `.tasks/`) are gitignored. Use `bash ls` + `read` for these — glob/search tools will return empty results.
@@ -400,13 +400,17 @@ The toolkit supports a mandatory "Test-First" workflow for high-stakes projects.
 
 
 
-## 13. The Global Twin Protocol (State-as-Source)
+## 13. The Global Twin Protocol (Direct Markdown State Engine)
 
-To eliminate document destruction and ensure total idempotency, all SWT-managed documents follow the **Global Twin** protocol. This transforms documentation from "string patching" to "state management."
+To eliminate document destruction and ensure total idempotency, all SWT-managed documents follow the **Global Twin** protocol. This transforms documentation from "string patching" to "state management" executed directly and in-memory on the Markdown AST.
 
-1. **The Twin Relationship**: Every managed Markdown file (`filename.md`) has an authoritative sidecar (`filename.md.json`). The JSON is the **Source of Truth**; the Markdown is a convenience projection.
+1. **Direct Markdown State**: To maintain clean workspaces, system directories (`.tasks/`, `.specs/`, and `.digests/`) are entirely sidecar-free. The Markdown files themselves serve as the sole absolute source of truth. The Global Twin engine parses, harvests, and merges state in-memory directly on the Markdown AST. Sidecars (`.yaml` or `.json`) are allowed only for general files outside system directories.
 2. **The 3-Step Lifecycle**:
-   - **Harvest**: Ingest the current Markdown projection into the JSON sidecar to capture manual human edits.
-   - **Modify**: Programmatic changes (agent logic, checklist updates, status shifts) are applied directly to the JSON object.
-   - **Synthesize**: Re-render the Markdown projection from the JSON state using a standard template. Any human-added sections not found in the template MUST be preserved and appended to the end of the document.
+   - **Harvest**: Ingest the current Markdown projection directly into an in-memory state object to capture manual human edits and custom sections.
+   - **Modify**: Programmatic changes (agent logic, checklist updates, status shifts) are applied to the state object in-memory.
+   - **Synthesize**: Re-render the Markdown file from the in-memory state using a standard template. Any human-added custom sections not found in the template MUST be preserved and appended to the end of the document.
 3. **Mandatory Sync**: All core commands (`graduate`, `phase`, `sync-docs`) MUST invoke the Global Twin loop. String patching via `sed` or `grep` on managed documents is strictly FORBIDDEN.
+
+## Ritual: TDD
+This project has Test-Driven Development (TDD) globally enabled. All agents are required to write failing tests and obtain a verified `test fail` ritual log in Phase 5 before implementing any production changes.
+
