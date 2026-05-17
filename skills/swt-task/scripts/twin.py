@@ -65,17 +65,29 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         }}
 
         .container {{
-            max-width: 800px;
+            max-width: 95%;
             width: 100%;
         }}
 
+        .container.narrow {{
+            max-width: 1000px;
+        }}
+
         .card {{
+            border: none;
+            background-color: transparent;
+            border-radius: 0;
+            padding: 40px 0;
+            box-shadow: none;
+            margin-bottom: 24px;
+        }}
+
+        .container.narrow .card {{
             border: 1px solid var(--border-color);
             background-color: var(--card-bg);
             border-radius: 8px;
             padding: 40px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            margin-bottom: 24px;
         }}
 
         header {{
@@ -116,6 +128,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             background: rgba(251, 191, 36, 0.1);
             color: var(--pending-color);
             border: 1px solid rgba(251, 191, 36, 0.2);
+        }}
+
+        .badge-status-completed {{
+            background: rgba(52, 211, 153, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }}
+
+        .badge-status-markdown {{
+            background: rgba(167, 139, 250, 0.1);
+            color: #a78bfa;
+            border: 1px solid rgba(167, 139, 250, 0.2);
         }}
 
         .badge-phase {{
@@ -226,7 +250,114 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             text-decoration: line-through;
             opacity: 0.7;
         }}
+
+        .mermaid {{
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            background: var(--pre-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+        }}
+
+        .header-badges {{
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }}
+
+        .toggle-btn {{
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: inherit;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+        }}
+
+        .toggle-btn:hover {{
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.05);
+        }}
+
+        @media (max-width: 768px) {{
+            body {{
+                padding: 20px 10px;
+            }}
+            .card {{
+                padding: 20px 0;
+            }}
+            .container.narrow .card {{
+                padding: 20px;
+            }}
+            header {{
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }}
+            .header-badges {{
+                align-items: flex-start;
+            }}
+            .mermaid {{
+                padding: 10px;
+                overflow-x: auto;
+            }}
+            pre {{
+                overflow-x: auto;
+            }}
+        }}
     </style>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        mermaid.initialize({{ startOnLoad: false, theme: isDark ? 'dark' : 'default' }});
+        
+        document.addEventListener("DOMContentLoaded", async () => {{
+            // Fluid/Narrow Width Toggle Control
+            const container = document.querySelector(".container");
+            const toggleBtn = document.getElementById("width-toggle");
+            
+            // Default to fluid unless narrow preference is saved
+            if (localStorage.getItem("swt-fluid-width") === "false") {{
+                container.classList.add("narrow");
+                toggleBtn.textContent = "↔";
+                toggleBtn.title = "Toggle Full Width";
+            }} else {{
+                toggleBtn.textContent = "→🔀←";
+                toggleBtn.title = "Toggle Normal Width";
+            }}
+            
+            toggleBtn.addEventListener("click", () => {{
+                const isNarrow = container.classList.toggle("narrow");
+                localStorage.setItem("swt-fluid-width", !isNarrow);
+                if (isNarrow) {{
+                    toggleBtn.textContent = "↔";
+                    toggleBtn.title = "Toggle Full Width";
+                }} else {{
+                    toggleBtn.textContent = "→🔀←";
+                    toggleBtn.title = "Toggle Normal Width";
+                }}
+            }});
+
+            const mermaidCodes = document.querySelectorAll("pre code.language-mermaid");
+            for (const codeEl of mermaidCodes) {{
+                const preEl = codeEl.parentElement;
+                const graphDefinition = codeEl.textContent;
+                const insertDiv = document.createElement("div");
+                insertDiv.className = "mermaid";
+                insertDiv.textContent = graphDefinition;
+                preEl.parentElement.replaceChild(insertDiv, preEl);
+            }}
+            await mermaid.run();
+        }});
+    </script>
 </head>
 <body>
     <div class="container">
@@ -234,19 +365,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <header>
                 <div>
                     <h1 class="task-title">{task_title}</h1>
-                    <div class="task-meta-row">
-                        <span>Created: {meta_created}</span>
-                        <span>Updated: {meta_updated}</span>
-                        <span>Category: {meta_category}</span>
-                    </div>
+                    {meta_row_html}
                 </div>
-                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-                    <span class="badge badge-status">{meta_status}</span>
-                    <div style="display: flex; gap: 6px;">
-                        <span class="badge badge-phase">Phase {meta_phase}</span>
-                        <span class="badge badge-priority" style="{priority_style}">{meta_priority}</span>
-                    </div>
-                </div>
+                {badges_container_html}
             </header>
 
             {dynamic_cards}
@@ -312,13 +433,15 @@ class GlobalTwin:
         # 1. Harvest Metadata (**Key**: Value)
         for line in lines:
             if line.startswith("## "): break
-            title_match = re.match(r'^#\s+Task:\s*(.*)', line)
-            if title_match:
-                self.state["meta"]["Task"] = title_match.group(1).strip()
-                continue
-            title_match_spec = re.match(r'^#\s+Spec:\s*(.*)', line)
-            if title_match_spec:
-                self.state["meta"]["Task"] = title_match_spec.group(1).strip()
+            title_match_generic = re.match(r'^#\s*(.*)', line)
+            if title_match_generic and "Task" not in self.state["meta"]:
+                title_val = title_match_generic.group(1).strip()
+                # Clean up prefixes if present
+                if title_val.lower().startswith("task:"):
+                    title_val = title_val[5:].strip()
+                elif title_val.lower().startswith("spec:"):
+                    title_val = title_val[5:].strip()
+                self.state["meta"]["Task"] = title_val
                 continue
             match = re.match(r'^\*\*?([^*:]+)\*\*?:\s*(.*)', line)
             if match:
@@ -485,15 +608,65 @@ class GlobalTwin:
             
         dynamic_cards_str = "\n".join(dynamic_cards)
         
+        # Extract metadata
+        meta_created = meta.get("Created")
+        meta_updated = meta.get("Updated")
+        meta_category = meta.get("Category")
+        
+        meta_row_items = []
+        if meta_created and meta_created != "N/A":
+            meta_row_items.append(f"<span>Created: {meta_created}</span>")
+        if meta_updated and meta_updated != "N/A":
+            meta_row_items.append(f"<span>Updated: {meta_updated}</span>")
+        if meta_category and meta_category != "uncategorized":
+            meta_row_items.append(f"<span>Category: {meta_category}</span>")
+            
+        meta_row_html = ""
+        if meta_row_items:
+            meta_row_html = f'<div class="task-meta-row">{" ".join(meta_row_items)}</div>'
+
+        # Badges
+        meta_status = meta.get("Status")
+        meta_phase = meta.get("Phase")
+        meta_priority = meta.get("Priority")
+        
+        status_badge_html = ""
+        if meta_status and meta_status.lower() != "unknown" and meta_status.lower() != "markdown":
+            status_badge_html = f'<span class="badge badge-status badge-status-{meta_status.lower()}">{meta_status}</span>'
+            
+        badge_row_items = []
+        if meta_phase and meta_phase != "0":
+            badge_row_items.append(f'<span class="badge badge-phase">Phase {meta_phase}</span>')
+        if meta_priority and meta_priority.lower() != "low":
+            badge_row_items.append(f'<span class="badge badge-priority" style="{priority_style}">{meta_priority}</span>')
+            
+        badge_row_html = ""
+        if badge_row_items:
+            badge_row_html = f'<div style="display: flex; gap: 6px;">{" ".join(badge_row_items)}</div>'
+            
+        if status_badge_html or badge_row_html:
+            badges_container_html = f"""
+                <div class="header-badges">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        {status_badge_html}
+                        <button id="width-toggle" class="toggle-btn" title="Toggle Full Width">↔</button>
+                    </div>
+                    {badge_row_html}
+                </div>
+            """
+        else:
+            badges_container_html = """
+                <div class="header-badges">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button id="width-toggle" class="toggle-btn" title="Toggle Full Width">↔</button>
+                    </div>
+                </div>
+            """
+
         rendered_html = HTML_TEMPLATE.format(
             task_title=meta.get("Task", "Unnamed Document"),
-            meta_created=meta.get("Created", "N/A"),
-            meta_updated=meta.get("Updated", "N/A"),
-            meta_category=meta.get("Category", "uncategorized"),
-            meta_status=meta.get("Status", "unknown"),
-            meta_phase=meta.get("Phase", "0"),
-            meta_priority=meta.get("Priority", "low"),
-            priority_style=priority_style,
+            meta_row_html=meta_row_html,
+            badges_container_html=badges_container_html,
             dynamic_cards=dynamic_cards_str,
             json_metadata=json.dumps(state_dict, indent=2).replace("</script>", "<\\/script>").replace("</SCRIPT>", "<\\/SCRIPT>")
         )

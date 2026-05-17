@@ -6,7 +6,9 @@ from pathlib import Path
 
 # Add state.py directory to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../skills/swt-flow/scripts")))
+# pyrefly: ignore [missing-import]
 import state
+# pyrefly: ignore [missing-import]
 from state import read_phase, get_substance, md5, sensor_phase_loop, sensor_twin_protocol, TaskParser
 
 class TestStateRecognizer(unittest.TestCase):

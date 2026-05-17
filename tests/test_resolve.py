@@ -5,6 +5,7 @@ import tempfile
 
 # Add resolve.py directory to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../skills/swt-task/scripts")))
+# pyrefly: ignore [missing-import]
 from resolve import resolve
 
 class TestResolve(unittest.TestCase):

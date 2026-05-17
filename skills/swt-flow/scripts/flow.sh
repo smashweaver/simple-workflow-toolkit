@@ -157,13 +157,52 @@ case $CMD in
         grep -A 1 "## Objective" "$RESOLVED" | grep -v "## Objective" | sed '/^$/d' | head -1
         grep -m 1 "\[ \]" "$RESOLVED" | sed 's/.*\[ \] /Next: /'
         ;;
-    open) shift; # Internal flow.sh logic (Browser Open)
-        RESOLVED=$(resolve_task_path "$1")
-        if [ $? -ne 0 ]; then echo "❌ Error: Could not resolve task."; exit 1; fi
-        open_browser "$RESOLVED"
-        SPEC_FILE=$(grep -oP '^\*\*?Spec\*\*?:\s*\K\S+' "$RESOLVED" | head -n 1)
-        if [ -n "$SPEC_FILE" ] && [ -f "$ROOT_DIR/$SPEC_FILE" ]; then
-            open_browser "$ROOT_DIR/$SPEC_FILE"
+    open) shift; # Compile and open any markdown or task in browser
+        INPUT_FILE=$1
+        if [ -z "$INPUT_FILE" ]; then
+            RESOLVED=$(resolve_task_path)
+            if [ $? -ne 0 ] || [ ! -f "$RESOLVED" ]; then
+                echo "❌ Error: No target file provided and no active task context."
+                exit 1
+            fi
+            INPUT_FILE=$RESOLVED
+        fi
+
+        if [ ! -f "$INPUT_FILE" ]; then
+            RESOLVED_TASK=$(resolve_task_path "$INPUT_FILE" 2>/dev/null)
+            if [ -n "$RESOLVED_TASK" ] && [ -f "$RESOLVED_TASK" ]; then
+                INPUT_FILE=$RESOLVED_TASK
+            else
+                echo "❌ Error: Target file '$INPUT_FILE' not found."
+                exit 1
+            fi
+        fi
+
+        if [[ "$INPUT_FILE" == *.md ]]; then
+            BASE_NAME=$(basename "$INPUT_FILE" .md)
+            CACHE_FILE="$ROOT_DIR/.cache/${BASE_NAME}.html"
+            mkdir -p "$ROOT_DIR/.cache"
+            
+            echo "⚡ Compiling visual dashboard for $BASE_NAME..."
+            uv run python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$INPUT_FILE" --out "$CACHE_FILE" --synthesize
+            
+            if [ -f "$CACHE_FILE" ]; then
+                open_browser "$CACHE_FILE"
+                
+                SPEC_FILE=$(grep -oP '^\*\*?Spec\*\*?:\s*\K\S+' "$INPUT_FILE" | head -n 1)
+                if [ -n "$SPEC_FILE" ] && [ -f "$ROOT_DIR/$SPEC_FILE" ]; then
+                    SPEC_BASE_NAME=$(basename "$SPEC_FILE" .md)
+                    SPEC_CACHE_FILE="$ROOT_DIR/.cache/${SPEC_BASE_NAME}.html"
+                    echo "⚡ Compiling visual spec dashboard for $SPEC_BASE_NAME..."
+                    uv run python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$ROOT_DIR/$SPEC_FILE" --out "$SPEC_CACHE_FILE" --synthesize
+                    open_browser "$SPEC_CACHE_FILE"
+                fi
+            else
+                echo "❌ Error: Failed to compile visual HTML."
+                exit 1
+            fi
+        else
+            open_browser "$INPUT_FILE"
         fi
         ;;
 

@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 # Add audit.py directory to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../skills/swt-audit/scripts")))
+# pyrefly: ignore [missing-import]
 from audit import audit_workspace
 
 class TestWorkspaceAuditor(unittest.TestCase):

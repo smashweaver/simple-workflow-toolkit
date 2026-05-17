@@ -5,6 +5,7 @@ import tempfile
 
 # Add crow.py directory to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../skills/swt-task/scripts")))
+# pyrefly: ignore [missing-import]
 from crow import get_section_map, patch_file
 
 class TestCrowPatcher(unittest.TestCase):

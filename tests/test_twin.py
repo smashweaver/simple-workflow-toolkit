@@ -6,6 +6,7 @@ from datetime import datetime
 
 # Add twin.py directory to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../skills/swt-task/scripts")))
+# pyrefly: ignore [missing-import]
 from twin import GlobalTwin
 
 class TestGlobalTwin(unittest.TestCase):
@@ -110,6 +111,24 @@ Implement robust unit tests for GlobalTwin.
         self.assertIn("# Task: new-task-name", content)
         self.assertIn("**Status**: completed", content)
         self.assertIn("New objective text.", content)
+
+    def test_universal_heading_fallback(self):
+        generic_md_path = os.path.join(self.test_dir.name, "generic_document.md")
+        generic_content = """# Universal Viewport Mock Fixture
+**Created**: 2026-05-18 06:20:00
+**Status**: pending
+
+## Core Objective
+Prove that the HTML compiler parses non-prefixed generic headers.
+"""
+        with open(generic_md_path, "w") as f:
+            f.write(generic_content)
+
+        twin = GlobalTwin(generic_md_path)
+        state = twin.harvest()
+
+        self.assertEqual(state["meta"]["Task"], "Universal Viewport Mock Fixture")
+        self.assertEqual(state["meta"]["Status"], "pending")
 
 if __name__ == "__main__":
     unittest.main()
