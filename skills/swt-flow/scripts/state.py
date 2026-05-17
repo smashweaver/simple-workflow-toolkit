@@ -88,7 +88,11 @@ def get_substance(filepath: str) -> str:
         content = f.read()
     substance = []
     for section in ("Objective", "Notes"):
-        m = re.search(rf'^## {section}\s*\n(.*?)(?=\n## |\Z)', content, re.DOTALL | re.MULTILINE)
+        if section == "Objective":
+            pattern = rf'^## (?:1\.\s+Problem\s+Statement|Objective)\s*\n(.*?)(?=\n## |\Z)'
+        else:
+            pattern = rf'^## {section}\s*\n(.*?)(?=\n## |\Z)'
+        m = re.search(pattern, content, re.DOTALL | re.MULTILINE)
         if m:
             text = re.sub(r'\s+', ' ', m.group(1)).strip()
             substance.append(text)

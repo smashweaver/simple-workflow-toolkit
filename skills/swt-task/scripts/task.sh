@@ -514,6 +514,44 @@ if [ -z "$CMD" ]; then
 fi
 
 if [ "$CMD" == "init" ]; then
+    UPGRADE_MODE=false
+    for arg in "$@"; do
+        if [ "$arg" == "--upgrade" ]; then
+            UPGRADE_MODE=true
+        fi
+    done
+
+    if [ "$UPGRADE_MODE" == "true" ]; then
+        echo "🧹 Performing smart upgrade & environment liquidation..."
+        
+        # 1. Purge legacy local directories surgically
+        if [ -d .agents ]; then
+            echo "🗑 Purging legacy local .agents/ directory..."
+            rm -rf .agents
+        fi
+        if [ -d .claude ]; then
+            echo "🗑 Purging legacy local .claude/ directory..."
+            rm -rf .claude
+        fi
+
+        # 2. Clear root-level ephemeral leftover session files
+        for f in commit.diff commit.draft commit.task; do
+            if [ -f "$f" ]; then
+                echo "🗑 Purging ephemeral leftover: $f"
+                rm -f "$f"
+            fi
+        done
+
+        # 3. Reset task.ctx if the referenced task file no longer exists
+        if [ -f task.ctx ]; then
+            CTX_FILE=$(cat task.ctx)
+            if [ ! -f "$CTX_FILE" ]; then
+                echo "🗑 Task file referenced in task.ctx is missing. Purging stale task.ctx."
+                rm -f task.ctx
+            fi
+        fi
+    fi
+
     mkdir -p .tasks/archive
     mkdir -p .specs
     mkdir -p .digests
@@ -525,7 +563,7 @@ if [ "$CMD" == "init" ]; then
     fi
     
     # Add SWT ignores if they don't exist
-    for ignore in ".digests/" ".cache/" ".tasks/*.md.yaml" ".tasks/*.plan.md" ".tasks/*.tr.md" ".tasks/*.walkthrough.md" "task.ctx" "commit.diff" "commit.draft" "commit.task"; do
+    for ignore in ".digests/" ".cache/" "task.ctx" "commit.diff" "commit.draft" "commit.task" "*.plan.html" "*.tr.html" "*.walk.html" ".tasks/*.md.yaml" ".tasks/*.plan.md" ".tasks/*.tr.md" ".tasks/*.walkthrough.md" "graphify-out/"; do
         if ! grep -q "^$ignore" .gitignore; then
             echo "$ignore" >> .gitignore
         fi
@@ -537,14 +575,29 @@ if [ "$CMD" == "init" ]; then
         HOOK_SOURCE="$ROOT_DIR/skills/swt-task/scripts/hooks/pre-commit"
         HOOK_TARGET=".git/hooks/pre-commit"
         
+        # Backup hook if it exists and is not ours
+        if [ -f "$HOOK_TARGET" ] && ! grep -q "Simple Workflow Toolkit" "$HOOK_TARGET" 2>/dev/null; then
+            echo "📦 Backing up existing pre-commit hook..."
+            cp "$HOOK_TARGET" "${HOOK_TARGET}.bak"
+        fi
+
         if [ -f "$HOOK_SOURCE" ]; then
             cp "$HOOK_SOURCE" "$HOOK_TARGET"
             chmod +x "$HOOK_TARGET"
-            echo "✅ Installed physical task gate: $HOOK_TARGET"
+            echo "✅ Armed physical task gate: $HOOK_TARGET"
         fi
     fi
     
-    echo "Initialized SWT workspace."
+    if [ "$UPGRADE_MODE" == "true" ]; then
+        # 4. Re-install active copy-install skills back to .agents/ and .claude/
+        if [ -f "$ROOT_DIR/skills/swt-link/scripts/install.sh" ]; then
+            echo "🔄 Restoring active copy-install skills..."
+            bash "$ROOT_DIR/skills/swt-link/scripts/install.sh"
+        fi
+        echo "🎉 Successful smart upgrade & environment liquidation!"
+    else
+        echo "Initialized SWT workspace."
+    fi
     exit 0
 fi
 

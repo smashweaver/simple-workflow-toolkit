@@ -70,3 +70,10 @@ __pycache__/
 *.pyd
 .pytest_cache/
 
+*.plan.html
+*.tr.html
+*.walk.html
+.tasks/*.md.yaml
+.tasks/*.plan.md
+.tasks/*.tr.md
+.tasks/*.walkthrough.md
