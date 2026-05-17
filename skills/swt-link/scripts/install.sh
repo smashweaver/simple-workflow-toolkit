@@ -75,9 +75,9 @@ if [[ "$CLEAR" == "true" ]]; then
             find "$target_dir" -maxdepth 1 | while read -r item; do
                 [[ "$item" == "$target_dir" ]] && continue
                 
-                # Identify if it's an SWT skill (either a symlink to SWT or a directory matching a skill name)
+                # Identify if it's an SWT skill (matches an active skill name or a legacy/deprecated swt- directory)
                 SKILL_NAME=$(basename "$item")
-                if [[ -d "$SKILLS_DIR/$SKILL_NAME" ]]; then
+                if [[ -d "$SKILLS_DIR/$SKILL_NAME" || "$SKILL_NAME" == swt-* ]]; then
                     echo "Removing: $item"
                     if [[ "$DRY_RUN" == "false" ]]; then
                         rm -rf "$item"
