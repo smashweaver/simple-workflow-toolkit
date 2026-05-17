@@ -736,7 +736,7 @@ if [ "$CMD" == "graduate" ]; then
         python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$FILE" --state "$FILE" --template "$spec_template" --out "$SPEC_FILE" --synthesize
 
         echo "Graduated $FILE to Phase 1. Spec created: $SPEC_FILE"
-        xdg-open "$SPEC_FILE" &
+        # xdg-open "$SPEC_FILE" &
         
         # Scaffold implementation plan and protocol
         scaffold_artifact "implementation_plan" "$FILE"
@@ -794,8 +794,8 @@ if [ "$CMD" == "sync-docs" ]; then
     # 5. Re-sync task.md
     sync_task_md "$FILE"
     
-    echo "✨ Downstream artifacts synchronized via Global Twin. Task reset to Phase 1."
-    xdg-open "$SPEC_FILE" &
+    echo "✨ Downstream artifacts synchronized via Global Twin. Task reset to Phase 1."    
+    # xdg-open "$SPEC_FILE" &
     exit 0
 fi
 

@@ -97,34 +97,7 @@ function open_browser() {
     fi
 
     echo "🌐 Attempting to open: $(basename "$target")"
-    
-    # Try xdg-open first
-    if command -v xdg-open >/dev/null 2>&1; then
-        if xdg-open "$target" &>/dev/null; then 
-            echo "✅ Sent to xdg-open."
-            # We don't return here because xdg-open often lies about success
-        fi
-    fi
-
-    # Fallback to direct browser commands if no graphical window appeared
-    if [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; then
-        for cmd in firefox google-chrome chromium open; do
-            if command -v "$cmd" >/dev/null 2>&1; then
-                if "$cmd" "$target" &>/dev/null; then
-                    echo "🚀 Launched $cmd."
-                    return 0
-                fi
-            fi
-        done
-    fi
-
-    # Fallback to terminal display if all else fails
-    if [ ! -f "$target" ]; then return 1; fi
-    echo "⚠️ Warning: Graphical open might have failed. Displaying in terminal..."
-    echo "--- Start of Document ---"
-    cat "$target" | head -n 50
-    echo "--- End of Document ---"
-    return 0
+    xdg-open "$target" &
 }
 
 function resolve_task_path() {

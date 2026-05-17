@@ -7,8 +7,259 @@ import os
 import argparse
 import yaml
 import re
+import json
 from datetime import datetime
 from markdown_it import MarkdownIt
+
+HTML_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWT Dashboard - {task_title}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {{
+            /* ☀️ LIGHT THEME DEFAULTS */
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --text-content: #374151;
+            --accent-cyan: #0284c7;
+            --success-color: #059669;
+            --pending-color: #d97706;
+            --code-bg: #f1f5f9;
+            --pre-bg: #f8fafc;
+            --code-text: #db2777;
+        }}
+
+        @media (prefers-color-scheme: dark) {{
+            :root {{
+                /* 🌙 AUTOMATIC DARK THEME OVERRIDES */
+                --bg-color: #0b0c10;
+                --card-bg: #111216;
+                --border-color: #1f2937;
+                --text-primary: #f3f4f6;
+                --text-secondary: #9ca3af;
+                --text-content: #d1d5db;
+                --accent-cyan: #38bdf8;
+                --success-color: #34d399;
+                --pending-color: #fbbf24;
+                --code-bg: #1e1e24;
+                --pre-bg: #18181c;
+                --code-text: #f472b6;
+            }}
+        }}
+
+        body {{
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }}
+
+        .container {{
+            max-width: 800px;
+            width: 100%;
+        }}
+
+        .card {{
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            margin-bottom: 24px;
+        }}
+
+        header {{
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 24px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }}
+
+        .task-title {{
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            color: var(--accent-cyan);
+        }}
+
+        .task-meta-row {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }}
+
+        .badge {{
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: inline-block;
+        }}
+
+        .badge-status {{
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--pending-color);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }}
+
+        .badge-phase {{
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }}
+
+        .badge-priority {{
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }}
+
+        h2 {{
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 16px;
+            color: var(--accent-cyan);
+        }}
+
+        .section-content {{
+            color: var(--text-content);
+            line-height: 1.6;
+        }}
+
+        .section-content p {{
+            margin-top: 0;
+            margin-bottom: 16px;
+        }}
+
+        .section-content code {{
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            color: var(--code-text);
+        }}
+
+        .section-content pre {{
+            background: var(--pre-bg);
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }}
+
+        .section-content pre code {{
+            background: none;
+            padding: 0;
+            color: inherit;
+        }}
+
+        .section-content a {{
+            color: var(--accent-cyan);
+            text-decoration: none;
+        }}
+
+        .section-content a:hover {{
+            text-decoration: underline;
+        }}
+
+        .section-content ul, .section-content ol {{
+            margin-top: 0;
+            margin-bottom: 16px;
+            padding-left: 20px;
+        }}
+
+        .section-content li {{
+            margin-bottom: 8px;
+        }}
+
+        .checklist-item {{
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+        }}
+
+        .checkbox {{
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }}
+
+        .checkbox-checked {{
+            color: var(--success-color);
+        }}
+
+        .checkbox-partial {{
+            color: var(--pending-color);
+        }}
+
+        .checkbox-unchecked {{
+            color: var(--text-secondary);
+        }}
+
+        .item-text {{
+            font-size: 14px;
+        }}
+
+        .item-text-completed {{
+            color: var(--text-secondary);
+            text-decoration: line-through;
+            opacity: 0.7;
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <header>
+                <div>
+                    <h1 class="task-title">{task_title}</h1>
+                    <div class="task-meta-row">
+                        <span>Created: {meta_created}</span>
+                        <span>Updated: {meta_updated}</span>
+                        <span>Category: {meta_category}</span>
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <span class="badge badge-status">{meta_status}</span>
+                    <div style="display: flex; gap: 6px;">
+                        <span class="badge badge-phase">Phase {meta_phase}</span>
+                        <span class="badge badge-priority" style="{priority_style}">{meta_priority}</span>
+                    </div>
+                </div>
+            </header>
+
+            {dynamic_cards}
+        </div>
+    </div>
+
+    <!-- 💾 EMBEDDED JSON DATABASE STATE -->
+    <script id="swt-metadata" type="application/json">
+{json_metadata}
+    </script>
+</body>
+</html>
+"""
 
 class GlobalTwin:
     SECTION_CROSSWALK = {
@@ -31,7 +282,6 @@ class GlobalTwin:
     def __init__(self, md_path, template_path=None):
         self.md_path = md_path
         self.yaml_path = f"{md_path}.yaml"
-        # Legacy: also check for old .json sidecar for migration awareness
         self.json_path = f"{md_path}.json"
         self.template_path = template_path
         self.md_parser = MarkdownIt()
@@ -45,8 +295,12 @@ class GlobalTwin:
         }
 
     def harvest(self):
-        """Extracts metadata, sections, and checklists from Markdown to JSON."""
+        """Extracts metadata, sections, and checklists from Markdown or HTML to JSON."""
         if not os.path.exists(self.md_path):
+            return self.state
+
+        if self.md_path.endswith('.html'):
+            self.state = self.extract_metadata_from_html(self.md_path)
             return self.state
 
         with open(self.md_path, 'r') as f:
@@ -56,19 +310,20 @@ class GlobalTwin:
         tokens = self.md_parser.parse(content)
 
         # 1. Harvest Metadata (**Key**: Value)
-        # Search preamble (before first ##)
         for line in lines:
             if line.startswith("## "): break
-            # Capture # Task: Title as meta key "Task"
             title_match = re.match(r'^#\s+Task:\s*(.*)', line)
             if title_match:
                 self.state["meta"]["Task"] = title_match.group(1).strip()
+                continue
+            title_match_spec = re.match(r'^#\s+Spec:\s*(.*)', line)
+            if title_match_spec:
+                self.state["meta"]["Task"] = title_match_spec.group(1).strip()
                 continue
             match = re.match(r'^\*\*?([^*:]+)\*\*?:\s*(.*)', line)
             if match:
                 key = match.group(1).strip()
                 value = match.group(2).strip()
-                # Remove HTML comments from value
                 value = re.sub(r'<!--.*?-->', '', value).strip()
                 self.state["meta"][key] = value
 
@@ -87,7 +342,6 @@ class GlobalTwin:
             section_lines = lines[h["start"]+1:end]
             section_content = "\n".join(section_lines).strip()
             
-            # Identify if it's a checklist
             checklist_items = []
             for line in section_lines:
                 item_match = re.match(r'^\s*-\s*\[([ xX/])\]\s*(.*)', line)
@@ -112,34 +366,149 @@ class GlobalTwin:
 
     def save_state(self):
         """Persists the current state to the sidecar YAML file."""
-        if self.is_system_path():
+        if self.is_system_path() or self.md_path.endswith('.html'):
             return
         with open(self.yaml_path, 'w') as f:
             yaml.dump(self.state, f, default_flow_style=False, allow_unicode=True)
         print(f"✅ State persisted: {self.yaml_path}")
 
     def load_state(self):
-        """Loads state from the sidecar YAML file (migrates legacy JSON if present)."""
+        """Loads state from the sidecar YAML file."""
+        if self.md_path.endswith('.html'):
+            if os.path.exists(self.md_path):
+                self.state = self.extract_metadata_from_html(self.md_path)
+            return self.state
         if self.is_system_path():
             return self.state
         if os.path.exists(self.yaml_path):
             with open(self.yaml_path, 'r') as f:
                 self.state = yaml.safe_load(f) or self.state
         elif os.path.exists(self.json_path):
-            # Legacy JSON fallback — migrate on load and clean up JSON
-            import json
+            import json as _json
             try:
                 with open(self.json_path, 'r') as f:
-                    self.state = json.load(f)
-                print(f"⚠️  Legacy JSON sidecar detected. Migrating to YAML and deleting JSON: {self.yaml_path}")
+                    self.state = _json.load(f)
                 self.save_state()
                 os.remove(self.json_path)
             except Exception as e:
                 print(f"⚠️  Failed to migrate legacy JSON: {e}")
         return self.state
 
+    def extract_metadata_from_html(self, html_path):
+        """Surgically extracts and parses the JSON metadata block inside the HTML file."""
+        with open(html_path, "r") as f:
+            content = f.read()
+        
+        start_tag = '<script id="swt-metadata" type="application/json">'
+        end_tag = '</script>'
+        
+        start_idx = content.find(start_tag)
+        if start_idx == -1:
+            raise ValueError(f"Could not find start of swt-metadata block in {html_path}!")
+            
+        start_idx += len(start_tag)
+        end_idx = content.find(end_tag, start_idx)
+        
+        if end_idx == -1:
+            raise ValueError(f"Could not find end of swt-metadata block in {html_path}!")
+            
+        json_str = content[start_idx:end_idx].strip()
+        return json.loads(json_str)
+
+    def compile_state_to_html(self, state_dict):
+        """Renders the standard state dictionary into visual HTML and embeds the JSON."""
+        meta = state_dict.get("meta", {})
+        sections = state_dict.get("sections", {})
+        checklists = state_dict.get("checklists", {})
+        
+        priority = meta.get("Priority", "low").lower()
+        if priority == "high":
+            priority_style = "background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);"
+        elif priority == "medium":
+            priority_style = "background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);"
+        else:
+            priority_style = "background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);"
+
+        dynamic_cards = []
+        
+        # Render dynamic section cards
+        for name, content in sections.items():
+            rendered_md = self.md_parser.render(content)
+            if name == "Objective" or name == "Summary":
+                dynamic_cards.append(f"""
+            <section style="margin-bottom: 28px;">
+                <h2>🎯 {name}</h2>
+                <div class="section-content">{rendered_md}</div>
+            </section>""")
+            else:
+                dynamic_cards.append(f"""
+            <section style="margin-bottom: 28px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <h2>## {name}</h2>
+                <div class="section-content">{rendered_md}</div>
+            </section>""")
+            
+        # Render dynamic checklists
+        for name, items in checklists.items():
+            checklist_html_list = []
+            for item in items:
+                status = item.get("status", " ")
+                text = item.get("text", "")
+                
+                if status in ("x", "X"):
+                    box_class = "checkbox checkbox-checked"
+                    icon = "[✓]"
+                    text_class = "item-text item-text-completed"
+                elif status == "/":
+                    box_class = "checkbox checkbox-partial"
+                    icon = "[⚡]"
+                    text_class = "item-text"
+                else:
+                    box_class = "checkbox checkbox-unchecked"
+                    icon = "[ ]"
+                    text_class = "item-text"
+                    
+                checklist_html_list.append(f"""
+                <div class="checklist-item">
+                    <div class="{box_class}">{icon}</div>
+                    <span class="{text_class}">{text}</span>
+                </div>""")
+                
+            checklist_html = "\n".join(checklist_html_list)
+            
+            dynamic_cards.append(f"""
+            <section style="margin-bottom: 28px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <h2>📋 {name}</h2>
+                <div id="checklist-container">
+                    {checklist_html}
+                </div>
+            </section>""")
+            
+        dynamic_cards_str = "\n".join(dynamic_cards)
+        
+        rendered_html = HTML_TEMPLATE.format(
+            task_title=meta.get("Task", "Unnamed Document"),
+            meta_created=meta.get("Created", "N/A"),
+            meta_updated=meta.get("Updated", "N/A"),
+            meta_category=meta.get("Category", "uncategorized"),
+            meta_status=meta.get("Status", "unknown"),
+            meta_phase=meta.get("Phase", "0"),
+            meta_priority=meta.get("Priority", "low"),
+            priority_style=priority_style,
+            dynamic_cards=dynamic_cards_str,
+            json_metadata=json.dumps(state_dict, indent=2).replace("</script>", "<\\/script>").replace("</SCRIPT>", "<\\/SCRIPT>")
+        )
+        
+        return rendered_html
+
     def synthesize(self, force_template=False):
-        """Re-renders Markdown from JSON state + template."""
+        """Re-renders Markdown or HTML from JSON state + template."""
+        if self.md_path.endswith('.html'):
+            html_content = self.compile_state_to_html(self.state)
+            with open(self.md_path, 'w') as f:
+                f.write(html_content)
+            print(f"✨ Visual HTML document synthesized: {self.md_path}")
+            return
+
         if not self.template_path or not os.path.exists(self.template_path):
             print(f"⚠️ No template found. Falling back to basic synthesis.")
             self._basic_synthesize()
@@ -150,8 +519,6 @@ class GlobalTwin:
 
         output = template_content
         
-        # 1. Inject Metadata
-        # Apply sensible defaults for common spec fields if missing
         all_aliases = set()
         for k in self.state["meta"]:
             all_aliases.add(k)
@@ -163,31 +530,24 @@ class GlobalTwin:
             spec_val = self.state["meta"].get("Spec", "")
             if spec_val:
                 self.state["meta"]["Linked Task"] = spec_val
-        # We replace {{Key}} or {{ Key }} with the value from meta
         for k, v in self.state["meta"].items():
             pattern = re.compile(r'\{\{\s*' + re.escape(k) + r'\s*\}\}')
             output = pattern.sub(v, output)
-            # Also try crosswalk aliases (e.g. Task → TASK_NAME, TASK_TITLE)
             if k in self.META_CROSSWALK:
                 for alias in self.META_CROSSWALK[k]:
                     alias_pattern = re.compile(r'\{\{\s*' + re.escape(alias) + r'\s*\}\}')
                     output = alias_pattern.sub(v, output)
-            # Also handle the header Task Title if needed
             if k == "Task":
                 output = re.sub(r'# Task:\s*.*', f'# Task: {v}', output)
 
-        # 2. Inject Sections and Checklists
-        # Templates use {{SECTION_NAME}} or similar tags. 
         processed_sections = set()
         
         def clean_tag(name):
-            # Strip punctuation, normalize whitespace, replace spaces with underscores
             tag = re.sub(r'[^a-zA-Z0-9\s]', ' ', name)
             tag = re.sub(r'\s+', ' ', tag).strip()
             return tag.upper().replace(' ', '_')
 
         for name, content in self.state["sections"].items():
-            # Try both exact match and cleaned match
             tag_exact = f"{{{{{name.upper().replace(' ', '_')}}}}}"
             tag_clean = f"{{{{{clean_tag(name)}}}}}"
             
@@ -221,7 +581,6 @@ class GlobalTwin:
                     output = output.replace(tag_crosswalk, checklist_md)
                     processed_sections.add(name)
 
-        # Warn about remaining unfilled template tags (don't silently replace)
         unfilled = re.findall(r'\{\{.*?\}\}', output)
         if unfilled:
             for tag in set(unfilled):
@@ -270,12 +629,13 @@ class GlobalTwin:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="SWT Global Twin Engine")
-    parser.add_argument("file", help="Markdown file to process")
+    parser.add_argument("file", nargs="?", help="Markdown or HTML file to process")
     parser.add_argument("--harvest", action="store_true", help="MD -> JSON")
     parser.add_argument("--synthesize", action="store_true", help="JSON -> MD")
     parser.add_argument("--template", help="Template to use for synthesis")
-    parser.add_argument("--out", help="Alternative output Markdown path")
+    parser.add_argument("--out", help="Alternative output path")
     parser.add_argument("--state", help="Alternative input JSON state path")
+    parser.add_argument("--convert", nargs=2, metavar=("INPUT_MD", "OUTPUT_HTML"), help="Convert Markdown to HTML-embedded JSON")
     
     # State Modification Flags
     parser.add_argument("--set-meta", nargs=2, action="append", metavar=("KEY", "VALUE"), help="Set metadata field")
@@ -284,24 +644,39 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     
+    if args.convert:
+        in_path, out_path = args.convert
+        print(f"🔄 Migrating legacy Markdown from '{in_path}' to HTML-embedded JSON '{out_path}'...")
+        temp_twin = GlobalTwin(in_path)
+        temp_twin.harvest()
+        temp_twin.md_path = out_path
+        temp_twin.synthesize()
+        print(f"🎉 Successful Migration! '{out_path}' generated with 100% data fidelity.")
+        sys.exit(0)
+
+    if not args.file:
+        parser.print_help()
+        sys.exit(1)
+
     twin = GlobalTwin(args.file, template_path=args.template)
-    if args.out:
-        twin.md_path = args.out
-        twin.yaml_path = f"{args.out}.yaml"
-        twin.json_path = f"{args.out}.json"
     
-    # 1. Initial State Load (Sidecar first — YAML preferred, JSON legacy fallback)
-    if os.path.exists(twin.yaml_path) or os.path.exists(twin.json_path):
+    # 1. Initial State Load from source file
+    if os.path.exists(twin.yaml_path) or os.path.exists(twin.json_path) or (twin.md_path.endswith('.html') and os.path.exists(twin.md_path)):
         twin.load_state()
 
-    # 2. Harvest from Markdown (ALWAYS harvest existing MD to capture manual edits)
-    # Always harvest before synthesis to preserve any direct MD edits
+    # 2. Harvest from source file
     if os.path.exists(twin.md_path):
         twin.harvest()
     elif args.harvest or (not os.path.exists(twin.yaml_path) and os.path.exists(args.file)):
         twin.harvest()
 
-    # 2. Merge with external state if provided
+    # 3. Apply alternative output path if requested
+    if args.out:
+        twin.md_path = args.out
+        twin.yaml_path = f"{args.out}.yaml"
+        twin.json_path = f"{args.out}.json"
+
+    # 3. Merge with external state if provided
     if args.state and os.path.exists(args.state):
         if args.state.endswith('.md'):
             temp_twin = GlobalTwin(args.state)
@@ -310,20 +685,17 @@ if __name__ == "__main__":
         else:
             import json as _json
             with open(args.state, 'r') as f:
-                # Support both YAML and JSON state files
                 if args.state.endswith('.yaml'):
                     new_state = yaml.safe_load(f) or {}
                 else:
                     new_state = _json.load(f)
 
-            # Protected Fields (Do not overwrite target identity)
             protected = ["Status", "Phase", "Version", "Linked Task", "Created", "Completed"]
 
             for k, v in new_state.get("meta", {}).items():
                 if k not in protected or k not in twin.state["meta"]:
                     twin.state["meta"][k] = v
 
-            # Merge sections and checklists
             twin.state["sections"].update(new_state.get("sections", {}))
             twin.state["checklists"].update(new_state.get("checklists", {}))
 
@@ -341,7 +713,6 @@ if __name__ == "__main__":
             if lst not in twin.state["checklists"]:
                 twin.state["checklists"][lst] = []
             
-            # Update existing item if text matches, otherwise append
             found = False
             for item in twin.state["checklists"][lst]:
                 if item["text"] == txt:
@@ -351,7 +722,7 @@ if __name__ == "__main__":
             if not found:
                 twin.state["checklists"][lst].append({"text": txt, "status": stat})
 
-    # 5. Finalize Sidecar State
+    # 5. Finalize State
     if args.harvest or args.set_meta or args.set_section or args.set_item:
         twin.state["updated_at"] = datetime.now().isoformat()
         twin.save_state()
@@ -359,6 +730,5 @@ if __name__ == "__main__":
     # 6. Synthesize if requested
     if args.synthesize:
         twin.synthesize()
-        # Always persist sidecar after synthesis so re-synthesis can merge
         twin.state["updated_at"] = datetime.now().isoformat()
         twin.save_state()
