@@ -14,12 +14,20 @@ import glob
 from datetime import datetime
 from pathlib import Path
 
-# Resolve ROOT_DIR
-ROOT_DIR = Path(__file__).resolve().parents[3]
+# Resolve ROOT_DIR dynamically by ascending to find AGENTS.md, .git, or swt.json
+def find_root_dir() -> Path:
+    current = Path(__file__).resolve().parent
+    for parent in [current] + list(current.parents):
+        if (parent / "AGENTS.md").exists() or (parent / ".git").exists() or (parent / "swt.json").exists():
+            return parent
+    return Path(__file__).resolve().parents[3]  # Safe fallback
 
-# Import state and twin engines
-sys.path.append(str(ROOT_DIR / "skills/swt-flow/scripts"))
-sys.path.append(str(ROOT_DIR / "skills/swt-task/scripts"))
+ROOT_DIR = find_root_dir()
+
+# Import state and twin engines dynamically relative to active folder depth
+skills_dir = Path(__file__).resolve().parents[2]
+sys.path.append(str(skills_dir / "swt-flow/scripts"))
+sys.path.append(str(skills_dir / "swt-task/scripts"))
 # pyrefly: ignore [missing-import]
 import state
 # pyrefly: ignore [missing-import]

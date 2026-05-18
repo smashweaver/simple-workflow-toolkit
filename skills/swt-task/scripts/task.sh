@@ -14,6 +14,11 @@ while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.gi
     ROOT_DIR=$(dirname "$ROOT_DIR")
 done
 
+# Determine dynamic skills location
+REAL_SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
+SCRIPT_DIR="$(cd "$(dirname "$REAL_SCRIPT_PATH")" && pwd)"
+SKILLS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
 # --- Steve Ballmer Heartbeat (Protocol Alignment) ---
 SWT_CONFIG="$ROOT_DIR/swt.json"
 SWT_MODE="protocol" # Default
@@ -162,7 +167,7 @@ function validate_artifacts {
 function invoke_twin() {
     local file=$1
     shift
-    local twin_script="$ROOT_DIR/skills/swt-task/scripts/twin.py"
+    local twin_script="$SKILLS_DIR/swt-task/scripts/twin.py"
     
     if [ ! -f "$twin_script" ]; then
         echo "⚠️ Global Twin engine not found. Falling back to legacy patching."
@@ -317,8 +322,8 @@ function sync_roadmap {
     local roadmap=$(sed -n '/## 2. Gate 3: Execution Loop/,/##/p' "$roadmap_source" | grep -E '^\s*-\s*\[[ xX/]\]' || true)
     
     if [ -n "$roadmap" ]; then
-        if [ -f "$ROOT_DIR/skills/swt-task/scripts/crow.py" ]; then
-            python3 "$ROOT_DIR/skills/swt-task/scripts/crow.py" "$internal_file" --patch "Tactical Roadmap" "$roadmap"
+        if [ -f "$SKILLS_DIR/swt-task/scripts/crow.py" ]; then
+            python3 "$SKILLS_DIR/swt-task/scripts/crow.py" "$internal_file" --patch "Tactical Roadmap" "$roadmap"
             echo "✅ Internal tactical roadmap synchronized."
         else
             echo "⚠️  crow.py not found. Roadmap synchronization skipped."
@@ -428,7 +433,7 @@ function scaffold_artifact {
     local task_file=$2
     local force=$3
     
-    local template_path="$ROOT_DIR/skills/swt-task/templates/${type}.md"
+    local template_path="$SKILLS_DIR/swt-task/templates/${type}.md"
     local target_path=$(get_artifact_path "$task_file" "$type")
     
     # Fallback for legacy support
@@ -451,7 +456,7 @@ function scaffold_artifact {
     if [ -f "$task_file" ]; then
         echo "🔄 Merging Task state and synthesizing $target_path..."
         # We pass task state as the merging input to the existing artifact state
-        python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$target_path" --state "$task_file" --template "$template_path" --out "$target_path" --synthesize
+        python3 "$SKILLS_DIR/swt-task/scripts/twin.py" "$target_path" --state "$task_file" --template "$template_path" --out "$target_path" --synthesize
     else
         # Legacy fallback
         local title=$(grep -m 1 "^# Task:" "$task_file" | sed 's/^# Task:[[:space:]]*//')
@@ -514,7 +519,7 @@ if [ -z "$CMD" ]; then
     exit 0
 fi
 
-if [ "$CMD" == "init" ]; then
+if [ "$CMD" == "setup" ]; then
     UPGRADE_MODE=false
     for arg in "$@"; do
         if [ "$arg" == "--upgrade" ]; then
@@ -558,6 +563,22 @@ if [ "$CMD" == "init" ]; then
     mkdir -p .digests
     mkdir -p .cache
     
+    # Ensure README.md has SWT Quick Start section
+    if [ ! -f "README.md" ]; then
+        echo "# Project Workspace" > README.md
+        echo "This is an automated workspace initialized by the Simple Workflow Toolkit." >> README.md
+    fi
+    
+    if ! grep -q "Simple Workflow Toolkit (SWT)" "README.md" 2>/dev/null; then
+        echo "" >> "README.md"
+        echo "## Simple Workflow Toolkit (SWT)" >> "README.md"
+        echo "This project uses the Simple Workflow Toolkit (SWT) for AI-assisted development." >> "README.md"
+        echo "- **Start a Session**: Run \`/swt:flow status\` to resume work." >> "README.md"
+        echo "- **Workflow Rules**: See \`AGENTS.md\` in this directory." >> "README.md"
+        echo "- **Upgrade SWT**: Run \`bash skills/swt-link/scripts/install.sh --clear .\` to pull the latest core methodology." >> "README.md"
+        echo "📝 Injected SWT Quick Start instructions into README.md"
+    fi
+    
     # Initialize .gitignore if it exists, otherwise create it
     if [ ! -f .gitignore ]; then
         touch .gitignore
@@ -573,27 +594,46 @@ if [ "$CMD" == "init" ]; then
     # Install physical pre-commit hook if in a git repo
     if [ -d .git ]; then
         mkdir -p .git/hooks
-        HOOK_SOURCE="$ROOT_DIR/skills/swt-task/scripts/hooks/pre-commit"
+        HOOK_SOURCE="$SKILLS_DIR/swt-task/scripts/hooks/pre-commit"
         HOOK_TARGET=".git/hooks/pre-commit"
         
-        # Backup hook if it exists and is not ours
-        if [ -f "$HOOK_TARGET" ] && ! grep -q "Simple Workflow Toolkit" "$HOOK_TARGET" 2>/dev/null; then
-            echo "📦 Backing up existing pre-commit hook..."
-            cp "$HOOK_TARGET" "${HOOK_TARGET}.bak"
-        fi
-
         if [ -f "$HOOK_SOURCE" ]; then
-            cp "$HOOK_SOURCE" "$HOOK_TARGET"
-            chmod +x "$HOOK_TARGET"
-            echo "✅ Armed physical task gate: $HOOK_TARGET"
+            # Check if an external hook already exists
+            if [ -f "$HOOK_TARGET" ] && ! grep -q "Simple Workflow Toolkit" "$HOOK_TARGET" 2>/dev/null; then
+                echo "📦 Existing pre-commit hook detected! Backing up to pre-commit.bak..."
+                cp "$HOOK_TARGET" "${HOOK_TARGET}.bak"
+                
+                # Non-destructively inject SWT gate at the bottom of their existing hook
+                echo "" >> "$HOOK_TARGET"
+                echo "# --- BEGIN SWT GATE ---" >> "$HOOK_TARGET"
+                tail -n +2 "$HOOK_SOURCE" >> "$HOOK_TARGET"
+                echo "# --- END SWT GATE ---" >> "$HOOK_TARGET"
+                chmod +x "$HOOK_TARGET"
+                
+                echo "⚠️ Appended SWT task gate to your existing pre-commit hook."
+                echo "👉 Please verify your custom lint actions run cleanly alongside SWT."
+            else
+                cp "$HOOK_SOURCE" "$HOOK_TARGET"
+                chmod +x "$HOOK_TARGET"
+                echo "✅ Armed physical task gate: $HOOK_TARGET"
+            fi
         fi
     fi
     
     if [ "$UPGRADE_MODE" == "true" ]; then
         # 4. Re-install active copy-install skills back to .agents/ and .claude/
-        if [ -f "$ROOT_DIR/skills/swt-link/scripts/install.sh" ]; then
-            echo "🔄 Restoring active copy-install skills..."
-            bash "$ROOT_DIR/skills/swt-link/scripts/install.sh"
+        swt_home=$(python3 -c "import json; print(json.load(open('$ROOT_DIR/swt.json')).get('swt_home', ''))" 2>/dev/null || echo "")
+        upgrade_script=""
+        
+        if [ -n "$swt_home" ] && [ -f "$swt_home/skills/swt-link/scripts/install.sh" ]; then
+            upgrade_script="$swt_home/skills/swt-link/scripts/install.sh"
+        elif [ -f "$SKILLS_DIR/swt-link/scripts/install.sh" ]; then
+            upgrade_script="$SKILLS_DIR/swt-link/scripts/install.sh"
+        fi
+        
+        if [ -n "$upgrade_script" ]; then
+            echo "🔄 Pulling latest pristine skills..."
+            bash "$upgrade_script" --clear "$ROOT_DIR"
         fi
         echo "🎉 Successful smart upgrade & environment liquidation!"
     else
@@ -612,7 +652,7 @@ if [ "$CMD" == "new" ]; then
     SAFE_NAME=$(echo "$ARG" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/-/g' -e 's/-\+/-/g' -e 's/^-//' -e 's/-$//')
     FILENAME=".tasks/${TIMESTAMP}_${SAFE_NAME}.md"
     
-    template_path="$ROOT_DIR/skills/swt-task/templates/task.md"
+    template_path="$SKILLS_DIR/swt-task/templates/task.md"
 
     # Initialize via Global Twin
     invoke_twin "$FILENAME" --template "$template_path" \
@@ -675,7 +715,7 @@ if [ "$CMD" == "brainstorm" ]; then
     SAFE_NAME=$(echo "$ARG" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/-/g' -e 's/-\+/-/g' -e 's/^-//' -e 's/-$//')
     FILENAME="${TASK_ROOT}/${TIMESTAMP}_${SAFE_NAME}.md"
 
-    template_path="$ROOT_DIR/skills/swt-task/templates/brainstorm.md"
+    template_path="$SKILLS_DIR/swt-task/templates/brainstorm.md"
     
     # Initialize via Global Twin
     invoke_twin "$FILENAME" --template "$template_path" \
@@ -783,11 +823,11 @@ if [ "$CMD" == "graduate" ]; then
     TIMESTAMP=$(date +%Y%m%d%H%M%S)
     SPEC_FILE=".specs/${TIMESTAMP}_${SLUG}.md"
     
-    spec_template="$ROOT_DIR/skills/swt-task/templates/spec.md"
+    spec_template="$SKILLS_DIR/swt-task/templates/spec.md"
     
     if [ -f "$spec_template" ]; then
         # Map task sections to spec sections via Global Twin synthesis
-        python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$FILE" --state "$FILE" --template "$spec_template" --out "$SPEC_FILE" --synthesize
+        python3 "$SKILLS_DIR/swt-task/scripts/twin.py" "$FILE" --state "$FILE" --template "$spec_template" --out "$SPEC_FILE" --synthesize
 
         echo "Graduated $FILE to Phase 1. Spec created: $SPEC_FILE"
         # xdg-open "$SPEC_FILE" &
@@ -818,7 +858,7 @@ if [ "$CMD" == "sync-docs" ]; then
     fi
     
     # 1. Harvest latest Task state
-    python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$FILE" --harvest
+    python3 "$SKILLS_DIR/swt-task/scripts/twin.py" "$FILE" --harvest
 
     # 2. Re-sync Spec from Task state
     echo "🔄 Re-syncing Spec from Task via Global Twin..."
@@ -829,9 +869,9 @@ if [ "$CMD" == "sync-docs" ]; then
         exit 1
     fi
 
-    spec_template="$ROOT_DIR/skills/swt-task/templates/spec.md"
+    spec_template="$SKILLS_DIR/swt-task/templates/spec.md"
     # We use the task's state to re-synthesize the spec
-    python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$FILE" --state "$FILE" --template "$spec_template" --out "$SPEC_FILE" --synthesize
+    python3 "$SKILLS_DIR/swt-task/scripts/twin.py" "$FILE" --state "$FILE" --template "$spec_template" --out "$SPEC_FILE" --synthesize
     echo "✅ Spec synchronized: $SPEC_FILE"
 
     # 3. Re-sync Implementation Plan and Protocol

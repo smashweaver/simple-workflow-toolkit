@@ -12,7 +12,20 @@ while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.gi
     ROOT_DIR=$(dirname "$ROOT_DIR")
 done
 
-LINT_SCRIPT="$ROOT_DIR/skills/swt-commit/scripts/lint.sh"
+# Determine dynamic skills location
+REAL_SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
+SCRIPT_DIR="$(cd "$(dirname "$REAL_SCRIPT_PATH")" && pwd)"
+SKILLS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# Resolve relative path for display
+skills_rel="skills"
+if [[ "$SKILLS_DIR" == "$ROOT_DIR/.agents/skills" ]]; then
+    skills_rel=".agents/skills"
+elif [[ "$SKILLS_DIR" == "$ROOT_DIR/.claude/skills" ]]; then
+    skills_rel=".claude/skills"
+fi
+
+LINT_SCRIPT="$SKILLS_DIR/swt-commit/scripts/lint.sh"
 
 function show_guide() {
     echo "🚀 Loading swt:commit ritual..."
@@ -23,7 +36,7 @@ function show_guide() {
     echo "Command: git diff --cached > commit.diff"
     echo ""
     echo "--- Step 3: Draft Message ---"
-    echo "Command: ./skills/swt-commit/scripts/commit.sh --draft \"type(scope): summary\n\n* bullet\" "
+    echo "Command: ./${skills_rel}/swt-commit/scripts/commit.sh --draft \"type(scope): summary\n\n* bullet\" "
     echo ""
     echo "--- Step 4: Approval ---"
     echo "Ask the user for approval of commit.draft."
@@ -33,9 +46,9 @@ function show_guide() {
     
     if [ -f "$ROOT_DIR/task.ctx" ]; then
         TASK_FILE=$(cat "$ROOT_DIR/task.ctx" | tr -d '[:space:]')
-        echo "Command: bash skills/swt-task/scripts/task.sh close $TASK_FILE <hash>"
+        echo "Command: bash ${skills_rel}/swt-task/scripts/task.sh close $TASK_FILE <hash>"
     else
-        echo "Command: bash skills/swt-task/scripts/task.sh close <task_file> <hash>"
+        echo "Command: bash ${skills_rel}/swt-task/scripts/task.sh close <task_file> <hash>"
     fi
 }
 

@@ -20,6 +20,23 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+# Resolve ROOT_DIR dynamically by ascending to find AGENTS.md, .git, or swt.json
+def find_root_dir() -> Path:
+    current = Path(__file__).resolve().parent
+    for parent in [current] + list(current.parents):
+        if (parent / "AGENTS.md").exists() or (parent / ".git").exists() or (parent / "swt.json").exists():
+            return parent
+    return Path(__file__).resolve().parents[3]  # Safe fallback
+
+ROOT_DIR = find_root_dir()
+
+# Determine dynamic skills location relative to active file depth
+skills_dir = Path(__file__).resolve().parents[2]
+try:
+    skills_rel = skills_dir.relative_to(ROOT_DIR)
+except ValueError:
+    skills_rel = Path("skills")
+
 # ── LOOPS.md Phase → Loop Map ─────────────────────────────────────────────────
 PHASE_LOOP_MAP = {
     0: ("Brainstorm Loop",  "Gate 1: Alignment Loop"),
@@ -42,10 +59,8 @@ VALID_NEXT = {
     5: ["Implement surgical changes", "Run: /swt:flow status after each chunk"],
     6: ["Update documentation", "Run: /swt:flow phase 7 <task_file>"],
     7: ["Run tests", "Present MVP to user at Gate 4"],
-    8: ["Draft commit: ./skills/swt-commit/scripts/commit.sh --draft", "Await user approval"],
+    8: [f"Draft commit: ./{skills_rel}/swt-commit/scripts/commit.sh --draft", "Await user approval"],
 }
-
-ROOT_DIR = Path(__file__).resolve().parents[3]
 
 def load_swt_config() -> dict:
     config_path = ROOT_DIR / "swt.json"
@@ -395,7 +410,7 @@ def sensor_commit_loop(phase: int, task_file: str | None) -> dict:
             if "RITUAL: commit guidelines read" not in content:
                 result["warnings"].append(
                     "COMMIT GUIDELINES RITUAL MISSING: You must acknowledge the manual before drafting. "
-                    "Run: 'cat skills/swt-commit/SKILL.md' and log 'RITUAL: commit guidelines read' in your task file."
+                    f"Run: 'cat {skills_rel}/swt-commit/SKILL.md' and log 'RITUAL: commit guidelines read' in your task file."
                 )
                 result["status"] = "error"
             else:
@@ -438,7 +453,7 @@ def sensor_commit_loop(phase: int, task_file: str | None) -> dict:
 
     if not commit_draft.exists():
         result["warnings"].append(
-            "commit.draft not found. Generate via: ./skills/swt-commit/scripts/commit.sh --draft \"<message>\""
+            f"commit.draft not found. Generate via: ./{skills_rel}/swt-commit/scripts/commit.sh --draft \"<message>\""
         )
         if result["status"] != "error":
             result["status"] = "warn"

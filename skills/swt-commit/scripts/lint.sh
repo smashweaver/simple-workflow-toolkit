@@ -22,6 +22,11 @@ while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.gi
     ROOT_DIR=$(dirname "$ROOT_DIR")
 done
 
+# Determine dynamic skills location
+REAL_SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
+SCRIPT_DIR="$(cd "$(dirname "$REAL_SCRIPT_PATH")" && pwd)"
+SKILLS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
 FAILED=0
 
 echo "--- Commit Protocol Lint Report ---"
@@ -78,7 +83,7 @@ fi
 
     if [ -n "$RESOLVED" ] && [ -f "$RESOLVED" ]; then
         # Use swt-task validate for a thorough check
-        if ! bash "$ROOT_DIR/skills/swt-task/scripts/task.sh" validate "$TASK_FILE"; then
+        if ! bash "$SKILLS_DIR/swt-task/scripts/task.sh" validate "$TASK_FILE"; then
             echo "❌ Validation: Task ritual failed."
             FAILED=1
         else

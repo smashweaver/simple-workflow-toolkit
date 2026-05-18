@@ -76,6 +76,11 @@ while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.gi
     ROOT_DIR=$(dirname "$ROOT_DIR")
 done
 
+# Determine dynamic skills location
+REAL_SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
+SCRIPT_DIR="$(cd "$(dirname "$REAL_SCRIPT_PATH")" && pwd)"
+SKILLS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
 # --- Implementation Visibility Interlock ---
 VISIBILITY_LOCK="$ROOT_DIR/.visibility_lock"
 SWT_CONFIG="$ROOT_DIR/swt.json"
@@ -111,8 +116,8 @@ function resolve_task_path() {
     fi
 
     # Use the new python resolver for smart resolution
-    if [ -f "$ROOT_DIR/skills/swt-task/scripts/resolve.py" ]; then
-        RESOLVED=$(python3 "$ROOT_DIR/skills/swt-task/scripts/resolve.py" "$task_input" --root "$ROOT_DIR")
+    if [ -f "$SKILLS_DIR/swt-task/scripts/resolve.py" ]; then
+        RESOLVED=$(python3 "$SKILLS_DIR/swt-task/scripts/resolve.py" "$task_input" --root "$ROOT_DIR")
         if [ $? -eq 0 ] && [ -n "$RESOLVED" ]; then
             echo "$RESOLVED"
             return 0
@@ -132,7 +137,8 @@ function resolve_task_path() {
 function delegate() {
     local script=$1
     shift
-    bash "$ROOT_DIR/$script" "$@"
+    local clean_script="${script#skills/}"
+    bash "$SKILLS_DIR/$clean_script" "$@"
 }
 
 case $CMD in
@@ -184,7 +190,7 @@ case $CMD in
             mkdir -p "$ROOT_DIR/.cache"
             
             echo "⚡ Compiling visual dashboard for $BASE_NAME..."
-            uv run python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$INPUT_FILE" --out "$CACHE_FILE" --synthesize
+            uv run python3 "$SKILLS_DIR/swt-task/scripts/twin.py" "$INPUT_FILE" --out "$CACHE_FILE" --synthesize
             
             if [ -f "$CACHE_FILE" ]; then
                 open_browser "$CACHE_FILE"
@@ -194,7 +200,7 @@ case $CMD in
                     SPEC_BASE_NAME=$(basename "$SPEC_FILE" .md)
                     SPEC_CACHE_FILE="$ROOT_DIR/.cache/${SPEC_BASE_NAME}.html"
                     echo "⚡ Compiling visual spec dashboard for $SPEC_BASE_NAME..."
-                    uv run python3 "$ROOT_DIR/skills/swt-task/scripts/twin.py" "$ROOT_DIR/$SPEC_FILE" --out "$SPEC_CACHE_FILE" --synthesize
+                    uv run python3 "$SKILLS_DIR/swt-task/scripts/twin.py" "$ROOT_DIR/$SPEC_FILE" --out "$SPEC_CACHE_FILE" --synthesize
                     open_browser "$SPEC_CACHE_FILE"
                 fi
             else
@@ -237,7 +243,7 @@ case $CMD in
         if [ $? -ne 0 ]; then echo "❌ Error: No active task context."; exit 1; fi
         delegate "skills/swt-task/scripts/task.sh" "test" "$RESOLVED" --fail "$@" ;;
 
-    state) shift; uv run python3 "$ROOT_DIR/skills/swt-flow/scripts/state.py" "$@" ;;
+    state) shift; uv run python3 "$SKILLS_DIR/swt-flow/scripts/state.py" "$@" ;;
     audit) shift; delegate "skills/swt-audit/scripts/audit.sh" "$@" ;;
 
 
@@ -309,7 +315,7 @@ elif [ -f "$ROOT_DIR/task.ctx" ]; then
             PHASE=$(grep -oP '^\*\*?Phase\*\*?:\s*\K\d+' "$RESOLVED_TASK" | head -n 1)
             if [ "$PHASE" -eq 5 ]; then
                 # Check for uncommitted source changes
-                if ! git diff --quiet -- "skills/" "*.md" "*.sh" "*.json"; then
+                if ! git diff --quiet -- "$SKILLS_DIR" "*.md" "*.sh" "*.json" 2>/dev/null; then
                     touch "$VISIBILITY_LOCK"
                     echo "🔒 Visibility Lock engaged: Uncommitted changes detected."
                 fi

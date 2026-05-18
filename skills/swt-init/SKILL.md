@@ -137,20 +137,31 @@ Read the template file, substitute the two placeholders, then write to `./AGENTS
 
 ---
 
-## Workspace Scaffolding
+## Unified Scaffolding
 
-When the type is **Workspace**, the agent must also perform these actions if they haven't been done:
+For BOTH **Single** and **Workspace** modes, the agent must perform these structural setup actions if they haven't been done:
 
-1. **Git Init**: Run `git init` to version the workspace meta-files.
-2. **.gitignore**: Create a `.gitignore` with:
+1. **Git Init**: Run `git init` to version the meta-files (if not already a git repo).
+2. **.gitignore**: Create or update `.gitignore` with:
    - `.tasks/` (unless tasks are intended to be shared via git)
    - `.cache/` (mandatory hygiene)
-   - Sub-project directory names (to prevent them being treated as submodules)
    - Common OS/IDE cruft (`.DS_Store`, `.vscode/`, etc.)
 3. **Directory Scaffolding**: Create the required structural directories:
-   - `mkdir -p .tasks/` to store cross-project tasks.
+   - `mkdir -p .tasks/` to store tasks.
    - `mkdir -p .cache/` to store ephemeral artifacts.
-4. **README**: Create a `README.md` skeleton with the project name and purpose.
+   - `mkdir -p .specs/` to store feature specifications.
+4. **README Injection**: Ensure maintainers know how to use and upgrade SWT.
+   - **If `README.md` does NOT exist**: Create a skeleton with the project name, purpose, and the "SWT Quick Start & Upgrade" section below.
+   - **If `README.md` DOES exist**: Surgically append the "SWT Quick Start & Upgrade" section at the bottom.
+
+**SWT Quick Start & Upgrade Section Template**:
+```markdown
+## SWT Integration
+This project uses the Simple Workflow Toolkit (SWT) for AI-assisted development.
+- **Start a Session**: Run `/swt:flow status` to resume work.
+- **Workflow Rules**: See `AGENTS.md` in this directory.
+- **Upgrade SWT**: Run `bash skills/swt-link/scripts/install.sh --clear .` to pull the latest core methodology.
+```
 
 ---
 
@@ -254,8 +265,9 @@ After successfully writing or updating `AGENTS.md`, confirm to the user:
 - [ ] `{{project_name}}` and `{{purpose}}` are filled in (no raw placeholders remain)
 - [ ] `GEMINI.md` discovery pointer created/updated
 - [ ] `CLAUDE.md` discovery pointer created/updated
+- [ ] **Task Setup & Hooks**: Automatically execute `/swt:flow setup --upgrade` to arm the physical pre-commit hook and ensure the consumer project's SWT installation is pristine and updated.
 - [ ] **Workspace only**: Remind the user that each sub-project also needs its own `AGENTS.md`.
-- [ ] Suggest the next step: *"Your workspace is bootstrapped. Run `/swt:flow` and describe your first task to begin."*
+- [ ] Suggest the next step: *"Your workspace is bootstrapped. Run `/swt:flow status` to verify the environment, then describe your first task to begin."*
 
 ---
 

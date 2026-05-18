@@ -22,6 +22,11 @@ while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.gi
     ROOT_DIR=$(dirname "$ROOT_DIR")
 done
 
+# Determine dynamic skills location
+REAL_SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
+SCRIPT_DIR="$(cd "$(dirname "$REAL_SCRIPT_PATH")" && pwd)"
+SKILLS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
 echo "--- Workspace ---"
 if [ -f "$ROOT_DIR/AGENTS.md" ]; then
     PROJECT_NAME=$(grep -m 1 "^# " "$ROOT_DIR/AGENTS.md" | sed 's/# //')
@@ -33,9 +38,9 @@ echo "Root: $ROOT_DIR"
 echo ""
 
 # 1.25 Active Task Context
-if [ -f "$ROOT_DIR/skills/swt-flow/scripts/state.py" ]; then
+if [ -f "$SKILLS_DIR/swt-flow/scripts/state.py" ]; then
     # Use state.py to show active context (Sensor 1 report)
-    uv run python3 "$ROOT_DIR/skills/swt-flow/scripts/state.py" | sed -n '/SWT State Report/,/===/p' | grep -v '==='
+    uv run python3 "$SKILLS_DIR/swt-flow/scripts/state.py" | sed -n '/SWT State Report/,/===/p' | grep -v '==='
 else
     echo "--- Active Task Context ---"
     echo "Engine (state.py) not found."
@@ -51,8 +56,8 @@ if [ -f "$ROOT_DIR/protocol.md" ]; then
 fi
 
 # 1.5 Graphify Status
-if [ -f "$ROOT_DIR/skills/swt-graphify/scripts/graphify.sh" ]; then
-    bash "$ROOT_DIR/skills/swt-graphify/scripts/graphify.sh" status
+if [ -f "$SKILLS_DIR/swt-graphify/scripts/graphify.sh" ]; then
+    bash "$SKILLS_DIR/swt-graphify/scripts/graphify.sh" status
     echo ""
 fi
 
@@ -74,8 +79,8 @@ echo ""
 
 # 3. Active Tasks
 echo "--- Active Tasks ---"
-if [ -f "$ROOT_DIR/skills/swt-flow/scripts/state.py" ]; then
-    uv run python3 "$ROOT_DIR/skills/swt-flow/scripts/state.py" --backlog --classify
+if [ -f "$SKILLS_DIR/swt-flow/scripts/state.py" ]; then
+    uv run python3 "$SKILLS_DIR/swt-flow/scripts/state.py" --backlog --classify
 else
     echo "Engine (state.py) not found."
 fi

@@ -4,6 +4,11 @@ set -e
 COMMAND=$1
 PROJECT_ROOT=${2:-.}
 
+# Determine dynamic skills location
+REAL_SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
+SCRIPT_DIR="$(cd "$(dirname "$REAL_SCRIPT_PATH")" && pwd)"
+SKILLS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
 PYTHON="/home/jason/.local/share/uv/tools/graphifyy/bin/python"
 GRAPHIFY_DIR="$PROJECT_ROOT/graphify-out"
 CACHE_DIR="$GRAPHIFY_DIR/.cache"
@@ -39,7 +44,7 @@ with open('$CACHE_AST', 'w') as f:
     json.dump(result, f, indent=2)
 "
         run_step "Extract semantic from docs..."
-        $PYTHON "$PROJECT_ROOT/skills/swt-graphify/scripts/extract_docs.py" full "$PROJECT_ROOT" > "$CACHE_SEM"
+        $PYTHON "$SKILLS_DIR/swt-graphify/scripts/extract_docs.py" full "$PROJECT_ROOT" > "$CACHE_SEM"
         run_step "Merge and build graph..."
         $PYTHON -c "
 import json
@@ -137,7 +142,7 @@ with open('$CACHE_AST', 'w') as f:
     json.dump(result, f, indent=2)
 "
             run_step "Extract semantic from docs..."
-            $PYTHON "$PROJECT_ROOT/skills/swt-graphify/scripts/extract_docs.py" full "$PROJECT_ROOT" > "$CACHE_SEM"
+            $PYTHON "$SKILLS_DIR/swt-graphify/scripts/extract_docs.py" full "$PROJECT_ROOT" > "$CACHE_SEM"
             run_step "Merge with existing graph (GlobalTwin rehydration)..."
             $PYTHON -c "
 import json
