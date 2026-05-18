@@ -556,7 +556,25 @@ if [ "$CMD" == "setup" ]; then
                 rm -f task.ctx
             fi
         fi
+        
+        # 4. Re-install active copy-install skills back to .agents/ and .claude/
+        swt_home=$(python3 -c "import json; print(json.load(open('$ROOT_DIR/swt.json')).get('swt_home', ''))" 2>/dev/null || echo "")
+        upgrade_script=""
+        
+        if [ -n "$swt_home" ] && [ -f "$swt_home/skills/swt-link/scripts/install.sh" ]; then
+            upgrade_script="$swt_home/skills/swt-link/scripts/install.sh"
+        elif [ -f "$SKILLS_DIR/swt-link/scripts/install.sh" ]; then
+            upgrade_script="$SKILLS_DIR/swt-link/scripts/install.sh"
+        fi
+        
+        if [ -n "$upgrade_script" ]; then
+            echo "🔄 Pulling latest pristine skills..."
+            bash "$upgrade_script" --clear "$ROOT_DIR"
+        fi
     fi
+    
+    # 5. Reload SKILLS_DIR dynamically after upgrade (in case directory structure changed)
+    SKILLS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 
     mkdir -p .tasks/archive
     mkdir -p .specs
@@ -572,10 +590,18 @@ if [ "$CMD" == "setup" ]; then
     if ! grep -q "Simple Workflow Toolkit (SWT)" "README.md" 2>/dev/null; then
         echo "" >> "README.md"
         echo "## Simple Workflow Toolkit (SWT)" >> "README.md"
-        echo "This project uses the Simple Workflow Toolkit (SWT) for AI-assisted development." >> "README.md"
-        echo "- **Start a Session**: Run \`/swt:flow status\` to resume work." >> "README.md"
-        echo "- **Workflow Rules**: See \`AGENTS.md\` in this directory." >> "README.md"
-        echo "- **Upgrade SWT**: Run \`bash skills/swt-link/scripts/install.sh --clear .\` to pull the latest core methodology." >> "README.md"
+        echo "This project uses the Simple Workflow Toolkit (SWT) for AI-assisted development. All methodology, workflow states, and agent behaviors are strictly governed by the local rules." >> "README.md"
+        echo "" >> "README.md"
+        echo "### For Maintainers & Agents" >> "README.md"
+        echo "- **Resume Work**: \`/swt:flow status\`" >> "README.md"
+        echo "- **Start a Task**: \`/swt:flow brainstorm \"Topic\"\` or \`/swt:flow new \"Task Name\"\`" >> "README.md"
+        echo "- **Review Rules**: See \`AGENTS.md\` in the project root." >> "README.md"
+        echo "" >> "README.md"
+        echo "### Upgrading SWT Core" >> "README.md"
+        echo "To pull the latest methodology from the core framework without destroying active task data, run:" >> "README.md"
+        echo "\`\`\`bash" >> "README.md"
+        echo "bash .agents/skills/swt-task/scripts/task.sh setup --upgrade" >> "README.md"
+        echo "\`\`\`" >> "README.md"
         echo "📝 Injected SWT Quick Start instructions into README.md"
     fi
     
@@ -621,20 +647,6 @@ if [ "$CMD" == "setup" ]; then
     fi
     
     if [ "$UPGRADE_MODE" == "true" ]; then
-        # 4. Re-install active copy-install skills back to .agents/ and .claude/
-        swt_home=$(python3 -c "import json; print(json.load(open('$ROOT_DIR/swt.json')).get('swt_home', ''))" 2>/dev/null || echo "")
-        upgrade_script=""
-        
-        if [ -n "$swt_home" ] && [ -f "$swt_home/skills/swt-link/scripts/install.sh" ]; then
-            upgrade_script="$swt_home/skills/swt-link/scripts/install.sh"
-        elif [ -f "$SKILLS_DIR/swt-link/scripts/install.sh" ]; then
-            upgrade_script="$SKILLS_DIR/swt-link/scripts/install.sh"
-        fi
-        
-        if [ -n "$upgrade_script" ]; then
-            echo "🔄 Pulling latest pristine skills..."
-            bash "$upgrade_script" --clear "$ROOT_DIR"
-        fi
         echo "🎉 Successful smart upgrade & environment liquidation!"
     else
         echo "Initialized SWT workspace."
