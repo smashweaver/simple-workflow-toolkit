@@ -103,7 +103,19 @@ function open_browser() {
     fi
 
     echo "🌐 Attempting to open: $(basename "$target")"
-    xdg-open "$target" &
+    if command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "$target" >/dev/null 2>&1 &
+    elif command -v firefox >/dev/null 2>&1; then
+        firefox "$target" >/dev/null 2>&1 &
+    elif command -v google-chrome >/dev/null 2>&1; then
+        google-chrome "$target" >/dev/null 2>&1 &
+    elif command -v chromium >/dev/null 2>&1; then
+        chromium "$target" >/dev/null 2>&1 &
+    else
+        echo "⚠️  No browser command (xdg-open, firefox, google-chrome, chromium) found."
+        return 1
+    fi
+    return 0
 }
 
 function resolve_task_path() {

@@ -69,6 +69,7 @@ The workflow is not linear; it is a recursive state machine governed by five nam
 | **/swt:flow mount <task>**| `swt:task` | Load task context & open in browser |
 | **/swt:flow unmount** | `swt:task` | Clear active task context (`task.ctx`) |
 | **/swt:flow view-task** | `swt:flow` | Smart search & browser opener |
+| **/swt:flow open <file>**| `swt:flow` | Compile and open task/spec/digest in browser |
 
 #### 2. Task Lifecycle (The "Workflow")
 | **Facade Command** | **Skill** | **Purpose** |
