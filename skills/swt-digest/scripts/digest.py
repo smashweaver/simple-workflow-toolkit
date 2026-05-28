@@ -160,6 +160,15 @@ def main():
         twin = GlobalTwin(str(existing_file), template_path=str(template_path))
         twin.harvest()
         
+        # Harvest the unheaded summary paragraph directly from the markdown file
+        try:
+            content = existing_file.read_text()
+            m = re.search(r'^#\s+SWT Session Summary\s*[-—]\s*[^\n]+\n+(.*?)(?=\n## |\Z)', content, re.DOTALL | re.MULTILINE)
+            if m:
+                twin.state["sections"]["SUMMARY"] = m.group(1).strip()
+        except Exception:
+            pass
+            
         # Ensure metadata DATE is preserved
         twin.state["meta"]["DATE"] = date_str
         
