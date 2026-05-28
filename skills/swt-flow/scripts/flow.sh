@@ -46,6 +46,7 @@ function show_help {
     echo "  abandon           - Mark task abandoned & archive"
     echo "  tidy              - Move closed tasks to archive"
     echo "  bug               - Report friction to SWT core (Upstream)"
+    echo "  jailbreak         - Record protocol violation to central log"
     echo ""
     echo "Environment & Continuity:"
     echo "  digest            - Daily session summary"
@@ -259,6 +260,7 @@ case $CMD in
         delegate "skills/swt-task/scripts/task.sh" "abandon" "$RESOLVED" "$@" ;;
     tidy) shift; delegate "skills/swt-task/scripts/task.sh" tidy "$@" ;;
     bug) shift; delegate "skills/swt-task/scripts/task.sh" brainstorm "$@" --uplink ;;
+    jailbreak) shift; delegate "skills/swt-task/scripts/task.sh" jailbreak "$@" ;;
 
     # Environment & Continuity
     digest) shift; delegate "skills/swt-digest/scripts/digest.sh" "$@" ;;

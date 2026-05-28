@@ -83,5 +83,85 @@ def test_downstream_path_resolution():
         # Leave demo folder intact for inspection
         pass
 
+def test_jailbreak_command():
+    """
+    Tests that a downstream workspace can log a jailbreak directly to the central SWT log.
+    """
+    
+    swt_core = Path(__file__).resolve().parents[1]
+    workspace = swt_core / "demo_jailbreak"
+    
+    # Save original JAILBREAKS.md content to restore it later
+    jailbreaks_file = swt_core / "JAILBREAKS.md"
+    assert jailbreaks_file.exists()
+    original_content = jailbreaks_file.read_text()
+    
+    if workspace.exists():
+        shutil.rmtree(workspace)
+    workspace.mkdir(parents=True)
+    
+    try:
+        # Initialize mock downstream
+        subprocess.run(["git", "init"], cwd=workspace, check=True, capture_output=True)
+        
+        # Install skills
+        install_script = swt_core / "skills" / "swt-link" / "scripts" / "install.sh"
+        subprocess.run(["bash", str(install_script), "--clear", str(workspace)], check=True, capture_output=True)
+        
+        # Write swt.json in downstream pointing to core
+        import json
+        swt_json_data = {
+            "mode": "protocol",
+            "swt_home": str(swt_core.resolve())
+        }
+        workspace.joinpath("swt.json").write_text(json.dumps(swt_json_data, indent=2))
+        
+        # Set up a mock task file and task.ctx
+        tasks_dir = workspace / ".tasks"
+        tasks_dir.mkdir(exist_ok=True)
+        mock_task_file = tasks_dir / "20260529120000_mock-test-downstream-task.md"
+        mock_task_file.write_text(
+            "# Task: mock-test-downstream-task\n"
+            "**Phase**: 5\n"
+            "**Status**: pending\n"
+        )
+        workspace.joinpath("task.ctx").write_text(".tasks/20260529120000_mock-test-downstream-task.md")
+        
+        # Run jailbreak command inside mock downstream
+        flow_sh = workspace / ".agents" / "skills" / "swt-flow" / "scripts" / "flow.sh"
+        assert flow_sh.exists()
+        
+        res = subprocess.run(
+            ["bash", str(flow_sh), "jailbreak", "TDD Test Violation", "TDD Test Detail", "--agent", "AntigravityTest"],
+            cwd=workspace,
+            capture_output=True,
+            text=True
+        )
+        assert res.returncode == 0, f"Jailbreak command failed: {res.stderr}\n{res.stdout}"
+        
+        # Verify central JAILBREAKS.md was updated
+        updated_content = jailbreaks_file.read_text()
+        assert "TDD Test Violation" in updated_content
+        assert "TDD Test Detail" in updated_content
+        assert "AntigravityTest" in updated_content
+        assert "mock-test-downstream-task" in updated_content
+        assert "file://" in updated_content
+        
+        print("[Test] 🚀 Downstream jailbreak logging integration test passed successfully!")
+    finally:
+        # Restore central JAILBREAKS.md to keep repository completely pristine
+        jailbreaks_file.write_text(original_content)
+        if workspace.exists():
+            shutil.rmtree(workspace)
+
+import unittest
+
+class TestDownstreamIntegration(unittest.TestCase):
+    def test_path_resolution(self):
+        test_downstream_path_resolution()
+        
+    def test_jailbreak(self):
+        test_jailbreak_command()
+
 if __name__ == "__main__":
-    test_downstream_path_resolution()
+    unittest.main()

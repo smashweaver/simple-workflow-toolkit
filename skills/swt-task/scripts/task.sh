@@ -750,6 +750,12 @@ if [ "$CMD" == "brainstorm" ]; then
     exit 0
 fi
 
+if [ "$CMD" == "jailbreak" ]; then
+    shift
+    python3 "$SKILLS_DIR/swt-task/scripts/jailbreak.py" "$@"
+    exit 0
+fi
+
 if [ "$CMD" == "sync" ]; then
     FILE=$2
     if [ -z "$FILE" ]; then
