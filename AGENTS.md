@@ -415,3 +415,9 @@ To eliminate document destruction and ensure total idempotency, all SWT-managed 
 ## Ritual: TDD
 This project has Test-Driven Development (TDD) globally enabled. All agents are required to write failing tests and obtain a verified `test fail` ritual log in Phase 5 before implementing any production changes.
 
+
+## Graphify
+<!-- swt:graphify state -->
+- **Status**: enabled
+- **Engine**: safishamsi/graphify
+
