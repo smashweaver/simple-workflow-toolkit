@@ -68,10 +68,10 @@ What still needs to be answered before this can become a task?
 - [ ] Phase 8: Review & Refine
 
 ## Artifact Phase Mapping
-| Artifact | Generated | Phase | Gate |
+| Section / Artifact | Generated | Phase | Gate |
 |---|---|---|---|
-| `[TS].plan.md` | Phase 1 | Plan | HARD STOP |
-| `[TS].tr.md` | Phase 1 | Plan | Roadmap |
+| `## Implementation Plan` | Phase 1 | Plan | HARD STOP |
+| `## Tactical Roadmap Protocol` | Phase 1 | Plan | Roadmap |
 
 ## Jailbreak Patterns Observed
 | # | Agent | Phase | Violation | Detail |
