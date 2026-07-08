@@ -161,6 +161,14 @@ function validate_artifacts {
             return 1
         fi
     fi
+
+    # Substance validation checks
+    if [ -f "$SKILLS_DIR/swt-task/scripts/validate_substance.py" ]; then
+        if ! python3 "$SKILLS_DIR/swt-task/scripts/validate_substance.py" "$task_file" "$phase"; then
+            return 1
+        fi
+    fi
+
     return 0
 }
 
@@ -862,7 +870,7 @@ if [ "$CMD" == "graduate" ]; then
         python3 "$SKILLS_DIR/swt-task/scripts/twin.py" "$FILE" --state "$FILE" --template "$SKILLS_DIR/swt-task/templates/protocol.md" --out .tmp_tr.md --synthesize
         cat .tmp_tr.md >> "$FILE"
         
-        rm -f .tmp_plan.md .tmp_tr.md
+        rm -f .tmp_plan.md .tmp_tr.md .tmp_plan.md.yaml .tmp_tr.md.yaml
         
         # Add Spec link to task header via Global Twin
         invoke_twin "$FILE" --set-meta "Spec" "$SPEC_FILE"
@@ -931,25 +939,26 @@ if [ "$CMD" == "close" ]; then
 
     # 1. Archive Implementation Plan into Spec
     SPEC_FILE=$(grep -oP '^\*\*?Spec\*\*?:\s*\K\S+' "$FILE" | head -n 1)
-    if [ -f "$SPEC_FILE" ] && [ -f "implementation_plan.md" ]; then
-        echo "🔄 Archiving Implementation Plan into Spec..."
-        # Extract content excluding title
-        grep -v "^# Implementation Plan" "implementation_plan.md" > .plan_content.tmp
-        
-        # Use a temporary file to rebuild the Spec
-        sed -n '1,/^## Implementation Plan/p' "$SPEC_FILE" | head -n -1 > .spec_new.tmp
-        echo "## Implementation Plan" >> .spec_new.tmp
-        echo "" >> .spec_new.tmp
-        cat .plan_content.tmp >> .spec_new.tmp
-        
-        # Capture everything after the Implementation Plan section (if anything)
-        # Assuming Implementation Plan is the last or second to last section
-        # Actually, let's just append the rest
-        sed -n '/^## Risks & Mitigations/,$p' "$SPEC_FILE" >> .spec_new.tmp
-        
-        mv .spec_new.tmp "$SPEC_FILE"
-        rm .plan_content.tmp
-        echo "✅ Plan archived into $SPEC_FILE"
+    if [ -f "$SPEC_FILE" ]; then
+        if [ -f "implementation_plan.md" ]; then
+            echo "🔄 Archiving legacy Implementation Plan into Spec..."
+            # Extract content excluding title
+            grep -v "^# Implementation Plan" "implementation_plan.md" > .plan_content.tmp
+            
+            # Use a temporary file to rebuild the Spec
+            sed -n '1,/^## Implementation Plan/p' "$SPEC_FILE" | head -n -1 > .spec_new.tmp
+            echo "## Implementation Plan" >> .spec_new.tmp
+            echo "" >> .spec_new.tmp
+            cat .plan_content.tmp >> .spec_new.tmp
+            sed -n '/^## Risks & Mitigations/,$p' "$SPEC_FILE" >> .spec_new.tmp
+            
+            mv .spec_new.tmp "$SPEC_FILE"
+            rm .plan_content.tmp
+            echo "✅ Legacy plan archived into $SPEC_FILE"
+        elif [ -f "$SKILLS_DIR/swt-task/scripts/archive_plan.py" ]; then
+            echo "🔄 Archiving internal Implementation Plan into Spec..."
+            python3 "$SKILLS_DIR/swt-task/scripts/archive_plan.py" "$FILE" "$SPEC_FILE"
+        fi
     fi
 
     DATE_STR=$(date +"%Y-%m-%d %H:%M:%S")
@@ -1249,7 +1258,7 @@ if [ "$CMD" == "validate" ]; then
             fi
 
             # Check staleness: Latest code edit must be older than the test log
-            last_code_edit=$(find "$ROOT_DIR" -maxdepth 5 -type f -not -path '*/.*' -not -path '*/node_modules*' -not -path '*/demo*' -printf '%T@ %p\n' | sort -rn | head -n 1 | cut -d' ' -f1 | cut -d. -f1)
+            last_code_edit=$(find "$ROOT_DIR" -maxdepth 5 -type f -not -path '*/.*' -not -path '*/node_modules*' -not -path '*/demo*' -not -name 'task.ctx' -not -name 'commit.diff' -not -name 'commit.draft' -not -name 'commit.task' -printf '%T@ %p\n' | sort -rn | head -n 1 | cut -d' ' -f1 | cut -d. -f1)
             last_test_time=$(stat -c %Y "$log_path")
 
             if [ "$last_code_edit" -gt "$last_test_time" ]; then
