@@ -953,9 +953,7 @@ if [ "$CMD" == "close" ]; then
     
     # Move to archive (including sidecars)
     mkdir -p .tasks/archive
-    local _ts
     _ts=$(basename "$FILE" .md | cut -d'_' -f1)
-    local _dir
     _dir=$(dirname "$FILE")
     mv "$FILE" .tasks/archive/
     if [ -f "${FILE}.yaml" ]; then
