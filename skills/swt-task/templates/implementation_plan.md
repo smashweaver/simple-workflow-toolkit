@@ -1,5 +1,4 @@
-# Implementation Plan - {{TASK_NAME}}
-**Spec**: {{SPEC_LINK}}
+## Implementation Plan
 
 ## Objective
 {{OBJECTIVE}}

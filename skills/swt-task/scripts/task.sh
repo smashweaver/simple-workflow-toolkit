@@ -146,18 +146,18 @@ function validate_artifacts {
     local sidecar_tr=$(get_artifact_path "$task_file" protocol)
 
     if [ "$phase" -ge 1 ] && [ "$phase" -lt 8 ]; then
-        if [ ! -f "$sidecar_plan" ] && [ ! -f "implementation_plan.md" ]; then
+        if [ ! -f "$sidecar_plan" ] && [ ! -f "implementation_plan.md" ] && ! grep -q "^## Implementation Plan" "$task_file"; then
             echo "🛑 PROTOCOL VIOLATION: Phase $phase requires Implementation Plan."
             echo "👉 Expected sidecar: $sidecar_plan"
-            echo "👉 Or legacy root: implementation_plan.md"
+            echo "👉 Or internal section: ## Implementation Plan"
             return 1
         fi
     fi
     if [ "$phase" -ge 5 ]; then
-        if [ ! -f "$sidecar_tr" ] && [ ! -f "protocol.md" ]; then
+        if [ ! -f "$sidecar_tr" ] && [ ! -f "protocol.md" ] && ! grep -q "^## Tactical Roadmap Protocol" "$task_file"; then
             echo "🛑 PROTOCOL VIOLATION: Phase $phase requires Tactical Roadmap."
             echo "👉 Expected sidecar: $sidecar_tr"
-            echo "👉 Or legacy root: protocol.md"
+            echo "👉 Or internal section: ## Tactical Roadmap Protocol"
             return 1
         fi
     fi
@@ -313,7 +313,10 @@ function sync_roadmap {
     
     if [ -f "$sidecar_tr" ]; then
         roadmap_source="$sidecar_tr"
-    elif [ ! -f "protocol.md" ]; then
+    elif [ -f "protocol.md" ]; then
+        roadmap_source="protocol.md"
+    else
+        # If no external roadmap exists, it is likely built into the task file.
         return 0
     fi
     
@@ -850,9 +853,16 @@ if [ "$CMD" == "graduate" ]; then
         echo "Graduated $FILE to Phase 1. Spec created: $SPEC_FILE"
         # xdg-open "$SPEC_FILE" &
         
-        # Scaffold implementation plan and protocol
-        scaffold_artifact "implementation_plan" "$FILE"
-        scaffold_artifact "protocol" "$FILE"
+        # Append implementation plan and protocol directly into the main task document
+        echo "" >> "$FILE"
+        python3 "$SKILLS_DIR/swt-task/scripts/twin.py" "$FILE" --state "$FILE" --template "$SKILLS_DIR/swt-task/templates/implementation_plan.md" --out .tmp_plan.md --synthesize
+        cat .tmp_plan.md >> "$FILE"
+        
+        echo "" >> "$FILE"
+        python3 "$SKILLS_DIR/swt-task/scripts/twin.py" "$FILE" --state "$FILE" --template "$SKILLS_DIR/swt-task/templates/protocol.md" --out .tmp_tr.md --synthesize
+        cat .tmp_tr.md >> "$FILE"
+        
+        rm -f .tmp_plan.md .tmp_tr.md
         
         # Add Spec link to task header via Global Twin
         invoke_twin "$FILE" --set-meta "Spec" "$SPEC_FILE"
@@ -892,11 +902,8 @@ if [ "$CMD" == "sync-docs" ]; then
     python3 "$SKILLS_DIR/swt-task/scripts/twin.py" "$FILE" --state "$FILE" --template "$spec_template" --out "$SPEC_FILE" --synthesize
     echo "✅ Spec synchronized: $SPEC_FILE"
 
-    # 3. Re-sync Implementation Plan and Protocol
-    echo "🔄 Re-syncing Implementation Plan and Protocol..."
-    scaffold_artifact "implementation_plan" "$FILE" --force
-    scaffold_artifact "protocol" "$FILE" --force
-    
+    # 3. Implementation Plan and Protocol are now internal to the task document.
+    # No external syncing is required.
     # 4. Physically reset Task to Phase 1 via Global Twin
     echo "🔄 Resetting Task to Phase 1 due to objective change..."
     invoke_twin "$FILE" --set-meta "Phase" "1" --set-item "Checklist" "Phase 1: Plan" "/"

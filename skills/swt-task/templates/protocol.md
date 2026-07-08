@@ -1,5 +1,4 @@
-# Tactical Roadmap: {{TASK_TITLE}}
-**Spec**: {{SPEC_FILE}}
+## Tactical Roadmap Protocol
 
 > This is a persistent execution protocol. It provides the tactical roadmap for implementation and ensures ritual compliance. 
 
@@ -15,5 +14,5 @@
 ## 4. Finality Ritual
 {{4_FINALITY_RITUAL}}
 
-## Tactical Roadmap
+### Tactical Roadmap Checklist
 {{TACTICAL_ROADMAP}}
