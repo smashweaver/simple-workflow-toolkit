@@ -144,6 +144,7 @@ This comprehensive synthesis rolls up the recent evolution of the {{Project Name
 
 - **No Autonomous Generation**: Agents are STRICTLY FORBIDDEN from generating digests unless explicitly requested by the user or triggered by a documented ritual (e.g., end-of-session goodbye).
 - **Source of Truth Verification**: Never invent progress. If a task status is unclear, ask the user before writing it into the digest.
+- **Agent-Authored Summary (MANDATORY)**: When the user invokes `/swt:digest`, it is the *agent's* job to compose the summary text from the session context — NOT to run the script bare and leave the user with empty sections. You MUST pass that text via `--summary` (or `--content <file>`). **Consequence of omitting it**: `digest.py` sets `new_summary` to empty, which causes the engine to inject literal `{{Outcome Title}}` / `{{Step 1}}` placeholders into the *Key Outcomes & Architecture* and *Immediate Next Steps* sections (digest.py:154-156). On a continuous merge these placeholders persist into the new file, violating the Born Complete principle. If you ever produce a digest with `{{...}}` tokens, treat it as a failed ritual and regenerate with `--summary`.
 
 ---
 
@@ -160,12 +161,13 @@ Proactively suggest `/swt:digest` when:
 
 You MUST use the automated script to generate digests. Never attempt to manually construct the timestamp or file structure.
 
-1. **Run the script**: `bash skills/swt-digest/scripts/digest.sh --summary "<Key Outcomes>"`
-2. **Optional Flags**:
+1. **Compose the summary first**: Synthesize the session's primary focus, key outcomes, and next steps from context into a concise prose block. This is agent-authored content — do not delegate it to the user.
+2. **Run the script**: `bash skills/swt-digest/scripts/digest.sh --summary "<Your composed summary text>"`
+3. **Optional Flags**:
     - `--milestone`: Generate a project roll-up.
-    - `--content <file>`: Use a scratch file for complex, multi-line summaries.
-3. **Post-Creation**: The script automatically handles parent archival.
-4. **Confirm to user**: *"Digest created: `.digests/YYYYMMDDHHMMSS_{digest|milestone}.md`. (Archived parents). See you next time!"*
+    - `--content <file>`: Use a scratch file for complex, multi-line summaries (same purpose as `--summary`).
+4. **Post-Creation**: The script automatically handles parent archival. **Verify** the generated `.digests/YYYYMMDDHHMMSS_digest.md` contains no `{{...}}` placeholder tokens; if it does, you ran without `--summary` — fix and regenerate.
+5. **Confirm to user**: *"Digest created: `.digests/YYYYMMDDHHMMSS_{digest|milestone}.md`. (Archived parents). See you next time!"*
 
 ---
 
