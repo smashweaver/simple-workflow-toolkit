@@ -54,6 +54,11 @@ The workflow is not linear; it is a recursive state machine governed by five nam
 3. **Mandatory Planning**: For non-trivial changes, you are mandated to generate root artifacts: `implementation_plan.md` (Phase 1), `protocol.md` (Phase 1), and `task.md` (Phase 5).
 4. **Staleness Awareness**: If the task file is newer than the Spec/Plan, you are in a "Stale State" and MUST loop back via `sync-docs`. Use the Substance Drift Recognizer output from `state` to confirm real drift before looping back.
 
+5. **Veer-to-Change Gate (Task or OOB)**: The moment a discussion trends toward changing this repo's **source or skills** (editing a script, SKILL.md, template, config, etc.), you MUST pause and ask the user: *"Should I create a task to track this, or is it Out-of-Band (OOB)?"*
+   - **Task**: create/mount one (`/swt:flow new` or `brainstorm`) before editing — this is the default for any non-trivial toolkit change.
+   - **OOB**: explicitly designate the work Out-of-Band; it is logged and later graduated into a Phase 0 task via the OOB Graduation Protocol rather than edited ad-hoc.
+   - Editing repo files with **no task mounted and no OOB designation** is an untracked change (jailbreak) and is forbidden. The facade prints a `⚠️ No active task mounted` reminder when `task.ctx` is empty to enforce this.
+
 ---
 
 ---

@@ -288,6 +288,7 @@ This repository provides a comprehensive suite of workflow skills. Agents must b
 
 > 🚫 **Forbidden:** Agents are STRICTLY FORBIDDEN from using standard `git commit -m` commands directly. All commits must go through the Draft-and-Approve protocol below.
 > 🚫 **Out-of-band/Bypass Commits:** The agent is strictly forbidden from executing out-of-band/bypass commits (using `--no-verify` or bypassing tasks) without first explicitly informing the user of the bypass and obtaining their direct, verbal confirmation in chat.
+> ⚠️ **Veer-to-Change Gate:** The moment a discussion trends toward changing this repo's source or skills, the agent MUST pause and ask the user: *"Create a task, or is this Out-of-Band?"* Editing repo files with no task mounted and no OOB designation is an untracked change (jailbreak) and is forbidden. The `/swt:flow` facade prints a `⚠️ No active task mounted` reminder when `task.ctx` is empty to enforce this (see `swt:flow` SKILL.md, Behavioral Rule 5).
 > 💡 **Enforce Default:** Whenever prompted for a git commit or help with a git commit message, agents MUST default to invoking the `/swt:flow commit` skill. Presenting a "naked" `git commit -m` command in the chat without the Draft-and-Approve ritual is a **PROTOCOL VIOLATION**.
 
 All commits follow the **Diff-First, Draft-and-Approve** protocol. There is a strict separation of concerns: `commit.draft` is ONLY for the human-readable, impact-focused commit message, while `commit.task` is ONLY for automation metadata (e.g., `Closes: .tasks/...`). Do not mix them.

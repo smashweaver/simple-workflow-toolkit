@@ -6,8 +6,6 @@ set -e
 
 CMD=${1:-""}
 
-echo "💓 PROTOCOL! PROTOCOL! PROTOCOL!"
-
 function show_help {
     echo "Usage: /swt:flow <command> [args]"
     echo ""
@@ -76,6 +74,12 @@ ROOT_DIR=$(pwd)
 while [[ "$ROOT_DIR" != "/" && ! -f "$ROOT_DIR/AGENTS.md" && ! -d "$ROOT_DIR/.git" ]]; do
     ROOT_DIR=$(dirname "$ROOT_DIR")
 done
+
+# Checkpoint: if no task is mounted, any edit to this repo's source or skills
+# must be tracked via a task or explicitly marked Out-of-Band (OOB) before proceeding.
+if [[ ! -s "$ROOT_DIR/task.ctx" ]] && [[ "$CMD" != "status" && "$CMD" != "pulse" && "$CMD" != "help" ]]; then
+    echo "⚠️  No active task mounted. Before changing any source or skill in this repo, either create a task (/swt:flow new|brainstorm) or designate the work Out-of-Band. Edits without a task are untracked (jailbreak risk)."
+fi
 
 # Determine dynamic skills location
 REAL_SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")

@@ -22,7 +22,7 @@ SKILLS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # --- Steve Ballmer Heartbeat (Protocol Alignment) ---
 SWT_CONFIG="$ROOT_DIR/swt.json"
 SWT_MODE="protocol" # Default
-BALLMER_CHANT="PROTOCOL! PROTOCOL! PROTOCOL!"
+BALLMER_CHANT="RITUAL ACKNOWLEDGED"
 
 if [ -f "$SWT_CONFIG" ]; then
     # Use python to extract mode safely
