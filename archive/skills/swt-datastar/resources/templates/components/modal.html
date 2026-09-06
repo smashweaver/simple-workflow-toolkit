@@ -1,0 +1,55 @@
+<!-- Modal Component — Datastar Skill
+
+     Uses native <dialog> element with data-show for automatic open/close.
+     data-on:keydown.esc closes on Escape key.
+-->
+
+<!-- Trigger -->
+<button class="btn btn-md btn-primary" data-on:click="$showModal = true">
+  Open Modal
+</button>
+
+<!-- Modal -->
+<dialog 
+  id="confirm-modal"
+  data-show="$showModal"
+  data-on:keydown.esc="$showModal = false">
+  <div class="modal-card">
+    <div class="stack">
+      <h3 class="heading-4">Confirm Action</h3>
+      <p class="text-body">Are you sure you want to proceed? This action cannot be undone.</p>
+      <div class="row row-end">
+        <button 
+          class="btn btn-md btn-ghost"
+          data-on:click="$showModal = false">
+          Cancel
+        </button>
+        <button 
+          class="btn btn-md btn-danger"
+          data-on:click="@post('/api/delete')"
+          data-indicator:deleting>
+          <span data-show="!$deleting">Delete</span>
+          <span data-show="$deleting">Deleting...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- Slide-over Panel (alternative to modal) -->
+<dialog 
+  id="slide-panel"
+  data-show="$showPanel"
+  style="margin-right: 0; margin-left: auto; height: 100vh; max-width: 400px; border-radius: 0;">
+  <div class="modal-card" style="height: 100%; border-radius: 0;">
+    <div class="stack">
+      <div class="row row-between">
+        <h3 class="heading-4">Panel Title</h3>
+        <button class="btn btn-sm btn-icon btn-ghost" data-on:click="$showPanel = false" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <p class="text-body">Panel content goes here.</p>
+    </div>
+  </div>
+</dialog>

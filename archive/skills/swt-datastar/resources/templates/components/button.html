@@ -1,0 +1,52 @@
+<!-- Button Component — Datastar Skill
+
+     Usage in your template engine:
+     {{ template "button" dict "Variant" "primary" "Size" "md" "Label" "Save" "Action" "@post('/api/save')" }}
+
+     Or copy-paste and modify directly.
+-->
+
+<!-- Primary Button -->
+<button 
+  class="btn btn-md btn-primary"
+  data-on:click="@post('/api/action')">
+  Button Label
+</button>
+
+<!-- Secondary Button -->
+<button 
+  class="btn btn-md btn-secondary"
+  data-on:click="@get('/fragment')">
+  Button Label
+</button>
+
+<!-- Ghost Button -->
+<button 
+  class="btn btn-md btn-ghost"
+  data-on:click="$showModal = true">
+  Button Label
+</button>
+
+<!-- Danger Button -->
+<button 
+  class="btn btn-md btn-danger"
+  data-on:click="@delete('/api/item')">
+  Delete
+</button>
+
+<!-- Button with Indicator (loading state) -->
+<button 
+  class="btn btn-md btn-primary"
+  data-on:click="@post('/api/save')"
+  data-indicator:loading>
+  <span data-show="!$loading">Save Changes</span>
+  <span data-show="$loading">Saving...</span>
+</button>
+
+<!-- Icon Button -->
+<button 
+  class="btn btn-md btn-icon btn-ghost"
+  data-on:click="$sidebarOpen = !$sidebarOpen"
+  aria-label="Toggle menu">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>

@@ -1,0 +1,39 @@
+<!-- Table Component — Datastar Skill -->
+
+<div class="table-wrapper">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Status</th>
+        <th>Role</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div class="row row-sm">
+            <div style="width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--color-primary-subtle); display: flex; align-items: center; justify-content: center; font-weight: var(--weight-semibold); font-size: var(--text-sm); color: var(--color-primary);">JD</div>
+            <div>
+              <div style="font-weight: var(--weight-medium);">John Doe</div>
+              <div class="text-xs">john@example.com</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge badge-success">Active</span></td>
+        <td class="text-sm">Admin</td>
+        <td>
+          <div class="row row-sm">
+            <button class="btn btn-sm btn-icon btn-ghost" data-on:click="@get('/user/1/edit')" aria-label="Edit">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            </button>
+            <button class="btn btn-sm btn-icon btn-ghost" data-on:click="@delete('/api/user/1')" aria-label="Delete">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

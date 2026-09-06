@@ -1,0 +1,193 @@
+<!-- Sample Dashboard Page — Datastar Skill
+
+     This shows how to compose components into a full page.
+     Copy this as a starting point for new pages.
+-->
+
+{{ define "content" }}
+<div class="stack-lg">
+  <!-- Page Header -->
+  <div class="row row-between">
+    <div class="stack-sm">
+      <h1 class="heading-2">Dashboard</h1>
+      <p class="text-body">Welcome back! Here's what's happening with your projects.</p>
+    </div>
+    <button class="btn btn-md btn-primary" data-on:click="$showModal = true">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+      New Project
+    </button>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="grid grid-4">
+    <div class="card">
+      <div class="stack-sm">
+        <p class="text-small">Total Projects</p>
+        <p class="heading-2" data-text="$projectCount">12</p>
+        <div class="row row-sm">
+          <span class="badge badge-success">+2 this week</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="stack-sm">
+        <p class="text-small">Active Tasks</p>
+        <p class="heading-2" data-text="$taskCount">48</p>
+        <div class="row row-sm">
+          <span class="badge badge-primary">8 due today</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="stack-sm">
+        <p class="text-small">Team Members</p>
+        <p class="heading-2" data-text="$memberCount">6</p>
+        <div class="row row-sm">
+          <span class="badge badge-secondary">2 online</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="stack-sm">
+        <p class="text-small">Completion Rate</p>
+        <p class="heading-2" data-text="$completionRate + '%'">87%</p>
+        <div class="row row-sm">
+          <span class="badge badge-success">+5% vs last month</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Recent Activity</h3>
+      <button class="btn btn-sm btn-ghost" data-on:click="@get('/api/activity')">
+        Refresh
+      </button>
+    </div>
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Action</th>
+            <th>User</th>
+            <th>Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="row row-sm">
+                <div style="width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--color-primary);"></div>
+                <span style="font-weight: var(--weight-medium);">Website Redesign</span>
+              </div>
+            </td>
+            <td class="text-sm">Updated homepage</td>
+            <td>
+              <div class="row row-sm">
+                <div style="width: 24px; height: 24px; border-radius: var(--radius-full); background: var(--color-primary-subtle); display: flex; align-items: center; justify-content: center; font-size: var(--text-xs); font-weight: var(--weight-semibold); color: var(--color-primary);">JD</div>
+                <span class="text-sm">John Doe</span>
+              </div>
+            </td>
+            <td class="text-sm" style="color: var(--color-text-muted);">2 min ago</td>
+            <td><span class="badge badge-success">Completed</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="row row-sm">
+                <div style="width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--color-warning);"></div>
+                <span style="font-weight: var(--weight-medium);">Mobile App</span>
+              </div>
+            </td>
+            <td class="text-sm">Fixed login bug</td>
+            <td>
+              <div class="row row-sm">
+                <div style="width: 24px; height: 24px; border-radius: var(--radius-full); background: var(--color-success-subtle); display: flex; align-items: center; justify-content: center; font-size: var(--text-xs); font-weight: var(--weight-semibold); color: var(--color-success);">AS</div>
+                <span class="text-sm">Alice Smith</span>
+              </div>
+            </td>
+            <td class="text-sm" style="color: var(--color-text-muted);">1 hour ago</td>
+            <td><span class="badge badge-warning">In Review</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="grid grid-2">
+    <div class="card card-hover">
+      <div class="stack">
+        <div class="row row-sm">
+          <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--color-primary-subtle); display: flex; align-items: center; justify-content: center; color: var(--color-primary);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+          </div>
+          <div>
+            <h4 class="heading-4" style="margin: 0;">Documentation</h4>
+            <p class="card-text">Read the getting started guide</p>
+          </div>
+        </div>
+        <button class="btn btn-md btn-secondary" style="align-self: flex-start;" data-on:click="@get('/docs')">
+          Open Docs
+        </button>
+      </div>
+    </div>
+    <div class="card card-hover">
+      <div class="stack">
+        <div class="row row-sm">
+          <div style="width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--color-success-subtle); display: flex; align-items: center; justify-content: center; color: var(--color-success);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div>
+            <h4 class="heading-4" style="margin: 0;">Invite Team</h4>
+            <p class="card-text">Add members to collaborate</p>
+          </div>
+        </div>
+        <button class="btn btn-md btn-secondary" style="align-self: flex-start;" data-on:click="$showInviteModal = true">
+          Invite Members
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Project Modal -->
+<dialog id="new-project-modal" data-show="$showModal" data-on:keydown.esc="$showModal = false">
+  <div class="modal-card" style="width: 28rem;">
+    <div class="stack">
+      <h3 class="heading-4">Create New Project</h3>
+      <div class="form-group">
+        <label for="project-name" class="label">Project Name</label>
+        <input id="project-name" type="text" class="input" placeholder="My Awesome Project" data-bind="projectName" />
+      </div>
+      <div class="form-group">
+        <label for="project-desc" class="label">Description</label>
+        <textarea id="project-desc" class="textarea" placeholder="What is this project about?" data-bind="projectDescription"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="project-category" class="label">Category</label>
+        <select id="project-category" class="select" data-bind="projectCategory">
+          <option value="">Select category</option>
+          <option value="web">Web Development</option>
+          <option value="mobile">Mobile App</option>
+          <option value="design">Design</option>
+          <option value="marketing">Marketing</option>
+        </select>
+      </div>
+      <div class="card-footer" style="padding: 0; border: none; margin-top: var(--space-2);">
+        <button class="btn btn-md btn-ghost" data-on:click="$showModal = false">Cancel</button>
+        <button 
+          class="btn btn-md btn-primary"
+          data-on:click="@post('/api/projects')"
+          data-indicator:creating>
+          <span data-show="!$creating">Create Project</span>
+          <span data-show="$creating">Creating...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</dialog>
+{{ end }}

@@ -1,0 +1,39 @@
+<!-- Card Component — Datastar Skill -->
+
+<!-- Basic Card -->
+<div class="card">
+  <div class="stack">
+    <h3 class="card-title">Card Title</h3>
+    <p class="card-text">Card description goes here. This is where you put the content.</p>
+  </div>
+</div>
+
+<!-- Card with Header & Footer -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Project Settings</h3>
+    <span class="badge badge-primary">Active</span>
+  </div>
+  <div class="stack">
+    <p class="card-text">Configure your project settings and preferences.</p>
+    <div class="form-group">
+      <label class="label">Project Name</label>
+      <input type="text" class="input" data-bind="projectName" />
+    </div>
+  </div>
+  <div class="card-footer">
+    <button class="btn btn-md btn-ghost" data-on:click="$editing = false">Cancel</button>
+    <button class="btn btn-md btn-primary" data-on:click="@post('/api/save')">Save</button>
+  </div>
+</div>
+
+<!-- Hover Card -->
+<div class="card card-hover">
+  <div class="stack-sm">
+    <div class="row row-between">
+      <h3 class="card-title">Feature Name</h3>
+      <span class="badge badge-success">New</span>
+    </div>
+    <p class="card-text">Description of the feature and what it does.</p>
+  </div>
+</div>

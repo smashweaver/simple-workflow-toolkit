@@ -1,0 +1,79 @@
+# Commit workflow temp files
+commit.diff
+commit.draft
+commit.task
+
+# Task tracking (per-project, not committed)
+task.ctx
+
+# Session digests
+.digests/
+
+# Specifications
+.specs/
+
+# Tasks
+.tasks/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Agent discovery directories (local dogfooding)
+.agents/
+.claude/
+.gemini/
+.opencode/
+.cache/
+demo/
+
+# Graphify artifacts
+graphify-out/
+
+# Sample artifacts (do not commit)
+sample_implementation_plan.md
+sample_walkthrough.md
+sample_task.md
+
+# Planning Mode root artifacts
+/task.md.yaml
+/protocol.md.yaml
+/implementation_plan.md.yaml
+/protocol.md
+/implementation_plan.md
+/walkthrough.md
+/task.md
+/JAILBREAKS.md
+.tests/
+swt-skills-audit.json
+.tasks/*.md.yaml
+.tasks/*.plan.md
+.tasks/*.tr.md
+.tasks/*.walkthrough.md
+.specs/*.md.yaml
+
+# Python caching
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+*.plan.html
+*.tr.html
+*.walk.html
+.tasks/*.md.yaml
+.tasks/*.plan.md
+.tasks/*.tr.md
+.tasks/*.walkthrough.md

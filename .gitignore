@@ -1,19 +1,11 @@
-# Commit workflow temp files
-commit.diff
-commit.draft
-commit.task
+# Minimal stub — full gitignore lives at archive/.gitignore
+# Old harness jailbreak-targeted rules removed; refactor will define new ones.
 
-# Task tracking (per-project, not committed)
-task.ctx
-
-# Session digests
-.digests/
-
-# Specifications
-.specs/
-
-# Tasks
-.tasks/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
 
 # OS
 .DS_Store
@@ -30,50 +22,23 @@ Thumbs.db
 .env.local
 .env.*.local
 
-# Agent discovery directories (local dogfooding)
+# Agent discovery (dogfooding)
 .agents/
 .claude/
 .gemini/
 .opencode/
-.cache/
-demo/
 
-# Graphify artifacts
+# Runtime / cache
+.cache/
+.tasks/
+.specs/
+.digests/
 graphify-out/
 
-# Sample artifacts (do not commit)
-sample_implementation_plan.md
-sample_walkthrough.md
-sample_task.md
+# Commit ritual temp files
+commit.diff
+commit.draft
+commit.task
 
-# Planning Mode root artifacts
-/task.md.yaml
-/protocol.md.yaml
-/implementation_plan.md.yaml
-/protocol.md
-/implementation_plan.md
-/walkthrough.md
-/task.md
-/JAILBREAKS.md
-.tests/
-swt-skills-audit.json
-.tasks/*.md.yaml
-.tasks/*.plan.md
-.tasks/*.tr.md
-.tasks/*.walkthrough.md
-.specs/*.md.yaml
-
-# Python caching
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.pytest_cache/
-
-*.plan.html
-*.tr.html
-*.walk.html
-.tasks/*.md.yaml
-.tasks/*.plan.md
-.tasks/*.tr.md
-.tasks/*.walkthrough.md
+# Task context pointer
+task.ctx
