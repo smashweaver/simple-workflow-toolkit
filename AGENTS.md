@@ -19,7 +19,7 @@
 
 - Be concise.
 - Prefer `./archive/` references over inventing prior context.
-- For commits, follow `skills/commit/SKILL.md` (Draft-and-Approve) — never naked `git commit -m`.
+- For commits, follow `skills/draft-commit/SKILL.md` (Draft-and-Approve) — never naked `git commit -m`.
 - Ask before any structural change.
 
 ## Archived (do NOT load as behavior)
