@@ -1,6 +1,6 @@
 ---
 name: "draft-digest"
-description: Draft-and-Approve session digest ritual. Display a session summary in chat first, then save to .digests/ on human approval. Context is either the conversation thread or the current git diffs. No dependencies, no merge engine, no auto-write.
+description: Draft-and-Approve session digest ritual. Display a session summary in chat first, then save to .digests/ on human approval. Context is thread, git diffs, or a commit ref. No dependencies, no merge engine, no auto-write.
 user-invocable: true
 allowed-tools:
   - Bash
@@ -16,7 +16,7 @@ Session digests make past work recoverable. This skill enforces a Display-then-A
 ## Protocol Validation (run before drafting)
 
 - [x] Re-read this SKILL.md
-- [x] Determined context source (thread or diffs — ask the human if unclear)
+- [x] Determined context source (thread, diffs, or commit — ask the human if unclear)
 - [x] Checked `.digests/` exists (create it on apply if missing)
 - [x] No placeholders will appear in the digest (see lint)
 
@@ -28,9 +28,10 @@ Session digests make past work recoverable. This skill enforces a Display-then-A
 
 Ask one question before drafting:
 
-> **Context for this digest: thread or diffs?**
+> **Context for this digest: thread, diffs, or commit?**
 > - **Thread** — summarize the conversation / session from chat history
 > - **Diffs** — summarize from `git status`, `git diff --stat`, `git diff`
+> - **Commit** — summarize from a given ref or latest commit (`<ref>` defaults to `HEAD`)
 
 If the human already specified, skip the question.
 
@@ -40,9 +41,19 @@ For **diffs**, run:
 git status --short
 git diff --stat
 git diff
+git diff --cached --stat
+git diff --cached
 ```
 
 For **thread**, use the conversation history. No git reads required.
+
+For **commit**, run (`<ref>` defaults to `HEAD`):
+
+```bash
+git log --oneline -5
+git show --stat <ref>
+git show <ref>
+```
 
 ### Step 2 — Display the digest
 
