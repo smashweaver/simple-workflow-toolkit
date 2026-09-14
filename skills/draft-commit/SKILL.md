@@ -33,6 +33,17 @@ Two temporary files are used (both should be in your `.gitignore`):
 - **`commit.diff`** — the staged diff exported from git
 - **`commit.draft`** — the agent-drafted commit message, ready for review
 
+### Step 0 — Preview on unstaged files (optional)
+
+```bash
+bash skills/draft-commit/scripts/draft-commit.sh --preview
+bash skills/draft-commit/scripts/draft-commit.sh --preview --draft "type(scope): summary
+
+* bullet: user benefit or impact"
+```
+
+Preview gets the diff on unstaged files and applies the draft-commit logic to it: status plus unstaged diff stats, protocol validation on the unstaged diff (WIP markers, debug statements, repo hygiene), then the full unstaged diff itself for drafting, and, with `--draft`, an in-memory lint of the message. It never stages anything and never writes `commit.diff` or `commit.draft`.
+
 ### Step 1 — Stage your changes
 
 ```bash
@@ -160,6 +171,7 @@ Before committing, verify:
 - [ ] Would someone understand the **impact** without knowing implementation?
 - [ ] Can I remove any bullet that just restates the title?
 - [ ] Am I describing a **problem solved**, not steps taken?
+- [ ] Does each bullet describe **delivered impact**, not future work? Next steps belong in progress records, not history.
 - [ ] Does each bullet add **new information** (no duplication)?
 - [ ] Are benefits **specific and measurable**, not vague?
 
@@ -172,6 +184,7 @@ Before committing, verify:
 | Bullet repeats the scope or title | Redundancy |
 | Bullet contains jargon | Replace with natural language |
 | WIP markers in body (`TODO`, `FIXME`, `WIP`) | Warning, not error |
+| Forward-looking phrasing (`next step`, `follow-up`, `plan to`) | Warning, not error — describe delivered impact |
 | `Closes:` / `Task:` / `Spec:` in the body | Use `--ref` instead |
 
 ---

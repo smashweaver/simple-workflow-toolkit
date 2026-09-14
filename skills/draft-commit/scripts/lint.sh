@@ -8,6 +8,7 @@
 #   3. Context: no file paths or extensions in bullets
 #   4. Separation: no metadata leaks (Closes:/Task:/Spec:) — use --ref instead
 #   5. Hygiene: warning (not error) for WIP markers in body
+#   6. Foresight: warning (not error) for forward-looking bullets — history records delivered impact, plans belong in progress records
 
 set -e
 
@@ -80,6 +81,16 @@ if [ -n "$WIP" ]; then
     WARNED=1
 else
     echo "✅ Hygiene: No WIP markers."
+fi
+
+# 6. Foresight Check: forward-looking bullets (warning, not error)
+FUTURE=$(tail -n +2 "$DRAFT_FILE" | grep -iE "\b(next steps?|follow-?ups?|plan to|remaining work)\b" || true)
+if [ -n "$FUTURE" ]; then
+    echo "⚠️  Foresight: forward-looking phrasing detected in bullets (warning only). Describe delivered impact; keep plans in progress records."
+    echo "$FUTURE" | sed 's/^/   /'
+    WARNED=1
+else
+    echo "✅ Foresight: No forward-looking phrasing."
 fi
 
 if [ $FAILED -eq 1 ]; then
