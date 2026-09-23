@@ -32,6 +32,7 @@ Thumbs.db
 .cache/
 .tasks/
 .specs/
+.spikes/
 .digests/
 graphify-out/
 
