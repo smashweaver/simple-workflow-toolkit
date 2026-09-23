@@ -1,6 +1,6 @@
 ---
 name: spike
-description: Probe a technical uncertainty with a small, isolated, runnable spike before committing an approach to production. Use when the user says "build a spike", "let's test this", "try this in isolation", "prove whether this works", "create an experiment for this", or when browser behavior, an API/protocol design, concurrency, a database strategy, framework behavior, or a performance assumption is better answered by running code than by discussion. Discussion mode creates no files; execution mode creates .spikes/<YYYYMMDD-slug>/ containing spike.md and sandbox/.
+description: Probe a technical uncertainty with a small, isolated, runnable spike before committing an approach to production. Use when the user says "build a spike", "let's test this", "try this in isolation", "prove whether this works", "create an experiment for this", or when browser behavior, an API/protocol design, concurrency, a database strategy, framework behavior, or a performance assumption is better answered by running code than by discussion. Discussion mode creates no files; execution mode creates .spikes/<YYYYMMDDHHMMSS_slug>/ containing spike.md and sandbox/.
 ---
 
 # spike — Isolated Proof-of-Approach Laboratory
@@ -90,13 +90,13 @@ Create under `<project-root>/.spikes/`:
 
 ```
 .spikes/
-└── 20260923-go-sse-broadcast/
+└── 20260923153045_go-sse-broadcast/
     ├── spike.md
     ├── sandbox/
     └── evidence/        # optional
 ```
 
-- Naming: `YYYYMMDD-[descriptive-slug]`; add `-02`, `-03` on collision.
+- Naming: `YYYYMMDDHHMMSS_[descriptive-slug]` (UTC); add `-02`, `-03` on collision.
 - Slug describes *what the spike proves*, not the whole feature.
 - `spike.md` and `sandbox/` are required; `evidence/` is optional.
 - `.spikes/` should be in the project's `.gitignore`.

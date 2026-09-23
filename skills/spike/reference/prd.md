@@ -825,23 +825,25 @@ This keeps experiments outside normal production version control unless the deve
 Default naming convention:
 
 ```
-YYYYMMDD-[descriptive-slug]
+YYYYMMDDHHMMSS_[descriptive-slug]
 ```
+
+The timestamp is UTC and mirrors the draft-digest convention.
 
 Examples:
 
 ```
-20260923-custom-carousel-element
+20260923153045_custom-carousel-element
 
-20260923-go-sse-broadcast
+20260923153045_go-sse-broadcast
 
-20260923-sqlite-concurrent-writes
+20260923153045_sqlite-concurrent-writes
 ```
 
 If multiple spikes share a slug:
 
 ```
-20260923-go-sse-broadcast-02
+20260923153045_go-sse-broadcast-02
 ```
 
 The slug should describe what the spike proves rather than an entire application feature whenever practical.
@@ -854,7 +856,7 @@ Base structure:
 
 ```
 .spikes/
-└── 20260923-example/
+└── 20260923153045_example/
     ├── spike.md
     ├── sandbox/
     └── evidence/
@@ -1044,7 +1046,7 @@ src/styles/carousel.css
 while writing to:
 
 ```
-.spikes/20260923-carousel-pointer-events/
+.spikes/20260923153045_carousel-pointer-events/
 ```
 
 Production files should not be modified merely to create a spike.
@@ -1236,7 +1238,7 @@ Spike Lab creates:
 
 ```
 .spikes/
-└── 20260923-native-scroll-carousel/
+└── 20260923153045_native-scroll-carousel/
     ├── spike.md
     └── sandbox/
         ├── index.html
@@ -1276,7 +1278,7 @@ Once they decide to test the approach:
 
 ```
 .spikes/
-└── 20260923-go-sse-broadcast/
+└── 20260923153045_go-sse-broadcast/
     ├── spike.md
     └── sandbox/
         ├── go.mod
@@ -1310,7 +1312,7 @@ Spike:
 
 ```
 .spikes/
-└── 20260923-rails-turbo-ordering/
+└── 20260923153045_rails-turbo-ordering/
     ├── spike.md
     └── sandbox/
         ├── Gemfile
@@ -1341,7 +1343,7 @@ Spike:
 
 ```
 .spikes/
-└── 20260923-sqlite-concurrent-writes/
+└── 20260923153045_sqlite-concurrent-writes/
     ├── spike.md
     ├── sandbox/
     │   ├── go.mod
@@ -1873,7 +1875,7 @@ Spike Lab creates:
 
 ```
 .spikes/
-└── 20260923-native-drag-component/
+└── 20260923153045_native-drag-component/
     ├── spike.md
     ├── sandbox/
     │   ├── index.html
