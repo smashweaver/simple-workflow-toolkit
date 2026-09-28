@@ -18,6 +18,7 @@
 ## Session rules
 
 - Be concise.
+- Use the Chrome MCP tools — not the `xdg-open`/`firefox`/etc. shell chain in a skill — when verifying browser output during development.
 - Prefer `./archive/` references over inventing prior context.
 - For commits, follow `skills/draft-commit/SKILL.md` (Draft-and-Approve) — never naked `git commit -m`.
 - Ask before any structural change.
