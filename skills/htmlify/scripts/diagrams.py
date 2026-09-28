@@ -60,12 +60,13 @@ HARNESS = """<!DOCTYPE html>
 SPLIT = "__HTMLIFY_DIAGRAM_SPLIT__"
 FAILED = "__HTMLIFY_DIAGRAM_ERROR__"
 
-# The article column is 46rem, so a diagram around 700px fits without scrolling.
-# A diagram wider than FIT_WIDTH is only scaled down to the column if that keeps
-# it above MIN_SCALE of its natural size; past that, shrinking costs more
-# legibility than scrolling costs convenience, so it keeps its natural width.
+# The stylesheet scales a diagram to the column with width:100%. A diagram
+# that shrinks below MIN_SCALE of its natural size stops shrinking there and
+# scrolls instead, because past that point the labels cost more legibility
+# than the scrollbar costs convenience. A diagram narrower than FIT_WIDTH
+# always fits outright.
 FIT_WIDTH = 980.0
-MIN_SCALE = 0.7
+MIN_SCALE = 0.6
 
 
 def is_diagram(lang, body):
@@ -157,9 +158,9 @@ def render(sources, timeout=180):
         return None
 
     # Mermaid stamps each SVG with width="100%" and an inline max-width sized
-    # to the render viewport. Those inline styles beat any stylesheet, so a wide
-    # diagram gets scaled down to the container and its labels become unreadable.
-    # Strip them and record the natural size so the figure can scroll instead.
+    # to the render viewport. Those inline styles beat any stylesheet, so a
+    # diagram wider than the column would never shrink with the viewport.
+    # Re-cap it at the column and add a min-width legibility floor.
     def naturalise(svg):
         style = re.search(r'\sstyle="([^"]*)"', svg)
         if not style:
@@ -168,13 +169,15 @@ def render(sources, timeout=180):
         if not natural:
             return svg
         width = float(natural.group(1))
-        # Small enough to fit, or shrinkable without becoming unreadable:
-        # let the stylesheet scale it down to the column.
-        if width <= FIT_WIDTH or width * MIN_SCALE <= FIT_WIDTH:
+        # Already fits: mermaid's own cap is the column, leave it alone.
+        if width <= FIT_WIDTH:
             return svg
-        # Otherwise keep the natural size and let the figure scroll.
-        return re.sub(r'\sstyle="[^"]*"', f' width="{natural.group(1)}"', svg, count=1).replace(
-            ' width="100%"', "", 1
+        floor = round(width * MIN_SCALE)
+        return re.sub(
+            r"max-width:\s*[\d.]+px",
+            f"max-width:100%;min-width:{floor}px",
+            svg,
+            count=1,
         )
 
     match = re.search(r"<body[^>]*>(.*)</body>", completed.stdout, re.DOTALL)

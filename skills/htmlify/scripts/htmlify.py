@@ -7,8 +7,10 @@ no webfonts, no JavaScript. Works offline from file:// forever.
 
 import argparse
 import html
+import os
 import re
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -38,6 +40,7 @@ h1 { font-size: 2rem; margin-top: 0; padding-bottom: .5rem; border-bottom: 1px s
 h2 { font-size: 1.5rem; padding-bottom: .3rem; border-bottom: 1px solid var(--rule); }
 h3 { font-size: 1.2rem; }
 p, ul, ol, blockquote, pre, table { margin: 0 0 1rem; }
+p, li, td, th, blockquote { overflow-wrap: break-word; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 ul, ol { padding-left: 1.5rem; }
@@ -59,21 +62,31 @@ blockquote {
 }
 blockquote > :last-child { margin-bottom: 0; }
 hr { border: 0; border-top: 1px solid var(--rule); margin: 2rem 0; }
-table { border-collapse: collapse; width: 100%; font-size: .95em; }
+/* Tables get their own scroll container: below the 34rem table minimum the
+   cells scroll sideways rather than collapsing into unreadable slivers. */
+.table-scroll { overflow-x: auto; margin: 0 0 1rem; }
+.table-scroll > table { margin: 0; }
+table { border-collapse: collapse; width: 100%; min-width: 34rem; font-size: .95em; }
 th, td { border: 1px solid var(--rule); padding: .5rem .75rem; text-align: left; }
 th { background: var(--code-bg); font-weight: 600; }
-img { max-width: 100%; }
+img { max-width: 100%; height: auto; }
 .diagram {
   margin: 0 0 1.25rem; padding: 1rem; overflow-x: auto;
   border: 1px solid var(--rule); border-radius: 6px; background: var(--code-bg);
 }
-/* Each SVG is pinned to its natural width at generation time, so a wide
-   diagram scrolls instead of being scaled down into illegibility. */
-.diagram svg { display: block; max-width: none; height: auto; }
+/* Diagrams scale to the column via width:100% plus the viewBox aspect ratio.
+   The inline max-width on each SVG still caps it at its natural size, so a
+   normal diagram shrinks with the viewport and a wide one scrolls. */
+.diagram svg { display: block; width: 100%; height: auto; margin: 0 auto; }
 .diagram-dark { display: none; }
 @media (prefers-color-scheme: dark) {
   .diagram-light { display: none; }
   .diagram-dark { display: block; }
+}
+@media (max-width: 40rem) {
+  body { padding: 2rem 1rem 3rem; }
+  .diagram { padding: .5rem; }
+  pre { padding: .75rem; }
 }
 """
 
@@ -116,12 +129,12 @@ def is_divider(line):
 
 def render_table(rows):
     head, *body = rows
-    out = ["<table>", "<thead><tr>"]
+    out = ['<div class="table-scroll">', "<table>", "<thead><tr>"]
     out += [f"<th>{inline(c)}</th>" for c in head]
     out.append("</tr></thead><tbody>")
     for row in body:
         out.append("<tr>" + "".join(f"<td>{inline(c)}</td>" for c in row) + "</tr>")
-    out.append("</tbody></table>")
+    out.append("</tbody></table></div>")
     return "".join(out)
 
 
@@ -319,6 +332,14 @@ def build(title, body):
 """
 
 
+def default_out(source):
+    """Artifacts are throwaway by default, so they land in the platform temp
+    directory instead of beside the source. gettempdir() honors TMPDIR on
+    Linux and resolves to the right location elsewhere; the htmlify/ subdir
+    keeps them out of the way of whatever else shares the temp directory."""
+    return Path(tempfile.gettempdir()) / "htmlify" / source.with_suffix(".html").name
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", help="Markdown file, or - for stdin")
@@ -369,10 +390,16 @@ def main():
     document = build(title, body)
 
     if args.stdout:
-        sys.stdout.write(document)
+        try:
+            sys.stdout.write(document)
+            sys.stdout.flush()
+        except BrokenPipeError:
+            # A downstream reader closed early (head, less, a pager). The
+            # document itself is fine, so exit quietly instead of tracing back.
+            os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
         return
 
-    out = Path(args.out).expanduser() if args.out else source.with_suffix(".html")
+    out = Path(args.out).expanduser() if args.out else default_out(source)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(document, encoding="utf-8")
     print(out)

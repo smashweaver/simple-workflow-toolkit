@@ -1,6 +1,6 @@
 ---
 name: htmlify
-description: Refactor a markdown document into a self-contained HTML artifact, then optionally open it in the default browser. Use when the user says "htmlify", "preview this markdown", "open this md in my browser", "render this doc as HTML", or wants a markdown file viewable as a single portable file. Standard library only, no network fetches, no JavaScript.
+description: Refactor a markdown document into a self-contained HTML artifact, then open it in the default browser. Use when the user says "htmlify", "preview this markdown", "open this md in my browser", "render this doc as HTML", or wants a markdown file viewable as a single portable file. Standard library only, no network fetches, no JavaScript.
 user-invocable: true
 allowed-tools:
   - Bash
@@ -25,22 +25,25 @@ Three properties define success. Verify all three:
    blockquotes, fenced code, rules, and inline emphasis/links/images render as
    HTML. All text is escaped, so source markdown containing `<script>` cannot
    execute.
-3. **Predictable location** — output sits beside the source as
-   `<source>.html` unless `-o` says otherwise. The user must be able to find,
-   re-generate, commit, or share it without guessing.
+3. **Predictable location** — the artifact is disposable by default and lands
+   in the platform temp directory, at `<tempdir>/htmlify/<source>.html`
+   (`/tmp/htmlify/ARCHITECTURE.html` on Linux; `gettempdir()` honors `TMPDIR`).
+   `-o` overrides it. The user must be able to find and re-generate it without
+   guessing; to commit or share, pass `-o` with a real path.
 
 ## Usage
 
 ```bash
-uv run --no-project python <skill>/scripts/htmlify.py <file.md>            # writes <file>.html
-uv run --no-project python <skill>/scripts/htmlify.py <file.md> -o out.html
+uv run --no-project python <skill>/scripts/htmlify.py <file.md>            # writes <tempdir>/htmlify/<file>.html
+uv run --no-project python <skill>/scripts/htmlify.py <file.md> -o out.html # writes where you say
 uv run --no-project python <skill>/scripts/htmlify.py <file.md> --stdout   # print, write nothing
 uv run --no-project python <skill>/scripts/htmlify.py <file.md> --no-diagrams
 cat file.md | uv run --no-project python <skill>/scripts/htmlify.py -      # stdin
 ```
 
 Always invoke Python through `uv run --no-project`. The script prints the
-output path on success. Report that path to the user.
+output path on success. Report that path to the user, then open it (see
+[Opening in the browser](#opening-in-the-browser)).
 
 ## Diagrams
 
@@ -72,7 +75,13 @@ not — documents with no charts never start a browser.
 
 ## Opening in the browser
 
-Optional, and only when asked. The artifact is complete without it.
+Default behavior: every run ends by opening the artifact in the user's default
+browser. The user wants to see the page; do not wait to be asked. Also report
+the path as a clickable link:
+
+```
+[file:///tmp/report.html](file:///tmp/report.html)
+```
 
 ```bash
 if command -v xdg-open >/dev/null 2>&1; then xdg-open "<path>" >/dev/null 2>&1 &
