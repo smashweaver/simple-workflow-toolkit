@@ -60,6 +60,13 @@ HARNESS = """<!DOCTYPE html>
 SPLIT = "__HTMLIFY_DIAGRAM_SPLIT__"
 FAILED = "__HTMLIFY_DIAGRAM_ERROR__"
 
+# The article column is 46rem, so a diagram around 700px fits without scrolling.
+# A diagram wider than FIT_WIDTH is only scaled down to the column if that keeps
+# it above MIN_SCALE of its natural size; past that, shrinking costs more
+# legibility than scrolling costs convenience, so it keeps its natural width.
+FIT_WIDTH = 980.0
+MIN_SCALE = 0.7
+
 
 def is_diagram(lang, body):
     """True when a fenced block should be treated as a diagram."""
@@ -149,6 +156,27 @@ def render(sources, timeout=180):
         print("warning: diagram rendering timed out; keeping code blocks", file=sys.stderr)
         return None
 
+    # Mermaid stamps each SVG with width="100%" and an inline max-width sized
+    # to the render viewport. Those inline styles beat any stylesheet, so a wide
+    # diagram gets scaled down to the container and its labels become unreadable.
+    # Strip them and record the natural size so the figure can scroll instead.
+    def naturalise(svg):
+        style = re.search(r'\sstyle="([^"]*)"', svg)
+        if not style:
+            return svg
+        natural = re.search(r"max-width:\s*([\d.]+)px", style.group(1))
+        if not natural:
+            return svg
+        width = float(natural.group(1))
+        # Small enough to fit, or shrinkable without becoming unreadable:
+        # let the stylesheet scale it down to the column.
+        if width <= FIT_WIDTH or width * MIN_SCALE <= FIT_WIDTH:
+            return svg
+        # Otherwise keep the natural size and let the figure scroll.
+        return re.sub(r'\sstyle="[^"]*"', f' width="{natural.group(1)}"', svg, count=1).replace(
+            ' width="100%"', "", 1
+        )
+
     match = re.search(r"<body[^>]*>(.*)</body>", completed.stdout, re.DOTALL)
     if not match:
         print("warning: diagram rendering produced no output; keeping code blocks", file=sys.stderr)
@@ -164,4 +192,4 @@ def render(sources, timeout=180):
             print("warning: a diagram failed to parse; rendering it as code", file=sys.stderr)
             return None
 
-    return [(parts[i * 2], parts[i * 2 + 1]) for i in range(len(sources))]
+    return [(naturalise(parts[i * 2]), naturalise(parts[i * 2 + 1])) for i in range(len(sources))]

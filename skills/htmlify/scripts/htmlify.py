@@ -67,6 +67,8 @@ img { max-width: 100%; }
   margin: 0 0 1.25rem; padding: 1rem; overflow-x: auto;
   border: 1px solid var(--rule); border-radius: 6px; background: var(--code-bg);
 }
+/* Each SVG is pinned to its natural width at generation time, so a wide
+   diagram scrolls instead of being scaled down into illegibility. */
 .diagram svg { display: block; max-width: none; height: auto; }
 .diagram-dark { display: none; }
 @media (prefers-color-scheme: dark) {
@@ -209,12 +211,16 @@ def render(markdown, collect=None):
             index += 1
             continue
 
-        fence = re.match(r"^(`{3,}|~{3,})\s*(\S+)?", line)
+        fence = re.match(r"^ {0,3}(`{3,}|~{3,})\s*(\S+)?", line)
         if fence:
-            marker, lang = fence.group(1)[0] * 3, fence.group(2) or ""
+            marker, lang = fence.group(1)[0], fence.group(2) or ""
             index += 1
             body = []
-            while index < len(lines) and not lines[index].lstrip().startswith(marker):
+            # A closing fence is the same character, at least as long, with no
+            # info string. A nested ```bash inside a ```markdown block is
+            # literal content, not a close.
+            closing = re.compile(rf"^ {{0,3}}{re.escape(marker)}{{{len(fence.group(1))},}}\s*$")
+            while index < len(lines) and not closing.match(lines[index]):
                 body.append(lines[index])
                 index += 1
             index += 1
@@ -230,6 +236,7 @@ def render(markdown, collect=None):
                 continue
             out.append(f"<pre><code{cls}>{escape(source)}</code></pre>")
             continue
+
 
         heading = re.match(r"^(#{1,6})\s+(.*)$", line)
         if heading:
