@@ -64,7 +64,17 @@ git diff --cached > commit.diff
 
 ### Step 3 — Generate a validated commit draft
 
-Run the skill with your draft message. The skill runs it through the lint gate and saves the validated version to `commit.draft`.
+Write the outcome bullets first, then derive the subject from their main outcome.
+The subject must make sense on its own and summarize what changed concretely;
+minor supporting details can remain in the bullets. For a single-line change,
+write that outcome directly as the subject.
+
+Avoid vague subjects such as `clarify requirements`. Verbs like "update,"
+"improve," or "clarify" are useful only when the subject states the concrete
+change. For example, bullets establishing a required CLI and proposal conventions
+support `chore(workflow): define CLI requirements and proposal conventions`.
+
+Run the skill with your draft message. The skill runs it through the lint gate and saves the validated version to `commit.draft`. The lint checks syntax; the agent must also check that the subject accurately summarizes the bullets.
 
 ```bash
 # Standard usage: skill generates the draft from your message
@@ -168,6 +178,7 @@ Use the most specific functional area affected. Prefer narrow scopes (`auth`, `r
 
 Before committing, verify:
 
+- [ ] Does the subject summarize the bullets' main outcome and stand on its own, without listing every minor detail?
 - [ ] Would someone understand the **impact** without knowing implementation?
 - [ ] Can I remove any bullet that just restates the title?
 - [ ] Am I describing a **problem solved**, not steps taken?
