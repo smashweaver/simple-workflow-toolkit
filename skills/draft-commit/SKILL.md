@@ -234,6 +234,6 @@ That's it. No config file, no environment variables, no setup wizard.
 
 ---
 
-## Companion Documentation
+## Provenance
 
 This skill is portable by design. It is **not** coupled to SWT (Simple Workflow Toolkit) or any other orchestrator. The original SWT-coupled version is preserved at `archive/skills/swt-commit/` for reference; that version includes task-context tracking and pre-commit hook integration, which this skill deliberately removes.
