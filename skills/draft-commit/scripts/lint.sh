@@ -9,6 +9,7 @@
 #   4. Separation: no metadata leaks (Closes:/Task:/Spec:) — use --ref instead
 #   5. Hygiene: warning (not error) for WIP markers in body
 #   6. Foresight: warning (not error) for forward-looking bullets — history records delivered impact, plans belong in progress records
+#   7. Readability: warning (not error) for bullets over 30 words — a long bullet is a paragraph; split or cut it
 
 set -e
 
@@ -91,6 +92,28 @@ if [ -n "$FUTURE" ]; then
     WARNED=1
 else
     echo "✅ Foresight: No forward-looking phrasing."
+fi
+
+# 7. Readability Check: bullet length (warning, not error)
+# Bullets wrap across lines in the draft, so paragraphs are rejoined before counting.
+LONG=$(awk '
+    /^\*/ { if (buf != "") print buf; buf = $0; next }
+    /^$/    { if (buf != "") print buf; buf = ""; next }
+         { buf = buf " " $0 }
+    END     { if (buf != "") print buf }
+' "$DRAFT_FILE" | while IFS= read -r bullet; do
+    n=$(printf '%s' "$bullet" | sed 's/^\* *//' | wc -w)
+    if [ "$n" -gt 30 ]; then
+        echo "   $n words: $(printf '%s' "$bullet" | cut -c1-90)..."
+    fi
+done)
+
+if [ -n "$LONG" ]; then
+    echo "⚠️  Readability: bullet(s) over 30 words detected (warning only). A bullet that long is a paragraph; split it or keep the claim and drop the explanation."
+    echo "$LONG" | sed 's/^/   /'
+    WARNED=1
+else
+    echo "✅ Readability: bullets are within 30 words."
 fi
 
 if [ $FAILED -eq 1 ]; then
