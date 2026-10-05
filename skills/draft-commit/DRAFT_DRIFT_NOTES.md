@@ -10,10 +10,11 @@ guidelines and whose remaining sections describe that tool's task workflow. The 
 repositories this ritual serves, so only the reasoning was taken and it was brought here rather than left in
 an archived skill elsewhere.
 
-**Status:** D-1 through D-4 are all applied. `SKILL.md` opens Step 3 with *establish purpose* and gates the
+**Status:** D-1 through D-5 are all applied. `SKILL.md` opens Step 3 with *establish purpose* and gates the
 subject on contribution; Step 3.5 is a self-critique pass the agent runs before presenting a draft to the
 human, covering whether the main line can be followed, whether its words are ordinary English, and whether
-each bullet is legible on its own. `scripts/lint.sh` checks bullet length as a warning. All four entries
+each bullet describes the situation rather than the mechanism. Each entry records a failure that passed
+every check in place at the time. `scripts/lint.sh` checks bullet length as a warning. All four entries
 record a failure that passed every check in place at the time.
 **Source:** Session 2026-10-02, HyperGo work; revisited 2026-10-04.
 **Scope:** Defects in how the agent derives the subject and bullets from a diff.
@@ -319,3 +320,80 @@ caught a 45-word bullet in a draft that had already passed every other check.
 The human asked. Nothing in the ritual prompted a close read of the body, which is the same shape as
 D-1 and D-3 — the gap is where nobody thought to look. The difference here is that the fix is partly
 mechanical, so it should not recur the way the others did.
+
+---
+
+## D-5 — Bullets that describe the mechanism in ordinary words
+
+**Severity:** High. Passes every legibility check in place at the time.
+
+### What happened
+
+Committing the limiter sweep. After fixing the subject three times, the bullets still produced this
+exchange:
+
+> **me:** * clearing out visitors who had gone quiet then ran inside the wait that every other request
+> needs, so that attacker's traffic made all of them queue behind the cleanup
+>
+> **human:** rephrase bullet 2
+>
+> **me:** * with no room left, tidying up ran on whichever unlucky request arrived next, so one
+> visitor's flood made every other visitor wait while the table was sorted out
+
+Then: *"do the same to the bullets what i did to the main line. i was really trying to extract the
+context fo the change"*.
+
+The first bullet is not jargon. It has no coined term, invents no name, sits under thirty words, and
+reaches its verb in one clause. It passed all four sub-checks of bullet legibility. It was still a
+description of a mutex — a lock — phrased in words that happen to be ordinary. The reader has to
+picture a concurrency primitive to get anything from it, and a reader who does not write this code
+gets nothing at all.
+
+### Root cause
+
+The legibility checks were all *mechanical*: length, vocabulary, clause shape. None asked the
+question that actually matters — is this bullet about the world or about the code? A bullet can be
+lexically immaculate and describe internals.
+
+That gap is invisible from the writer's side for the reason D-3 describes: the writer knows what a
+lock is and reads the bullet as a statement about the world, because to them it is one sentence
+removed from a real observation. It is not.
+
+The deeper error was mine, and it is worth naming: I applied the plain-language rule to the subject
+repeatedly and to the bullets never, treating "make it readable" as a property of the headline. The
+human had to ask for the second half twice — once for vocabulary, once for the underlying issue.
+That is two rounds of the same lesson, and the lesson is that the rule applies to the whole message.
+
+### Proposed change
+
+Make *situation, not mechanism* the first bullet-legibility check, above the mechanical ones:
+
+> Does the bullet describe what was happening and what it cost, or how the code works? A bullet is
+> history, and history is about the world the change happened in. "Ran inside the lock every other
+> request needs" is a description of a mutex wearing ordinary words; "ran on whichever unlucky
+> request arrived next, so everyone else waited while it tidied" is the same fact as something that
+> happened to people.
+
+With the operational test:
+
+> Could a reader who does not write this code still find the bullet true and useful?
+
+And say plainly that the mechanical checks are necessary and not sufficient, because "no coined
+terms, under thirty words, verb within a clause" is exactly what the bad bullet had.
+
+### Applied
+
+Both are in `SKILL.md`: the check leads bullet legibility, the Quality Checklist carries the question,
+and the sub-checks are marked as necessary rather than sufficient.
+
+### Detection note
+
+The human asked, twice. Nothing mechanical catches it, and the mechanical checks passing is exactly
+what creates the false confidence — a draft that satisfies every stated rule and is still unreadable
+looks like the rules are sufficient. A check that passes for the wrong reason is worse than a missing
+check, because it is taken as evidence.
+
+One further note on the exchange itself: the human's stated purpose was to *extract the context of the
+change*, not merely to read it. That is a different reading task than "understand what happened", and
+a message that answers it has to carry the situation rather than the mechanism. Worth remembering when
+the question is why a bullet exists at all.

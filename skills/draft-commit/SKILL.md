@@ -166,11 +166,17 @@ the others can land.
 5. **Missing reassurance.** What would the reader's first question be — "does this change what I
    have?", "what does it cost?", "is it on by default?" — and does the message answer it? If the
    change is opt-in, say so. If it gives something up, say what.
-6. **Bullet legibility.** Read each bullet on its own and check four things:
+6. **Bullet legibility.** Read each bullet on its own and check five things:
+   - **Situation, not mechanism.** Does the bullet describe *what was happening and what it cost*,
+     or *how the code works*? A bullet is history, and history is about the world the change happened
+     in. "Ran inside the lock every other request needs" is a description of a mutex wearing ordinary
+     words; "ran on whichever unlucky request arrived next, so everyone else waited while it tidied"
+     is the same fact as something that happened to people. The test: could a reader who does not
+     write this code still find the bullet true and useful?
    - **One clause before the verb.** If three modifiers stack up before the main verb, the point is
      at the end of the sentence where nobody reads. Put the verb first.
    - **The term rule applies to bullets too.** A subject cleaned of coined terms while its bullets
-     keep "shape", "fragment", and "replay" has only half been fixed — the reader still pays, and
+     keep "shape", "fragment", and "replay" has only been half fixed — the reader still pays, and
      now pays again after reading on. Same substitution: a term a reader must look up belongs in the
      diff, not the history.
    - **No invented plain-sounding name for a missing thing.** Do not coin a friendly phrase like
@@ -179,6 +185,11 @@ the others can land.
      up which part of a page was asked for").
    - **Under 30 words.** Longer than that and it is a paragraph that should be split or cut. A bullet
      carrying an argument about *why* usually wants the argument kept and the explanation dropped.
+
+   **The four sub-checks that follow are necessary and not sufficient.** A bullet can contain no
+   coined terms, invent no name, sit under thirty words, and reach its verb in one clause — and still
+   be a description of internals that only its author finds informative. Situation-first is the check
+   that catches those.
 7. **Subject accuracy.** Does the subject still summarize the revised bullets, and does it stand
    alone?
 
@@ -292,6 +303,7 @@ formality — the human should not be the one finding these.
 - [ ] Can a reader state what changed, in plain behavior, without an internal term or a chapter name?
 - [ ] Is every word in the subject ordinary English that a reader outside this project would use?
 - [ ] Does each bullet reach its verb within one clause, and stay under 30 words?
+- [ ] Does each bullet describe what happened and what it cost, rather than how the code works?
 - [ ] Do the bullets avoid coined terms too, and name absent mechanisms by their real name or in plain words?
 - [ ] Does the subject say what the change **contributes** to this repository, not only what it contains?
 - [ ] Could a reader use these bullets to reconstruct the implementation? If so, they describe contents rather than contribution.
