@@ -170,13 +170,20 @@ the others can land.
 5. **Missing reassurance.** What would the reader's first question be — "does this change what I
    have?", "what does it cost?", "is it on by default?" — and does the message answer it? If the
    change is opt-in, say so. If it gives something up, say what.
-6. **Bullet legibility.** Read each bullet on its own and check five things:
+6. **Bullet legibility.** Read each bullet on its own and check six things:
    - **Situation, not mechanism.** Does the bullet describe *what was happening and what it cost*,
      or *how the code works*? A bullet is history, and history is about the world the change happened
      in. "Ran inside the lock every other request needs" is a description of a mutex wearing ordinary
      words; "ran on whichever unlucky request arrived next, so everyone else waited while it tidied"
      is the same fact as something that happened to people. The test: could a reader who does not
      write this code still find the bullet true and useful?
+   - **Aim at where it bites.** A bullet about a check the change adds should name the moment the
+     check earns its keep, not the fact that the check exists. "Rewording a message reports how many
+     commits change hash" describes a rule; "rewording a commit further back reports how many
+     commits change hash" names the case where someone is actually hurt by not knowing. Same fact,
+     different reader: the first is a summary of the tooling, the second is something a person
+     needed once. Take any bullet whose subject is a guardrail and ask which mistake it prevents —
+     if the answer is a situation, that situation belongs in the bullet.
    - **One clause before the verb.** If three modifiers stack up before the main verb, the point is
      at the end of the sentence where nobody reads. Put the verb first.
    - **The term rule applies to bullets too.** A subject cleaned of coined terms while its bullets
@@ -190,7 +197,7 @@ the others can land.
    - **Under 30 words.** Longer than that and it is a paragraph that should be split or cut. A bullet
      carrying an argument about *why* usually wants the argument kept and the explanation dropped.
 
-   **The five sub-checks that follow are necessary and not sufficient.** A bullet can contain no
+   **The six sub-checks that follow are necessary and not sufficient.** A bullet can contain no
    coined terms, invent no name, sit under thirty words, and reach its verb in one clause — and still
    be a description of internals that only its author finds informative. Situation-first is the check
    that catches those.
@@ -359,6 +366,7 @@ formality — the human should not be the one finding these.
 - [ ] Is every count in the message one I counted rather than remembered?
 - [ ] Can a reader state what changed, in plain behavior, without an internal term or a chapter name?
 - [ ] Is every word in the subject ordinary English that a reader outside this project would use?
+- [ ] For each bullet about a guardrail: does it name the mistake it prevents, rather than the rule's existence?
 - [ ] Does each bullet reach its verb within one clause, and stay under 30 words?
 - [ ] Does each bullet describe what happened and what it cost, rather than how the code works?
 - [ ] Do the bullets avoid coined terms too, and name absent mechanisms by their real name or in plain words?
