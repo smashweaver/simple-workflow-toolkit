@@ -63,7 +63,18 @@ elif [ -n "$PATH_NOISE" ]; then
     echo "$PATH_NOISE" | sed 's/^/   /'
     FAILED=1
 else
-    echo "✅ Context: No obvious structural noise detected."
+    # The subject is read first and alone. Naming a directory there tells the reader nothing
+    # about why the change was made, so check it too -- but as a warning, not an error: a
+    # legitimate commit may name one path, and the agent's judgement decides.
+    SUBJ_NOISE=$(head -n 1 "$DRAFT_FILE" | grep -E "\.[a-z]{2,4}\b|(\s|^)/[a-z]" || true)
+    if [ -n "$SUBJ_NOISE" ]; then
+        echo "⚠️  Context: the subject names a file path. A reader sees the subject alone; say what"
+        echo "   changed, not which directory moved. WARNING, not an error."
+        echo "   $SUBJ_NOISE" | sed 's/^/   /'
+        WARNED=1
+    else
+        echo "✅ Context: No obvious structural noise detected."
+    fi
 fi
 
 # 4. Separation Check: No metadata leaks (use --ref instead)
@@ -120,10 +131,12 @@ if [ $FAILED -eq 1 ]; then
     echo "--- LINT FAILED ---"
     exit 1
 else
+    # A run with findings must not end on a checkmark: the reader's question is whether
+    # anything was found, and a tick answers "no" (see DRAFT_DRIFT_NOTES.md D-11).
     if [ $WARNED -eq 1 ]; then
-        echo "--- LINT PASSED (with warnings) ---"
+        echo "--- ⚠️  LINT PASSED WITH WARNINGS: review each one above before applying ---"
     else
-        echo "--- LINT PASSED ---"
+        echo "--- ✅ LINT PASSED: no errors, no warnings ---"
     fi
     exit 0
 fi

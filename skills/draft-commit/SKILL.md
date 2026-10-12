@@ -140,7 +140,11 @@ Critique against the purpose sentence from Step 3. Work in order — the first c
 the others can land.
 
 1. **Can you follow the main line?** State the change back as plain behavior in one sentence, the
-   way you would to a colleague who has not opened the diff. If you cannot do that with ordinary
+   way you would to a colleague who has not opened the diff. Then check the **scope** of what you named:
+   could a reader reasonably widen "packaging a design" into design as a discipline, when the actual
+   subject of study is one part of something larger? A message can be accurate about its change and
+   still misname its subject, and no accuracy check catches that. The fix is usually a possessive or a
+   preposition — *a fixture's design*, not *a design* — rather than a longer sentence. If you cannot do that with ordinary
    words, the subject is aimed at the repository rather than at a reader, and that is the defect. A
    reader who understands every word and still has to work out what happened has not been told the
    main line.
@@ -186,12 +190,36 @@ the others can land.
    - **Under 30 words.** Longer than that and it is a paragraph that should be split or cut. A bullet
      carrying an argument about *why* usually wants the argument kept and the explanation dropped.
 
-   **The four sub-checks that follow are necessary and not sufficient.** A bullet can contain no
+   **The five sub-checks that follow are necessary and not sufficient.** A bullet can contain no
    coined terms, invent no name, sit under thirty words, and reach its verb in one clause — and still
    be a description of internals that only its author finds informative. Situation-first is the check
    that catches those.
-7. **Subject accuracy.** Does the subject still summarize the revised bullets, and does it stand
-   alone?
+7. **Subject accuracy, in both directions.** Does the subject still summarize the revised bullets, and
+   does it stand alone? Then ask the inverse, which is the one that fails silently: **do the bullets
+   still support the subject?** A message with an accurate subject and individually excellent bullets
+   that are all about something else is still a message about something else, and every legibility check
+   above will have passed. The test: if the subject's own key noun appears in no bullet, the bullets
+   have drifted. The pull is always toward the more articulate topic — safety machinery and developer
+   experience make better sentences than a design decision does, so the bullets drift toward what is
+   easiest to say well and the subject's actual claim goes unrepresented.
+8. **Choice or expectation?** For each bullet, ask what would be different had we decided otherwise. If
+   the answer is *nothing*, the bullet records how the language, framework or tool behaves rather than
+   what this change did — and history records what was settled. Most available facts about a change are
+   consequences that follow anyway, and they are the easiest to write because they are the most
+   concrete. If adding "and this is surprising", or "which is not what the tool does by default", to
+   the bullet would be false, it is an expectation. Cut it.
+9. **Does the bullet assert only what was checked?** Claims of *shared*, *owned*, *per-application*,
+   *isolated*, *identical* or *independent* describe a relationship, and a diff usually cannot show
+   one: two identical files look like sharing, and the absence of a dependency appears as the absence
+   of a line. Confirm each relationship, and ask what a reader would *do* differently on the strength of
+   it. If nothing, it is decoration. A count in the message is counted, not remembered — if the number
+   is not in front of you, count it. And a check that passes the first time has not been shown to have
+   teeth: before believing it, make a second run in which the thing you expect to trip actually trips.
+
+Items 8 and 9 are reading checks and cannot be mechanized. The lint cannot tell an expectation from a
+decision, and cannot distinguish a verified relationship from an inferred one — the words are identical
+either way. They are named steps precisely because nothing else will prompt them, which is how D-6
+through D-9 all reached a human review of a finished-looking draft.
 
 On (1): abstract and concrete are not opposites. A subject may name a settled decision, a boundary,
 or a guarantee, and still be concrete — `fix(auth): a session that is revoked mid-request stops
@@ -222,6 +250,20 @@ remove the cause. A one-off wording problem is not a note.
 ### Step 4 — Fine-tune
 
 The user may edit `commit.draft` directly in their editor, or ask the agent to make specific changes. The skill itself does not run iteration; the agent does, in conversation with the user.
+
+**Before revising a message whose commit already exists,** establish what the change costs. A message
+for an uncommitted draft is free to change; a message for a committed one may rewrite history.
+
+```sh
+git log --oneline -3                        # is it the tip, or further back?
+git log --oneline <sha>..HEAD | wc -l       # how many commits would change hash
+git branch -r --contains <sha>              # has it reached a remote?
+```
+
+Report that blast radius as part of the proposal — not after the user has approved it. Rewriting a
+local commit is routine; rewriting one already pushed changes what other clones hold and cannot be
+undone by anyone who has fetched. Getting this check wrong means recommending a force-push as though
+it were a reword, and walking it back afterwards.
 
 For every revision:
 1. Read the current `commit.draft`.
@@ -275,7 +317,18 @@ rm -f commit.diff commit.draft
 * Performance or architectural improvements
 ```
 
-Skip the bullet block if the commit is a single-line change (e.g. typo fix, version bump).
+**Start with the subject and add bullets only against a named question.** Most messages need no bullets
+at all. A subject that states the whole outcome is a complete message, and size is not the test — a
+change spanning many files can still be fully described by its subject.
+
+Write a bullet only when you can name the reader question it answers, and only when its absence would
+leave that question open. Before presenting, run one mechanical pass: **delete each bullet in turn and
+read what remains.** Keep a bullet only if a reader would notice its absence; if you cannot say what
+they would miss, it is costing them.
+
+This pass is separate from the critique and comes after it, because the critique asks whether a draft
+is well-formed — and a padded draft is well-formed. Deleting your own bullets is the only reliable way
+to find the ones you were defending rather than writing. See DRAFT_DRIFT_NOTES.md D-13.
 
 ### Types
 
@@ -300,6 +353,10 @@ Run this in Step 3.5, before presenting a draft to the human. It is the agent's 
 formality — the human should not be the one finding these.
 
 - [ ] Does the subject summarize the bullets' main outcome and stand on its own, without listing every minor detail?
+- [ ] **Do the bullets support the subject?** If the subject's key noun appears in no bullet, they are about something else.
+- [ ] For each bullet: **is it a decision?** If nothing would differ had we decided otherwise, it records expected behaviour — cut it.
+- [ ] Does any bullet assert a relationship (*shared*, *owned*, *per-application*, *identical*) I actually verified? Would a reader act differently on it?
+- [ ] Is every count in the message one I counted rather than remembered?
 - [ ] Can a reader state what changed, in plain behavior, without an internal term or a chapter name?
 - [ ] Is every word in the subject ordinary English that a reader outside this project would use?
 - [ ] Does each bullet reach its verb within one clause, and stay under 30 words?
@@ -308,7 +365,9 @@ formality — the human should not be the one finding these.
 - [ ] Does the subject say what the change **contributes** to this repository, not only what it contains?
 - [ ] Could a reader use these bullets to reconstruct the implementation? If so, they describe contents rather than contribution.
 - [ ] Would someone understand the **impact** without knowing implementation?
-- [ ] Can I remove any bullet that just restates the title?
+- [ ] Could a reader widen what the subject names into something this change does not cover?
+- [ ] Delete each bullet in turn: would a reader notice its absence? If not, it goes.
+- [ ] Does the subject alone state the whole outcome? If so, there should be no bullets.
 - [ ] Am I describing a **problem solved**, not steps taken?
 - [ ] Does each bullet describe **delivered impact**, not future work? Next steps belong in progress records, not history.
 - [ ] Does each bullet add **new information** (no duplication)?
