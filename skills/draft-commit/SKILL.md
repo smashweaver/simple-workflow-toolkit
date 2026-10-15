@@ -44,17 +44,54 @@ bash skills/draft-commit/scripts/draft-commit.sh --preview --draft "type(scope):
 
 Preview gets the diff on unstaged files and applies the draft-commit logic to it: status plus unstaged diff stats, protocol validation on the unstaged diff (WIP markers, debug statements, repo hygiene), then the full unstaged diff itself for drafting, and, with `--draft`, an in-memory lint of the message. It never stages anything and never writes `commit.diff` or `commit.draft`.
 
-### Step 1 — Stage your changes
+### Step 1 — Group the changes into commits, then stage each one
 
 ```bash
-git add .               # stage all changes respecting .gitignore
-git status              # verify what is staged
+git status --porcelain     # the working tree, including untracked files
+```
+
+**Do not `git add .` and draft whatever lands.** A working tree accumulates unrelated work — a fix, a
+documentation update, a design fixture, a moved file — and one commit containing all of it has no main
+line, so its subject can only be vague and its bullets can only be a list of things. Group first.
+
+Read the tree and propose the smallest set of commits that covers it. **Present the grouping and get
+approval before drafting anything** — it is a decision about the history, and it is cheap to change now
+and expensive once messages exist. For each proposed commit, name its files and the one-line subject it
+would carry.
+
+**What makes a coherent commit:**
+
+- One subject can honestly summarize it. If you cannot write that sentence, it is two commits.
+- It is independently revertible. A reader can drop one commit without stranding the others.
+- It leaves the repository working, or explains why an intermediate state does not.
+
+**What rides together:**
+
+- A change and the documentation or evidence that only that change produced.
+- A file's new home and the change that put it there — unless the move is the whole point, as a pure
+  relocation whose review value is the rename itself.
+- A fix and the test that pins it. Never split these; the test is what makes the fix a claim.
+
+**Where the judgment actually falls — default to fewer.** Splitting costs the reviewer a commit per
+concern, and a commit that exists only because the work happened in one session is noise. Split when a
+subject genuinely cannot cover both halves; do not split merely to make each commit smaller, and do not
+split a single concern across several commits because its parts happen to sit in different files. Two
+changes discovered while fixing one module are often one story — say so, and let the subject carry it.
+
+Then stage and commit one group at a time:
+
+```bash
+git add <paths for this commit>
+git status --short         # confirm this group, and nothing else, is staged
 ```
 
 To unstage a specific file:
 ```bash
 git reset HEAD <file>
 ```
+
+A file that belongs to two groups is a signal that one of the groups is not the change you thought it
+was. Go back to the grouping rather than staging it twice.
 
 ### Step 2 — Capture the staged diff
 
@@ -160,9 +197,57 @@ the others can land.
 
    A coined term earns a place in a subject only when it names a genuine load-bearing concept with no
    plainer synonym. Even then, spell it out in the first bullet.
+
+   **Prefer the platform's word over a plainer one.** The reader is a practitioner of the ecosystem the
+   change lands in, not a bystander reading English. They know what `go mod vendor` does, what a module
+   is, what a migration is — and for those, the ecosystem's word is *more* precise than plain English,
+   not less. So the order of preference is: the platform's established term, then the project's own word
+   where it is also a real interface the reader will meet (a flag, a command), then plain words only
+   where the platform has no term at all.
+
+   Two failure modes that look like plainness:
+
+   - **A word can be ordinary here and opaque in the ecosystem.** *Layout* is fine in a project's own
+     records and means nothing to a Go developer reading the history, because Go has no such concept
+     under that name. Ask what a practitioner of *this* platform would call it.
+   - **A plausible invention can collide with an unrelated established meaning.** *Inlined* reads like a
+     reasonable gloss on "copied the source in" and means function inlining to every compiler engineer.
+     Where the platform already has a word for the act, the coinage is not just vaguer, it is wrong.
+
+   And where the project's word *is* the tool's own — a flag, a command — prefer it, so the history and
+   the interface agree and a reader can grep from one to the other.
+
+   **Name what the tool now does, never what was written.** A subject that reaches for the medium —
+   *code*, *source*, *content*, *files* — describes the artifact rather than the change, and the reader
+   has no reason to care in what form the change arrived. "Ships the session code an application needs"
+   says the same as "can now sign in an administrator" with three extra words and one chance to
+   misread: *code* invites the reader to picture a snippet, when what arrived is a capability. Say what
+   the tool, the application, or the user can now do. If the change really is only about a file
+   existing, then the honest subject is about what that file makes possible, not about the file.
+
+   **Do not shorten a subject by inventing a phrase.** Brevity is not a goal, and every compression
+   taken to protect it tends to cost a qualifier. Three real attempts at one subject produced "local
+   credentials" (readable as *stored on this machine* rather than *checked by the application*),
+   "own tables" (readable as a database per module rather than tables in one shared database), and
+   "session code" (a phrase nothing in the project used, readable as a credential value). All three
+   were shorter, all three were wrong, and each was caught by a reader asking what a word meant —
+   which is the test to run before presenting: **say each word of the subject aloud to someone who has
+   not opened the diff, and notice the moment you have to explain it.**
+
+   When the precise wording will not fit, the fix is the *bullet*, not the shorter word. Precision that
+   the headline cannot carry belongs one line down, where there is room for it.
 2. **Contribution, not contents.** Would someone reading only this message learn what the change
    makes possible, or merely what it contains? A message a reader could use to reconstruct the
    implementation is describing contents.
+
+   **Bullets sit at the subject's altitude, not below it.** A bullet can be true, relevant, and
+   verified, and still be too fine-grained to earn a line: facts about configuration, about the shape
+   of an implementation, or about documentation corrected along the way are all real and all invisible
+   at the altitude of "what can this now do". Ask of each bullet: does this change what somebody
+   *does*? If the honest answer is "it changes what somebody reads", it belongs in the evidence record
+   or the design document, and the reader meets it the moment they open the file. The discipline is the
+   delete-in-turn pass, run earlier and more literally than usual: most drafted bullets are
+   true-but-fine and cost the reader a line they would have spent better elsewhere.
 3. **Duplication.** Does any bullet restate the subject, or two bullets argue the same point?
    Merge them and spend the freed slot on something the reader does not yet know.
 4. **Evidence in the wrong place.** A bullet reciting test results belongs in the project's
@@ -209,6 +294,15 @@ the others can land.
    have drifted. The pull is always toward the more articulate topic — safety machinery and developer
    experience make better sentences than a design decision does, so the bullets drift toward what is
    easiest to say well and the subject's actual claim goes unrepresented.
+
+   **When no wording makes them connect, the commit holds two changes.** A subject that describes one
+   thing and bullets that describe another is not a wording problem, and rewriting will not fix it —
+   each rewrite makes the bullets shorter while the mismatch stays. The remedy is to split: two
+   changes that are independently reviewable and independently revertible belong in two commits, each
+   with a subject that summarizes its own bullets. This failure is easy to miss because the bullets can
+   individually be excellent, and because the temptation is to keep polishing instead of asking whether
+   the staging was honest. The tell is a bullet the reader cannot connect to the subject no matter how
+   it is worded — that bullet is evidence about the *commit*, not about the prose.
 8. **Choice or expectation?** For each bullet, ask what would be different had we decided otherwise. If
    the answer is *nothing*, the bullet records how the language, framework or tool behaves rather than
    what this change did — and history records what was settled. Most available facts about a change are
@@ -253,6 +347,44 @@ move on rather than manufacturing objections.
 Record any *systematic* failure here in [DRAFT_DRIFT_NOTES.md](DRAFT_DRIFT_NOTES.md), the same way
 the existing entries were recorded: a real failure, its root cause, and the change that would
 remove the cause. A one-off wording problem is not a note.
+
+### Step 3.6 — Review the change, not just the message
+
+Step 3.5 asks whether the message describes the right thing. It cannot ask whether the *change* is
+sound, because the diff is taken as given. That gap is where the expensive mistakes live: a message can
+be perfect about a change whose blast radius nobody examined.
+
+**Anchor every question below in the reader, not in the reviewer.** A note written as "the agent failed
+to ask about the blast radius" describes one session; a note written as "a reader of this commit would
+conclude the arrangement is now enforced, and it is not" describes a failure that recurs. For each
+question, the check is: *what would a passive reader wrongly come away believing if this went
+unexamined?* Name that, and the question earns its place. Many of these turn out to be the same failure
+as D-15 — a limit the author knows and the message does not say.
+
+Run this before presenting, and answer from the diff and the repository — not from the intention that
+produced the change. Six questions:
+
+1. **What problem does this solve, and who was hurt?** Name the situation it was found in and who
+   noticed. A change whose problem cannot be named is usually a change nobody needed.
+2. **Why this approach rather than the obvious alternative?** Name the alternative and why it lost. An
+   exemption that leaves the broad rule intact needs that argument; without it, the change looks like
+   the rule quietly stopped applying.
+3. **What is the blast radius?** What does this now permit that it should not? Answer it, do not
+   gesture at it. If the honest answer is "nothing stops X", that is a residual risk and belongs in the
+   message or the reviewer's attention — not in silence.
+4. **Which guardrails are pinned by a test, and did you run them?** Name the tests that would fail if
+   the change were wrong, then run them. A change that widens what is permitted needs at least one
+   check that the widening stopped where it was meant to.
+5. **What residual risk would you want on the record?** The limit this change does *not* address and
+   does not claim to. One sentence, stated plainly.
+6. **Is this the smallest change that settles the question?** If a smaller one would, the larger one is
+   carrying risk for nothing.
+
+**A command that fails wholesale should be re-checked before its output is believed.** A verification
+run where *every* check fails is far more often a wrong invocation than a wrong change: a path that is
+not a package, a filter matching nothing, an environment the runner does not have. Re-run it from
+where it would actually run before concluding anything — and say which it was, because a false negative
+here is the same shape as a false green.
 
 ### Step 4 — Fine-tune
 
@@ -366,6 +498,7 @@ formality — the human should not be the one finding these.
 - [ ] Is every count in the message one I counted rather than remembered?
 - [ ] Can a reader state what changed, in plain behavior, without an internal term or a chapter name?
 - [ ] Is every word in the subject ordinary English that a reader outside this project would use?
+- [ ] Or better: is every word the term a **practitioner of this platform** would use? Prefer the platform's term over a plainer paraphrase, and plain words only where the platform has none.
 - [ ] For each bullet about a guardrail: does it name the mistake it prevents, rather than the rule's existence?
 - [ ] Does each bullet reach its verb within one clause, and stay under 30 words?
 - [ ] Does each bullet describe what happened and what it cost, rather than how the code works?
@@ -374,6 +507,14 @@ formality — the human should not be the one finding these.
 - [ ] Could a reader use these bullets to reconstruct the implementation? If so, they describe contents rather than contribution.
 - [ ] Would someone understand the **impact** without knowing implementation?
 - [ ] Could a reader widen what the subject names into something this change does not cover?
+- [ ] Does the subject say what the tool can now **do**, rather than what was written (*code*, *source*, *files*, *content*)?
+- [ ] Read each word of the subject aloud to someone who has not opened the diff: did you have to explain any of them?
+- [ ] For each bullet: does it change what somebody **does**, or only what they read or how a thing is configured? If the latter, it belongs in the evidence record.
+- [ ] Is there a bullet you cannot connect to the subject however you word it? That is evidence the commit holds two changes — split it.
+- [ ] **Step 3.6:** Can I name the problem, the rejected alternative, the blast radius, the guardrail tests I ran, and the residual risk — from the diff, not from intention?
+- [ ] Did every guardrail check actually **pass**, run from where it would really run? A run where everything failed is a wrong command until proven otherwise.
+- [ ] Were the changes **grouped by change** rather than staged as one blob or split by session? Would each proposed commit survive being read on its own?
+- [ ] If a commit was kept whole rather than split, can one subject honestly summarize it?
 - [ ] Delete each bullet in turn: would a reader notice its absence? If not, it goes.
 - [ ] Does the subject alone state the whole outcome? If so, there should be no bullets.
 - [ ] Am I describing a **problem solved**, not steps taken?

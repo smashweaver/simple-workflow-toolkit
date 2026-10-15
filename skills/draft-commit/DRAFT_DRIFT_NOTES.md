@@ -850,3 +850,315 @@ Caught by the maintainer immediately after approving a near-identical subject on
 draft had already passed the critique, the lint, and a bullet-removal pass. It took someone asking
 "what does this cover?" to expose it — which is the same detection route as D-13, and the reason both
 notes say the same thing about mechanical checks.
+
+## D-15 — A limit the author knows and the message does not say
+
+**Severity:** Medium-high. The message is accurate about everything it says, and the reader is misled
+by what it leaves out.
+
+### What happened
+
+A change that renders session code into generated applications drafted its bullets as: a module could
+not be given a database without failing the checks; the session code now ships with the rest of the
+platform code; two generated notes no longer claim there is no authentication.
+
+All three were true. None said that the code arrives **unused**, that the application still owns its
+accounts table, and that the first sign-in fails until that migration is written — so the message read
+as "sign-in now works in generated applications", which is the belief the missing sentence exists to
+prevent. A reader who took the subject at face value would have handed the change to someone expecting
+a working login.
+
+The revised bullet says it in one clause: *the session code now ships in new applications unused; the
+application still owns its accounts table, and without that migration the first sign-in fails*.
+
+### Root cause
+
+The limit lives in the evidence record — the spike's record of what was observed, and the decision
+entry — and not in the staged diff. The diff's own tests demonstrate the new capability working, so a
+draft written from the diff reads "it works now", and the draft had no reason to look further afield.
+
+Nothing in the critique asks what the diff *cannot* show. Every existing check asks whether a claim in
+the message is true; none asks whether a true message has been made misleading by an omission, because
+the omission is not in the message to be checked.
+
+### Proposed change
+
+Add to the critique's third question an explicit step: re-read whatever record states what the
+capability does **not** yet do, and check each bullet against it. The question already exists — *am I
+holding back something only I can notice?* — but it is phrased around the diff, so a limit known only
+from a spike or a decision entry never triggers it.
+
+The useful discipline: before presenting, name the strongest assumption a reader would carry away from
+the subject alone, then check whether any bullet contradicts or qualifies it. If the subject invites
+"this now works", a bullet has to say where it does not yet.
+
+### Applied
+
+`SKILL.md` Step 3.5 item 3 now names the evidence record as the place to look, and the Quality Checklist
+carries the "strongest assumption" question.
+
+### Detection note
+
+Found during self-critique, not by the lint, the checks, or the human — but only because the same
+session had just written the spike record and the design. The failure mode is therefore *recency
+dependent*: a change that was itself spiked this session is most likely to have its limit dropped from
+its own commit message, because the author has the evidence fresh and the diff silent. A change written
+months after its spike is more likely to over-report limits, from memory.
+
+## D-16 — A subject shortened by coinage, and bullets pitched below it
+
+**Severity:** High for the reader, invisible to every existing check. The subject took four attempts
+to get right, and every wrong one was shorter than the right one.
+
+### What happened
+
+A change that renders session support into generated applications, and fixes two architecture checks,
+took four subjects and eleven bullets before the human approved the wording:
+
+| Attempt | Why it failed |
+|---|---|
+| "a generated app can admit an administrator **from local credentials**" | reads as *stored on this machine*, not *checked by the application* |
+| "...a generated app can **now ship the session code** an administrator sign-in needs" | names the medium; *session code* is a phrase nothing in the project used and invites *a credential value* |
+| bullets naming the credential check, the outside-provider decision, the corrected notes | true, verified, and too fine-grained to earn a line |
+| subject describing rendering, bullet describing an architecture check | the bullet could not be worded into the subject at all |
+
+The first two failures were caught by the human asking what a word meant. The third, by "bullets are
+too detailed". The fourth, by "you have to rethink the bullets" — after which the real cause turned out
+to be that the commit held two unrelated changes.
+
+### Root cause
+
+**Treating brevity as a goal.** Every wrong subject was shorter than the right one, and each was
+produced by compressing a claim until it fit a shape rather than by choosing the clearest wording. The
+qualifier that made the compressed phrase wrong is exactly the part compression removes.
+
+**And pitching bullets below the subject's altitude.** The failing bullets were about configuration and
+about documentation that had been corrected — real changes, accurately described, verified, and
+invisible to a reader asking what they can now do. Nothing in the existing checks separates "true and
+relevant" from "true and worth a line"; every one of them asks about truth, duplication, or legibility,
+and a well-phrased fine-grained bullet passes all three.
+
+The existing coinage check (D-3) does not catch this either. It looks for terms **borrowed from the
+project's own vocabulary** — *island*, *replay*, *admission* — where the failure here was terms
+**invented while shortening**, which is the opposite direction: the project never used them, and that
+is precisely why nobody could read them.
+
+### Proposed change
+
+Two additions to the critique, both in `SKILL.md`:
+
+1. In the main-line check: **name what the tool now does, never what was written**, with the medium list
+   (*code*, *source*, *content*, *files*) called out; and **do not shorten a subject by inventing a
+   phrase**, with the read-it-aloud test as the mechanism.
+2. In the contribution check: **bullets sit at the subject's altitude** — the test is whether the bullet
+   changes what somebody *does*, as against what they read or how a thing is configured.
+
+Plus the remedy for the fourth failure, added to the subject-accuracy check: **when no wording makes a
+bullet connect to the subject, the commit holds two changes** — split it. Each is a message that reads
+well and cannot be attached to anything.
+
+Three checklist questions carry them mechanically.
+
+### Applied
+
+`SKILL.md` Step 3.5 items 1, 2 and 7, and five new Quality Checklist questions.
+
+### Detection note
+
+Four rounds of human correction on one message, and the lint never objected to any of them — every
+draft passed clean or passed with a single word-count warning. The reader was doing what no check here
+does: asking what a word meant, asking whether the bullets were too detailed, and asking whether the
+thing was two changes. Note the shape of the correction: each round arrived as a *question* rather than
+an instruction ("what exactly is a session code?", "what do you mean by local credentials?"). That is
+the form to expect when a check is missing — the reader is probing the message, not rewriting it, and
+the answer is almost always that the wording was defending against a misreading that turned out to be
+correct.
+
+## D-17 — The message was reviewed; the change was not
+
+**Severity:** High. Nothing in the ritual asked a question about the change itself.
+
+### The reader-facing failure
+
+A passive reader of that commit would conclude the one-database arrangement is now *enforced*. It is
+not: nothing in the change stops the newly permitted file from being handed a **second** database. The
+message would have described a clean fix and left the reader holding a guarantee it does not provide.
+
+That is the same failure as D-15 — a limit the author knows and the message does not say — reached from
+the other end. D-15 was caught by looking for what the message left out; this one is caught by asking
+what the message *implies*, which requires knowing what the change does not do.
+
+### What happened
+
+A change that widens what the architecture checker permits was taken through four rounds of message
+review. Each round was about wording: a coined phrase in the subject, bullets pitched below the subject,
+a project term used as if it were plain English, a clause asserting more than was checked. The message
+improved and was ready to commit.
+
+Nobody had asked what the change now *permits*. Answering that for the first time produced the finding
+the commit should have carried from the start: nothing stops the newly permitted file from being handed
+a **second database**. The one-database discipline is a convention this change does not enforce and does
+not claim to — a residual risk that had to be written down rather than discovered later.
+
+The same pass produced the check that proved the widening stopped where intended: three pre-existing
+tests already pinned the old limits, and the change added four more. That evidence existed and had never
+been gathered, because no step asked for it.
+
+### A second failure, same pass
+
+The guardrail tests were run from the repository root. Every one of the eight "failed" — including four
+that had passed minutes earlier. The invocation was wrong, not the code: the path is not a package from
+that directory. Re-run from the module, all eight passed.
+
+This is the same false-green shape as the CI defect found in the same session, and it is the natural
+failure of a verification step run in a hurry: **a wholesale failure is more likely a wrong command
+than a wrong change**, and the instinct to report the failure first is backwards.
+
+### Root cause
+
+Every existing step takes the change as given. The lint checks the message. The critique checks whether
+the message describes the change. The checklist asks whether claims are supported. None of them asks
+whether the change is sound, has a bounded blast radius, has its guardrails pinned, or carries a risk
+the reader should know about.
+
+The vocabulary hid it too. "Commit review" reads as reviewing the *message* — the artefact the ritual
+actually produces — so an agent running the ritual diligently reviews the message well and never the
+change.
+
+### Proposed change
+
+A new step, 3.6, **Review the change, not just the message**, run before presenting: name the problem
+and who was hurt; name the rejected alternative; state the blast radius; name the guardrail tests and
+run them; state the residual risk; confirm it is the smallest change. With the verification corollary —
+a wholesale test failure is a wrong command until proven otherwise.
+
+Two checklist questions carry it mechanically.
+
+### Applied
+
+`SKILL.md` Step 3.6, and two Quality Checklist questions.
+
+### Detection note
+
+The maintainer asked for the review to be run the way a reviewer runs one — *"as a CTO, you know what to
+ask if presented with the commit during commit reviews"* — and the residual risk appeared immediately.
+That is the route to expect: the gap is in the ritual's framing, not in anyone's diligence, so
+supplying the reviewer's stance surfaces it in one turn. A ritual step is the durable fix; asking to be
+reviewed this way is the workaround until the step exists.
+
+## D-18 — One staging command, one commit, whatever the tree happened to contain
+
+**Severity:** Medium-high. Produces a commit with no main line, which forces a vague subject and a
+bulleted list in place of an argument.
+
+### The reader-facing failure
+
+A commit built from a whole working tree reads as an inventory. The reader gets "updated several things"
+where they needed one sentence saying what is now possible, and they cannot tell which change they could
+revert alone if it caused a problem.
+
+### What happened
+
+Six unrelated concerns sat in the framework tree at once: a rendering change, a review-rule change, a
+skills document, a design fixture with its PSDs, a moved diagram, and a proposal. `git add .` put all six
+in front of one draft, and the first subject could only be about a third of them.
+
+The first attempt at fixing it over-corrected: the two code changes were split again on the grounds that
+one bullet could not be worded into the subject — splitting a single file's diff by hunks, to serve the
+message rather than the reader. The maintainer rejected that: *"i dont get why you need to separate."*
+They were right. The two changes were one story, found while fixing one module, and splitting them bought
+a tidier message at the cost of a second commit to read.
+
+So the failure was not "staged too much". It was **no decision about grouping at all** — neither
+grouping nor deliberately choosing fewer.
+
+### Root cause
+
+`git add .` is presented as the step, so staging is treated as mechanical and grouping as absent. The
+skill then evaluates one message as though one commit were given, and its checks — subject, bullets,
+altitude — all operate inside that assumption. Nothing asks what the commits *are*.
+
+Meanwhile the correction to the over-split was just as unavailable: nothing recorded that splitting
+carries a cost, so the reflex when a subject will not cover a bullet is to split.
+
+### Proposed change
+
+Replace Step 1's staging with **grouping**. Read the working tree, propose the smallest set of commits
+that covers it, present the grouping with a one-line subject each, and get approval before drafting.
+Then give the judgment an explicit default: **fewer commits**, because a commit per concern costs the
+reviewer, and splitting to make a subject fit is splitting for the message's sake.
+
+Recorded with the criteria that decide it — one subject that honestly summarizes, independently
+revertible, leaves the repository working — and with what must never be separated, chiefly a fix from
+the test that pins it.
+
+### Applied
+
+`SKILL.md` Step 1, rewritten as grouping-then-staging, and two Quality Checklist questions.
+
+### Detection note
+
+Raised by the maintainer as a design point rather than a complaint about a message — *"agent should be
+smart to batch commits if necessary"* — after watching the same working tree go through one oversized
+commit, one over-split, and two reasonable ones. The pattern worth noticing: both errors came from the
+same silence. A step that says "decide the grouping" prevents the first; the note that fewer is the
+default prevents the second.
+
+## D-19 — The guidance pushed toward plainer words, and the right answer was the platform's
+
+**Severity:** Medium-high. Produces vaguer messages that a practitioner has to work harder to read, and
+costs several rounds of correction to notice.
+
+### The reader-facing failure
+
+A subject written in the project's own vocabulary — or in a plausible invention — leaves a reader who
+works in the ecosystem unable to place the change at all. "A new application can now sign in an
+administrator" was fine; the attempts that followed it were not. **A module can now be given the
+shared database** is unreadable without knowing what a module is here. **Ships the session code** is
+unreadable without knowing what "session code" means, and means something else entirely to anyone who
+has read a compiler. The final subject — *vendored or linked* — is understood immediately by any Go
+developer, because both words are terms that ecosystem already uses.
+
+### What happened
+
+The fine-tuning converged on this by accident, through a sequence of corrections: *local credentials* →
+readable as "stored on this machine"; *own tables* → readable as a database per module; *session code* →
+a phrase nothing in the project used; *either layout* → a project word meaning nothing in Go; *inlined* →
+function inlining. Each was rejected by the same reader asking what a word meant.
+
+The last step was the informative one. Asked whether "inlined" and "referenced" were the right terms,
+the answer was that the platform already had exact words: **vendored** for copying dependency source in,
+and **linked** for the other. The subject got shorter and more precise at the same time.
+
+### Root cause
+
+The existing guidance says *"the plain word is nearly always available"*, and ranks plain English above
+a project's own term. Applied here it would have rewritten *vendored* as *copied in* — vaguer, and
+wrong for the reader. The guidance is sound about **project coinages** and unsound as a general
+preference: it never asked who the reader is.
+
+The reader is not a bystander. They are a practitioner of the platform the change lands in, and that
+audience already owns a vocabulary. Plain English is the fallback for concepts the platform has no word
+for — not the default that outranks everything.
+
+### Proposed change
+
+Amend the coined-terms check with an order of preference — **the platform's established term, then the
+project's own word where it is also a real interface (a flag, a command), then plain words only where the
+platform has none** — and name the two failure modes that disguise themselves as plainness: a word that
+is ordinary in the project's records and opaque in the ecosystem (*layout*), and a plausible invention
+that collides with an unrelated established meaning (*inlined*).
+
+Carried into the checklist as an alternative to the plain-English question, not instead of it: the first
+still guards against project coinage, the new one guards against needless paraphrase.
+
+### Applied
+
+`SKILL.md` Step 3.5, item 1, and one added Quality Checklist question.
+
+### Detection note
+
+Not a complaint about any single message — it arrived as a design observation after a session in which
+the wording was corrected six times. That is the tell: when the same reader keeps asking *what does this
+word mean*, the question is not the word in the message but the **audience the guidance assumes**. The
+corrections were individually about vocabulary and collectively about who is reading.
