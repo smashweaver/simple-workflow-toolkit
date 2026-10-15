@@ -19,6 +19,7 @@ Impact-focused commit messages make code history readable and maintainable. This
 - [x] Verified the lint script (`scripts/lint.sh`) is present and executable
 - [x] Checked for red flags in the staged diff (no WIP markers, no debug statements)
 - [x] Verified Repo Hygiene (no leftover `commit.diff` / `commit.draft` in the working tree)
+- [x] Ran the Step 3.7 reviewer pass and carried its objections into the draft, unprompted
 
 > [!CAUTION]
 > **Zero Tolerance for Structural Noise**: Bullets MUST focus on outcomes. File paths, extensions, and internal refactoring details are forbidden in commit messages. Lint will fail them.
@@ -386,6 +387,48 @@ not a package, a filter matching nothing, an environment the runner does not hav
 where it would actually run before concluding anything — and say which it was, because a false negative
 here is the same shape as a false green.
 
+### Step 3.7 — Review the draft as the person who receives it
+
+**This step is not optional and does not wait to be asked.** The human should never be the first reader
+to meet a finished-looking draft. Step 3.5 asks whether the message is well-formed and Step 3.6 asks
+whether the change is sound; neither can ask the question that catches most of what actually reaches
+a human review, because both are asked by the author, who is holding the diff and already knows what
+every word means.
+
+Adopt a different stance and hold it for the whole pass. **You are the reviewer the commit is presented
+to — someone with the authority to send it back, reading the message cold, with no access to the
+session that produced it.** Not a co-author being careful. Not a summarizer of the diff. A reader who
+sees the message and the change and nothing else, and who will not ask you a clarifying question
+except by writing *what does this word mean?*
+
+That last constraint is the mechanism. A reviewer's correction arrives as a **question**, not an
+instruction — "what does this commit cover?", "what exactly is a session code?", "is this enforced?" —
+and a question is evidence that the message made them do the author's work. Run the pass looking for
+the moment you would have to stop and ask.
+
+Five questions, in this order:
+
+1. **Reading only the message, what do I now believe is true that is not?** Name the strongest
+   assumption the subject invites, then check whether any bullet qualifies it. This is where D-15 and
+   D-17 live: a message can be flawless about a change whose limits nobody examined.
+2. **What does this permit that it should not?** Answer it from the change, not from the subject. If
+   the honest answer is "nothing stops X", that is a limit the message does not carry.
+3. **What is in the change that I would be surprised to see missing?** Especially something true,
+   verified, and too small to earn a bullet — the reader meets it when they open the diff, and the
+   surprise is what they remember about your judgement.
+4. **What would I ask the author?** Write the questions out. Any question you would have to ask is a
+   defect in the message, not a gap in your understanding.
+5. **Would I merge this, or send it back?** Decide, and if back, name the one thing that has to change.
+   A pass that ends with no verdict is a pass that did not happen.
+
+**Then revise, and show what the pass caught.** The point is not to report that you reviewed — it is
+that the reviewer stance finds objections the author's stance cannot. Present the objections and the
+revised draft together, the same way Step 3.5 requires its critique. If the pass genuinely finds
+nothing, say so in one line and present the draft; do not manufacture objections to look thorough.
+
+**A reviewer is not an approver.** This pass produces a verdict you carry into the approval gate; it
+never replaces the human's "apply". Nothing here runs `git commit`.
+
 ### Step 4 — Fine-tune
 
 The user may edit `commit.draft` directly in their editor, or ask the agent to make specific changes. The skill itself does not run iteration; the agent does, in conversation with the user.
@@ -513,6 +556,9 @@ formality — the human should not be the one finding these.
 - [ ] Is there a bullet you cannot connect to the subject however you word it? That is evidence the commit holds two changes — split it.
 - [ ] **Step 3.6:** Can I name the problem, the rejected alternative, the blast radius, the guardrail tests I ran, and the residual risk — from the diff, not from intention?
 - [ ] Did every guardrail check actually **pass**, run from where it would really run? A run where everything failed is a wrong command until proven otherwise.
+- [ ] **Step 3.7:** Did I run the reviewer pass before presenting, unprompted, and carry its objections into the draft?
+- [ ] **Step 3.7:** Reading only the message, what would I wrongly believe is true? What would I ask the author that the message should have answered?
+- [ ] **Step 3.7:** Did the pass end in a verdict — merge or send back — rather than a note that it was reviewed?
 - [ ] Were the changes **grouped by change** rather than staged as one blob or split by session? Would each proposed commit survive being read on its own?
 - [ ] If a commit was kept whole rather than split, can one subject honestly summarize it?
 - [ ] Delete each bullet in turn: would a reader notice its absence? If not, it goes.

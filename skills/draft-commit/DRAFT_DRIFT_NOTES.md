@@ -1162,3 +1162,76 @@ Not a complaint about any single message — it arrived as a design observation 
 the wording was corrected six times. That is the tell: when the same reader keeps asking *what does this
 word mean*, the question is not the word in the message but the **audience the guidance assumes**. The
 corrections were individually about vocabulary and collectively about who is reading.
+
+## D-20 — The critique was written by the person the message defends
+
+**Severity:** High. Every step before the approval gate asks a question the author can answer from
+memory, which is why defects survive all of them and reach the human.
+
+### The reader-facing failure
+
+A commit that adds a review step, a grouping step, and a set of wording rules presented a message whose
+first two bullets read *"a change's blast radius, rejected alternative, and residual risk get named
+before a draft is presented"* and *"staging becomes a grouping decision proposed for approval"*. Both
+were accurate. Both were **contents** — a reader could reconstruct the new steps from them and learn
+nothing about the failures those steps exist to prevent. The third bullet asked for a rule, in the same
+register. Meanwhile the subject carried *"the commit boundaries"*, the vaguest phrase in a message whose
+whole argument is that vague phrases mislead readers.
+
+None of this was visible to the checks already in place. Every question in the critique is answerable
+from inside the session that produced the change, and every question was being answered from inside it.
+
+### What happened
+
+The draft had already been through the critique, the lint, and a bullet-removal pass, and was presented.
+The human asked for it to be **reviewed as a CTO**. That stance — a reader with the authority to send
+the draft back, no access to the session, and no clarifying questions available — produced three
+objections in one pass: two bullets described the checklist instead of the situation, the subject's
+weakest phrase was still there, and the one-commit question had not been examined at all.
+
+Every one of those was available earlier. None was found earlier.
+
+### Root cause
+
+**The critic and the criticized are the same party.** Step 3.5 asks whether the message describes the
+right thing and Step 3.6 asks whether the change is sound; both are asked by the author, holding the
+diff, and both are answered by recall. Recall is where the defects live: the author knows what "the
+commit boundaries" means, so it reads as precise; the author knows what each new step contains, so a
+bullet reciting a step reads as informative.
+
+No step adopted **the reader's position**. The checks vary the question — is it a decision, does it sit
+at the subject's altitude, is the change sound — and none of them varies the *stance*. A question asked
+from the author's seat gets an author-shaped answer whatever the question is.
+
+There is also a mechanism the notes already named and the ritual never used. D-16 recorded that every
+correction arrived as a **question** rather than an instruction: *what does this word mean*, *what does
+this cover*, *is this enforced*. A reviewer's question is a defect report. The ritual had checks for
+truth and legibility but nothing that asked the agent to notice the questions it would have to ask.
+
+### Proposed change
+
+A mandatory step, **3.7 — Review the draft as the person who receives it**, run before presenting and
+not waited to be asked. The stance is defined, not suggested: a reviewer with the authority to send the
+draft back, reading cold, with no access to the session and no clarifying questions available except
+by writing *what does this word mean?* Five questions in order — what do I wrongly believe is true,
+what does this permit that it should not, what would surprise me as missing, what would I ask the
+author, and would I merge this or send it back — with a required verdict, since a pass that ends
+without one did not happen.
+
+Its output is presented the way Step 3.5 requires its critique: the objections and the revised draft
+together, so the human sees what the pass caught rather than a message that appears already perfect.
+
+### Applied
+
+`SKILL.md` Step 3.7, three Quality Checklist questions, and a line in the protocol validation that
+fails if the pass was skipped.
+
+### Detection note
+
+The maintainer asked for the stance by name, and had to ask for it **after** a critique the agent had
+already run unprompted — the second request in a session in which the agent believed it had already
+reviewed the message. That gap between what the agent believed it had done and what the reader wanted
+is the failure: the agent was reviewing, and reviewing is not the same act as being reviewed. When a
+maintainer supplies a *stance* rather than a finding — "as a CTO", "as a reviewer would", "the way I'd
+present it" — the missing thing is not diligence. It is a step, and the workaround will keep being
+needed until the step exists.
