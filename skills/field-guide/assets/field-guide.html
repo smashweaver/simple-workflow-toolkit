@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A reusable HTML specimen for readable guides with a warm editorial design.">
+<title>Field Guide — a visual starter</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Crect width=%2240%22 height=%2240%22 rx=%229%22 fill=%22%23214e3d%22/%3E%3Ctext x=%2212%22 y=%2229%22 fill=%22white%22 font-size=%2229%22 font-family=%22sans-serif%22%3Ef%3C/text%3E%3C/svg%3E">
+<style>
+    :root { color-scheme: light; --paper: #f6f4ed; --surface: #fffef9; --ink: #202e2b; --muted: #52635d; --line: #cdd4c8; --green: #214e3d; --soft: #e7eddf; --accent: #ba471f; }
+    * { box-sizing: border-box; }
+    html { scroll-padding-top: 24px; }
+    body { margin: 0; color: var(--ink); background: var(--paper); font: 17px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    a { color: var(--green); text-underline-offset: .22em; }
+    a:hover { text-decoration-thickness: 2px; }
+    button { font: inherit; cursor: pointer; }
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+    [hidden] { display: none !important; }
+    .skip { position: fixed; left: 16px; top: -100px; padding: 12px 20px; background: var(--surface); z-index: 10; }
+    .skip:focus { top: 12px; }
+    .layout { display: grid; grid-template-columns: 256px minmax(0, 1fr); max-width: 1600px; margin: auto; }
+    aside { padding: 40px 28px; border-right: 1px solid var(--line); }
+    .rail { position: sticky; top: 36px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-size: 25px; font-weight: 750; text-decoration: none; letter-spacing: -.04em; }
+    .brand-mark { display: grid; place-items: center; width: 35px; height: 35px; background: var(--green); color: white; border-radius: 9px; font-size: 20px; letter-spacing: -.08em; }
+    .edition { margin: 10px 0 38px; font-size: 12px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
+    nav { display: grid; gap: 4px; }
+    nav a { display: flex; align-items: baseline; gap: 12px; padding: 10px 0; text-decoration: none; font-size: 14px; }
+    nav a:hover { color: var(--accent); }
+    nav span { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .rail-note { margin-top: 36px; border-top: 1px solid var(--line); padding-top: 20px; font-size: 13px; color: var(--muted); }
+    main { min-width: 0; padding: 58px clamp(24px, 5vw, 84px) 32px; }
+    .eyebrow { margin: 0 0 16px; color: var(--accent); font-weight: 700; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+    h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; letter-spacing: -.045em; line-height: 1.08; }
+    h1 { font-size: clamp(48px, 5.6vw, 82px); margin: 0 0 24px; max-width: 800px; }
+    h2 { font-size: clamp(32px, 3vw, 43px); margin: 0 0 20px; }
+    h3 { font-size: 19px; line-height: 1.3; margin: 0 0 12px; letter-spacing: -.02em; }
+    p { margin: 0 0 16px; }
+    .lede { max-width: 690px; font-size: 20px; color: var(--muted); }
+    .hero-bottom { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; margin: 28px 0 44px; }
+    .primary { display: inline-block; padding: 12px 22px; color: white; background: var(--green); border-radius: 6px; font-size: 15px; text-decoration: none; font-weight: 650; }
+    .small { font-size: 13px; color: var(--muted); }
+    .principle { display: grid; grid-template-columns: auto 1fr; gap: 20px; padding: 24px; background: var(--soft); border-left: 3px solid var(--green); }
+    .principle .symbol { font-family: Georgia, serif; font-size: 40px; line-height: 1; }
+    .principle p { margin: 0; font-size: 15px; }
+    section { padding: 54px 0; border-bottom: 1px solid var(--line); }
+    .section-top { display: flex; gap: 16px; align-items: baseline; }
+    .number { color: var(--accent); font-size: 12px; font-weight: 700; }
+    .intro { max-width: 740px; color: var(--muted); }
+    .steps { margin: 28px 0; padding: 0; list-style: none; counter-reset: steps; display: grid; gap: 20px; }
+    .steps li { counter-increment: steps; position: relative; padding-left: 46px; }
+    .steps li::before { content: counter(steps); position: absolute; left: 0; top: 0; display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 50%; font-size: 13px; }
+    .steps strong { display: block; margin-bottom: 3px; }
+    .steps p { font-size: 15px; color: var(--muted); margin: 0; }
+    .prompt { background: var(--surface); padding: 22px; border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+    .prompt-label { color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 12px; }
+    .prompt-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: 15px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .copy { display: inline-flex; align-items: center; min-height: 44px; margin-top: 16px; padding: 8px 14px; background: transparent; color: var(--green); border: 1px solid var(--line); border-radius: 5px; font-size: 13px; font-weight: 650; }
+    .copy:hover { background: var(--soft); border-color: var(--green); }
+    .hint { margin-top: 14px; color: var(--muted); font-size: 14px; }
+    .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 10px; }
+    .filter-bar button { border: 1px solid var(--line); border-radius: 100px; min-height: 44px; padding: 8px 16px; color: var(--ink); background: transparent; font-size: 14px; }
+    .filter-bar button[aria-pressed="true"] { color: white; background: var(--green); border-color: var(--green); }
+    .result-count { color: var(--muted); font-size: 13px; min-height: 22px; margin: 10px 0 20px; }
+    .requests { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .request { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 25px; display: flex; flex-direction: column; }
+    .tag { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 14px; }
+    .request .prompt-text { padding: 16px 0; border-top: 1px solid var(--line); }
+    .request .copy { align-self: flex-start; margin: 0 0 18px; }
+    .expect { margin: auto 0 0; color: var(--muted); font-size: 14px; }
+    .expect strong { color: var(--ink); }
+    .two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; margin: 28px 0; }
+    .two-col > div { border-top: 2px solid var(--green); padding-top: 18px; }
+    ul { padding-left: 21px; }
+    li { padding-left: 3px; margin: 7px 0; }
+    .two-col ul { color: var(--muted); font-size: 15px; }
+    .note { padding: 20px 24px; border: 1px solid var(--line); border-radius: 6px; font-size: 15px; }
+    .note p:last-child { margin-bottom: 0; }
+    .review { list-style: none; padding: 0; display: grid; gap: 12px; }
+    .review li { margin: 0; padding: 16px 20px; border-left: 2px solid var(--green); background: var(--surface); }
+    .review strong { display: block; }
+    .review span { color: var(--muted); font-size: 15px; }
+    details { border-top: 1px solid var(--line); padding: 17px 0; }
+    summary { cursor: pointer; font-weight: 650; padding: 5px 0; }
+    details p { font-size: 15px; color: var(--muted); margin: 14px 0 0; }
+    .reference-links { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 24px; font-size: 14px; }
+    footer { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 26px; color: var(--muted); font-size: 12px; }
+    .feedback { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); max-width: calc(100% - 32px); border-radius: 6px; background: var(--ink); color: white; padding: 12px 20px; font-size: 14px; z-index: 5; box-shadow: 0 4px 22px #0002; }
+    .feedback:empty { display: none; }
+    @media (min-width: 1600px) { .layout { border-left: 1px solid var(--line); border-right: 1px solid var(--line); } }
+    @media (max-width: 1000px) { .layout { grid-template-columns: 205px minmax(0, 1fr); } aside { padding: 30px 20px; } main { padding: 40px 28px; } .requests { grid-template-columns: 1fr; } }
+    @media (max-width: 700px) { .layout { display: block; } aside { padding: 20px 22px; border-right: 0; border-bottom: 1px solid var(--line); } .rail { position: static; } .brand { font-size: 22px; } .edition { margin: 6px 0 18px; } nav { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 18px; } nav a { font-size: 13px; padding: 8px 0; min-height: 44px; } .rail-note { display: none; } main { padding: 32px 22px; } h1 { font-size: clamp(44px, 10vw, 64px); } .lede { font-size: 18px; } section { padding: 40px 0; } .two-col { grid-template-columns: 1fr; gap: 12px; } .principle { padding: 20px; gap: 12px; } .request { padding: 20px; } }
+    @media print { body { background: white; color: black; font-size: 11pt; } .layout { display: block; } aside, .hero-bottom, .filter-bar, .copy, .feedback, .skip, .result-count { display: none !important; } main { padding: 0; } h1 { font-size: 38pt; } h2 { font-size: 25pt; } section { padding: 24px 0; } .requests, .two-col { display: block; } .request, .request[hidden] { display: block !important; margin: 12px 0; break-inside: avoid; } .prompt, .note, .principle, .review li { break-inside: avoid; } details { break-inside: avoid; } footer { font-size: 9pt; } }
+
+    code { overflow-wrap: anywhere; }
+    @media print { details::details-content { content-visibility: visible !important; } details > :not(summary) { display: block !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to guide</a>
+<div class="layout">
+  <aside aria-label="Guide navigation"><div class="rail">
+    <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">f</span>Field Guide</a>
+    <p class="edition">A visual starter</p>
+    <nav aria-label="Contents">
+      <a href="#orient"><span>01</span>Give the reader a start</a>
+      <a href="#examples"><span>02</span>Make the next step concrete</a>
+      <a href="#review"><span>03</span>Help them review</a>
+      <a href="#details"><span>04</span>Keep context nearby</a>
+    </nav>
+    <p class="rail-note">Warm paper. Clear steps.<br>A guide people can use.</p>
+  </div></aside>
+  <main id="main">
+    <header id="top">
+      <p class="eyebrow">A practical reading experience</p>
+      <h1>Make knowledge<br>easy to use.</h1>
+      <p class="lede">Give someone a starting point, a concrete example, and a way to know they are on the right track.</p>
+      <div class="hero-bottom"><a class="primary" href="#examples">Explore the examples <span aria-hidden="true">↗</span></a><span class="small">A reusable specimen for your next guide.</span></div>
+      <div class="principle"><span class="symbol" aria-hidden="true">↔</span><p><strong>Build around the reader's next useful action.</strong><br>This starter demonstrates the design and its components. Replace this specimen content with the subject, evidence, and examples your reader needs.</p></div>
+    </header>
+    <section id="orient" aria-labelledby="orient-title">
+      <div class="section-top"><span class="number">01</span><h2 id="orient-title">Give the reader a start.</h2></div>
+      <p class="intro">Open with what the guide helps someone do. Keep background close to the action it explains, and make the first step small enough to try.</p>
+      <ol class="steps">
+        <li><strong>Name the outcome.</strong><p>Use the reader's language. Explain what becomes possible after following the guide.</p></li>
+        <li><strong>Show what to bring.</strong><p>List the inputs or context needed for that action. Keep optional preparation clearly optional.</p></li>
+        <li><strong>Describe what happens next.</strong><p>Give the reader a visible result to look for, including any limits that matter.</p></li>
+      </ol>
+      <div class="prompt"><p class="prompt-label">Copyable example · a useful starting question</p><p class="prompt-text" id="start-example">What am I trying to do, what do I need to provide, and how will I recognize a useful result?</p><button class="copy" type="button" data-copy="start-example" aria-label="Copy example: a starting question" hidden>Copy example</button></div>
+    </section>
+    <section id="examples" aria-labelledby="examples-title">
+      <div class="section-top"><span class="number">02</span><h2 id="examples-title">Make the next step concrete.</h2></div>
+      <p class="intro">Examples pair an action with an expected result. These cards demonstrate the pattern; their buttons copy text without running or submitting anything.</p>
+      <div class="filter-bar" role="group" aria-label="Filter example patterns" hidden>
+        <button type="button" data-filter="all" aria-pressed="true">All examples</button>
+        <button type="button" data-filter="begin" aria-pressed="false">Begin</button>
+        <button type="button" data-filter="review" aria-pressed="false">Review</button>
+      </div>
+      <p class="result-count" id="result-count" role="status" hidden></p>
+      <div class="requests">
+        <article class="request" data-category="begin"><p class="tag">Context → a first step</p><h3>Describe the situation</h3><p class="prompt-text" id="context-example">I have [current material]. I want to help [reader] do [action]. Start with the smallest useful next step.</p><button class="copy" type="button" data-copy="context-example" aria-label="Copy example: describe the situation" hidden>Copy example</button><p class="expect"><strong>Expect:</strong> a shared understanding of the reader, the material, and the immediate outcome.</p></article>
+        <article class="request" data-category="begin"><p class="tag">An action → a visible result</p><h3>Try one example</h3><p class="prompt-text" id="try-example">Walk through one example using [sample input]. Explain what I should see and what would mean something went wrong.</p><button class="copy" type="button" data-copy="try-example" aria-label="Copy example: try one example" hidden>Copy example</button><p class="expect"><strong>Expect:</strong> an observable result and a useful explanation of a failure case.</p></article>
+        <article class="request" data-category="review"><p class="tag">An observation → useful feedback</p><h3>Explain what you noticed</h3><p class="prompt-text" id="feedback-example">I expected [result], but I observed [what happened]. Help me understand the difference and the next useful check.</p><button class="copy" type="button" data-copy="feedback-example" aria-label="Copy example: explain what you noticed" hidden>Copy example</button><p class="expect"><strong>Expect:</strong> a concrete question to investigate, grounded in an observation.</p></article>
+        <article class="request" data-category="review"><p class="tag">Today's work → tomorrow's start</p><h3>Leave a return point</h3><p class="prompt-text" id="return-example">Record what changed, what was checked, what is still open, and the next agreed action.</p><button class="copy" type="button" data-copy="return-example" aria-label="Copy example: leave a return point" hidden>Copy example</button><p class="expect"><strong>Expect:</strong> enough context to continue without reconstructing the whole conversation.</p></article>
+      </div>
+      <p class="hint">The filters demonstrate an optional component. For a short guide, remove the filter bar and result count and show every example.</p>
+    </section>
+    <section id="review" aria-labelledby="review-title">
+      <div class="section-top"><span class="number">03</span><h2 id="review-title">Help them review the result.</h2></div>
+      <p class="intro">Use comparisons when two ideas belong side by side. Keep the main explanation in prose so the page has a comfortable reading rhythm.</p>
+      <div class="two-col"><div><h3>What the reader brings</h3><ul><li>The outcome they want to reach.</li><li>Existing material and relevant context.</li><li>Observations and questions.</li></ul></div><div><h3>What the guide provides</h3><ul><li>A practical sequence of actions.</li><li>Examples with expected results.</li><li>Limits and a useful next step.</li></ul></div></div>
+      <ul class="review"><li><strong>Can I find my starting point?</strong><span>The first action is visible and understandable without reading every section.</span></li><li><strong>Can I tell whether it worked?</strong><span>The example includes the result to look for and any uncertainty.</span></li><li><strong>Can I return later?</strong><span>The guide has clear sections, meaningful links, and enough context to continue.</span></li></ul>
+      <div class="note"><p><strong>Keep qualifications attached to the claim.</strong> If an example is proposed, incomplete, or unverified, tell the reader where that distinction affects their next action.</p></div>
+    </section>
+    <section id="details" aria-labelledby="details-title">
+      <div class="section-top"><span class="number">04</span><h2 id="details-title">Keep context nearby.</h2></div>
+      <details open><summary>What should I change in this starter?</summary><p>Replace the specimen content, title, description, brand, navigation, and examples. Keep only the components that serve the actual guide. Preserve the source material's facts and limits.</p></details>
+      <details><summary>Does a guide need these interactions?</summary><p>No. Copy controls help with reusable examples; filters help when there are enough examples to browse. The reading content stays available without JavaScript.</p></details>
+      <details><summary>What happens when I print it?</summary><p>All examples and supplementary explanations are included. Navigation and interactive controls are hidden so the result reads as a document.</p></details>
+      <p class="hint">This starter includes its styles, script, and icon. It needs no external fonts or services to render.</p>
+    </section>
+    <footer><span>Field Guide · A visual starter</span><span>Adapt the content. Keep the clarity.</span></footer>
+  </main>
+</div>
+<div class="feedback" id="feedback" role="status" aria-live="polite" aria-atomic="true"></div>
+<script>
+(() => {
+  const requests = [...document.querySelectorAll('.request')];
+  const filters = [...document.querySelectorAll('[data-filter]')];
+  const count = document.getElementById('result-count');
+  const feedback = document.getElementById('feedback');
+  let feedbackTimer;
+  function announce(message) {
+    clearTimeout(feedbackTimer);
+    if (!feedback) return;
+    feedback.textContent = message;
+    feedbackTimer = setTimeout(() => { feedback.textContent = ''; }, 5000);
+  }
+  const filterBar = document.querySelector('.filter-bar');
+  if (filterBar) filterBar.hidden = false;
+  if (count) {
+    count.hidden = false;
+    count.textContent = `${requests.length} examples · choose a starting point`;
+  }
+  filters.forEach(button => button.addEventListener('click', () => {
+    const selected = button.dataset.filter;
+    filters.forEach(filter => filter.setAttribute('aria-pressed', String(filter === button)));
+    requests.forEach(request => { request.hidden = selected !== 'all' && request.dataset.category !== selected; });
+    if (count) count.textContent = `${requests.filter(request => !request.hidden).length} examples · ${button.textContent}`;
+  }));
+  document.querySelectorAll('[data-copy]').forEach(button => {
+    button.hidden = false;
+    button.addEventListener('click', async () => {
+      const target = document.getElementById(button.dataset.copy);
+      const text = target.textContent.trim();
+      let copied = false;
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          copied = true;
+        }
+      } catch (_) { /* Try local clipboard support below. */ }
+      if (!copied) {
+        const input = document.createElement('textarea');
+        input.value = text;
+        input.setAttribute('aria-label', 'Example to copy');
+        input.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+        document.body.append(input);
+        input.select();
+        try { copied = document.execCommand('copy'); } catch (_) { copied = false; }
+        input.remove();
+        button.focus({ preventScroll: true });
+      }
+      if (copied) {
+        announce('Example copied. Paste it where you need it.');
+      } else {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(target);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        announce('Copy is unavailable. The example is selected; copy it using your browser.');
+      }
+    });
+  });
+  let printDetails;
+  window.addEventListener('beforeprint', () => {
+    if (printDetails) return;
+    printDetails = [...document.querySelectorAll('details')].map(element => [element, element.open]);
+    printDetails.forEach(([element]) => { element.open = true; });
+  });
+  window.addEventListener('afterprint', () => {
+    if (!printDetails) return;
+    printDetails.forEach(([element, wasOpen]) => { element.open = wasOpen; });
+    printDetails = undefined;
+  });
+})();
+</script>
+</body>
+</html>
