@@ -21,23 +21,21 @@ draft-commit — Draft-and-Approve commit ritual
 
 Step 0: Preview on unstaged files (optional, no side effects)
     bash skills/draft-commit/scripts/draft-commit.sh --preview
-    bash skills/draft-commit/scripts/draft-commit.sh --preview --draft "type(scope): summary
+    bash skills/draft-commit/scripts/draft-commit.sh --preview --draft "type(scope): concrete outcome"
 
-    * bullet: user benefit or impact"
-
-Step 1: Stage your changes
-    git add .
-    git status
+Step 1: Group changes into commits, then stage each group
+    git status --porcelain
+    # Decide and approve the grouping before drafting.
+    git add <paths for this commit>
+    git status --short
 
 Step 2: Capture the staged diff
     git diff --cached > commit.diff
 
 Step 3: Generate a validated commit draft
-    bash skills/draft-commit/scripts/draft-commit.sh --draft "type(scope): summary
+    bash skills/draft-commit/scripts/draft-commit.sh --draft "type(scope): concrete outcome"
 
-    * bullet: user benefit or impact
-    * bullet: additional distinct information"
-
+    # Add bullets for important limits, costs, or choices the subject cannot fit.
     # Optional: append a reference (e.g. issue tracker ID)
     bash skills/draft-commit/scripts/draft-commit.sh --draft "..." --ref "Fixes #42"
 

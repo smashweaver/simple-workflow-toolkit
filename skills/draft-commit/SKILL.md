@@ -13,16 +13,12 @@ Impact-focused commit messages make code history readable and maintainable. This
 
 ---
 
-## Protocol Validation (run before drafting)
+## Before drafting
 
-- [x] Re-read this SKILL.md
-- [x] Verified the lint script (`scripts/lint.sh`) is present and executable
-- [x] Checked for red flags in the staged diff (no WIP markers, no debug statements)
-- [x] Verified Repo Hygiene (no leftover `commit.diff` / `commit.draft` in the working tree)
-- [x] Ran the Step 3.7 reviewer pass and carried its objections into the draft, unprompted
+Verify the skill and lint script are present, inspect the staged diff for WIP markers or debug statements, and check that no stale `commit.diff` or `commit.draft` remains. Run the reviewer pass later, after the draft exists.
 
 > [!CAUTION]
-> **Zero Tolerance for Structural Noise**: Bullets MUST focus on outcomes. File paths, extensions, and internal refactoring details are forbidden in commit messages. Lint will fail them.
+> **Keep structural noise out of the message.** Bullets describe outcomes, not paths, extensions, or internal refactoring. The lint rejects structural noise in bullets and warns about paths in the subject.
 
 ---
 
@@ -38,9 +34,7 @@ Two temporary files are used (both should be in your `.gitignore`):
 
 ```bash
 bash skills/draft-commit/scripts/draft-commit.sh --preview
-bash skills/draft-commit/scripts/draft-commit.sh --preview --draft "type(scope): summary
-
-* bullet: user benefit or impact"
+bash skills/draft-commit/scripts/draft-commit.sh --preview --draft "type(scope): concrete outcome"
 ```
 
 Preview gets the diff on unstaged files and applies the draft-commit logic to it: status plus unstaged diff stats, protocol validation on the unstaged diff (WIP markers, debug statements, repo hygiene), then the full unstaged diff itself for drafting, and, with `--draft`, an in-memory lint of the message. It never stages anything and never writes `commit.diff` or `commit.draft`.
@@ -107,10 +101,11 @@ issue) and write one sentence naming what this change is evidence of, enables, o
 bullet and the subject are measured against that sentence, not against the diff. A person reading
 `git log` should not have to open the README to learn why the code matters.
 
-Write the outcome bullets first, then derive the subject from their main outcome.
-The subject must make sense on its own and summarize what changed concretely;
-minor supporting details can remain in the bullets. For a single-line change,
-write that outcome directly as the subject.
+Start with the subject: state the concrete outcome on its own. Add a bullet only when it supplies
+important information the subject leaves out, such as a limit, cost, or choice. For example, after
+`feat(map): let people choose a starting point`, `* People can drop a pin or enter coordinates`
+answers *which choices are available?* A bullet about where the chooser link moved usually just
+narrates the interface. If the subject states the whole outcome, it is the complete message.
 
 Avoid vague subjects such as `clarify requirements`. Verbs like "update,"
 "improve," or "clarify" are useful only when the subject states the concrete
@@ -121,10 +116,9 @@ Run the skill with your draft message. The skill runs it through the lint gate a
 
 ```bash
 # Standard usage: skill generates the draft from your message
-bash skills/draft-commit/scripts/draft-commit.sh --draft "type(scope): summary
+bash skills/draft-commit/scripts/draft-commit.sh --draft "type(scope): concrete outcome"
 
-* bullet: user benefit or impact
-* bullet: additional distinct information"
+# Add bullets only for important facts the subject leaves out, such as a limit, cost, or choice.
 
 # With an optional reference (e.g. for issue trackers)
 bash skills/draft-commit/scripts/draft-commit.sh --draft "type(scope): summary
@@ -165,9 +159,9 @@ Ask three questions, and answer them in the critique rather than in your head:
 - **Is there a simpler message?** A draft that has been revised three times is usually trying to carry
   two arguments in one body. Cut to the fewest bullets that each earn their place — a bullet the
   reader could delete without losing anything is a bullet that was costing them.
-- **Am I holding back something only I can notice?** If the diff contains something the message will
-  not say, or a limit you are hoping nobody asks about, that belongs in the draft. Raising it costs
-  one sentence; being caught omitting it costs the whole message.
+- **Am I holding back something only I can notice?** Check the diff and any evidence or decision record
+  that states what the change does not yet do. If a known limit would change what a reader expects, carry
+  it into the draft. Raising it costs one sentence; being caught omitting it costs the whole message.
 
 **Surface the revision, do not just perform it.** When you revise, show what changed and why. A
 draft that appears already-perfect after three silent passes teaches the human nothing about where
@@ -192,9 +186,9 @@ the others can land.
    *enhanced*, *native*, *shape*, *replay*, *admission* are all common coinages in software. Each is
    legible to the team and opaque outside it, and the reader pays for it.
 
-   The plain word is nearly always available: **a request made by JavaScript** for "scripted", **part
-   of a page** for "island", **a size limit** for "bound". When the plain word feels less precise, the
-   precision belongs in a bullet — the headline's job is to be understood, not to be exact.
+   A plain word is often available: **a request made by JavaScript** for "scripted", **part of a page**
+   for "island", **a size limit** for "bound". Use the platform's established term when it is more
+   precise for the intended reader; when no such term exists, prefer ordinary words over project coinage.
 
    A coined term earns a place in a subject only when it names a genuine load-bearing concept with no
    plainer synonym. Even then, spell it out in the first bullet.
@@ -246,9 +240,11 @@ the others can land.
    of an implementation, or about documentation corrected along the way are all real and all invisible
    at the altitude of "what can this now do". Ask of each bullet: does this change what somebody
    *does*? If the honest answer is "it changes what somebody reads", it belongs in the evidence record
-   or the design document, and the reader meets it the moment they open the file. The discipline is the
-   delete-in-turn pass, run earlier and more literally than usual: most drafted bullets are
-   true-but-fine and cost the reader a line they would have spent better elsewhere.
+   or the design document, and the reader meets it the moment they open the file. A bullet about where a
+   control moved, what a label says, or how a panel is arranged is answered by opening the app; keep it
+   only if it still matters to a reader who cannot see the interface. The discipline is the delete-in-turn
+   pass, run earlier and more literally than usual: most drafted bullets are true-but-fine and cost the
+   reader a line they would have spent better elsewhere.
 3. **Duplication.** Does any bullet restate the subject, or two bullets argue the same point?
    Merge them and spend the freed slot on something the reader does not yet know.
 4. **Evidence in the wrong place.** A bullet reciting test results belongs in the project's
@@ -283,7 +279,7 @@ the others can land.
    - **Under 30 words.** Longer than that and it is a paragraph that should be split or cut. A bullet
      carrying an argument about *why* usually wants the argument kept and the explanation dropped.
 
-   **The six sub-checks that follow are necessary and not sufficient.** A bullet can contain no
+   **The six sub-checks above are necessary and not sufficient.** A bullet can contain no
    coined terms, invent no name, sit under thirty words, and reach its verb in one clause — and still
    be a description of internals that only its author finds informative. Situation-first is the check
    that catches those.
@@ -317,6 +313,7 @@ the others can land.
    it. If nothing, it is decoration. A count in the message is counted, not remembered — if the number
    is not in front of you, count it. And a check that passes the first time has not been shown to have
    teeth: before believing it, make a second run in which the thing you expect to trip actually trips.
+   Record the command and observed result accurately; distinguish what ran from what you infer it proves.
 
 Items 8 and 9 are reading checks and cannot be mechanized. The lint cannot tell an expectation from a
 decision, and cannot distinguish a verified relationship from an inferred one — the words are identical
@@ -416,8 +413,10 @@ Five questions, in this order:
 3. **What is in the change that I would be surprised to see missing?** Especially something true,
    verified, and too small to earn a bullet — the reader meets it when they open the diff, and the
    surprise is what they remember about your judgement.
-4. **What would I ask the author?** Write the questions out. Any question you would have to ask is a
-   defect in the message, not a gap in your understanding.
+4. **What would I ask the author?** Write the questions out, then decide whether each belongs in the
+   message. A question answered by the interface itself—such as where a visible control moved—does not
+   automatically earn a bullet. Keep that detail only if it matters to a reader who cannot see the
+   interface.
 5. **Would I merge this, or send it back?** Decide, and if back, name the one thing that has to change.
    A pass that ends with no verdict is a pass that did not happen.
 
@@ -490,27 +489,30 @@ rm -f commit.diff commit.draft
 
 ## Format
 
+A commit message may be just a subject. Add a bullet only when it supplies an important fact the
+subject leaves out:
+
 ```
-<type>(<scope>): <short, descriptive summary>
+feat(map): let people choose a starting point
 
-* What users gain from the change
-* How the change improves user experience
-* What problems it solves or prevents
-* Performance or architectural improvements
+* People can drop a pin or enter coordinates
 ```
 
-**Start with the subject and add bullets only against a named question.** Most messages need no bullets
-at all. A subject that states the whole outcome is a complete message, and size is not the test — a
-change spanning many files can still be fully described by its subject.
+The bullet answers *which choices are available?* A detail about where the chooser link moved is
+usually visible in the app and does not need a line in history. More generally, bullets can carry a
+limit, cost, or decision that the subject cannot fit; do not add generic benefit, problem, or performance
+bullets by default.
 
-Write a bullet only when you can name the reader question it answers, and only when its absence would
-leave that question open. Before presenting, run one mechanical pass: **delete each bullet in turn and
-read what remains.** Keep a bullet only if a reader would notice its absence; if you cannot say what
-they would miss, it is costing them.
+Most messages need no bullets. A subject that states the whole outcome is complete, and size is not the
+test — a change spanning many files can still be fully described by its subject.
+
+Before presenting, **delete each bullet in turn and read what remains.** Keep it only if removing the
+fact would leave the reader with an important gap; if you cannot say what they would miss, it is costing
+them a line.
 
 This pass is separate from the critique and comes after it, because the critique asks whether a draft
 is well-formed — and a padded draft is well-formed. Deleting your own bullets is the only reliable way
-to find the ones you were defending rather than writing. See DRAFT_DRIFT_NOTES.md D-13.
+to find the ones you were defending rather than writing.
 
 ### Types
 
@@ -531,33 +533,33 @@ Use the most specific functional area affected. Prefer narrow scopes (`auth`, `r
 
 ## Quality Checklist
 
-Run this in Step 3.5, before presenting a draft to the human. It is the agent's own check, not a
-formality — the human should not be the one finding these.
+Use this as a final check before presenting the draft. Complete each check at the step it names;
+change grouping is decided in Step 1, before drafting.
 
-- [ ] Does the subject summarize the bullets' main outcome and stand on its own, without listing every minor detail?
+- [ ] Does the subject state the concrete outcome on its own? If there are bullets, do they support it without merely restating it?
 - [ ] **Do the bullets support the subject?** If the subject's key noun appears in no bullet, they are about something else.
 - [ ] For each bullet: **is it a decision?** If nothing would differ had we decided otherwise, it records expected behaviour — cut it.
-- [ ] Does any bullet assert a relationship (*shared*, *owned*, *per-application*, *identical*) I actually verified? Would a reader act differently on it?
+- [ ] Does any bullet assert a relationship (*shared*, *owned*, *per-application*, *isolated*, *identical*, *independent*) I actually verified? Would a reader act differently on it?
 - [ ] Is every count in the message one I counted rather than remembered?
 - [ ] Can a reader state what changed, in plain behavior, without an internal term or a chapter name?
-- [ ] Is every word in the subject ordinary English that a reader outside this project would use?
-- [ ] Or better: is every word the term a **practitioner of this platform** would use? Prefer the platform's term over a plainer paraphrase, and plain words only where the platform has none.
+- [ ] Does the subject avoid project coinage and use the platform's established term when it is more precise, otherwise ordinary English?
 - [ ] For each bullet about a guardrail: does it name the mistake it prevents, rather than the rule's existence?
 - [ ] Does each bullet reach its verb within one clause, and stay under 30 words?
 - [ ] Does each bullet describe what happened and what it cost, rather than how the code works?
 - [ ] Do the bullets avoid coined terms too, and name absent mechanisms by their real name or in plain words?
-- [ ] Does the subject say what the change **contributes** to this repository, not only what it contains?
+- [ ] Does the subject say what the change **contributes** to this repository, not only what it contains? If the repository exists to prove, evaluate, or demonstrate something, does the subject say what this change shows, verifies, or enables?
 - [ ] Could a reader use these bullets to reconstruct the implementation? If so, they describe contents rather than contribution.
 - [ ] Would someone understand the **impact** without knowing implementation?
 - [ ] Could a reader widen what the subject names into something this change does not cover?
 - [ ] Does the subject say what the tool can now **do**, rather than what was written (*code*, *source*, *files*, *content*)?
 - [ ] Read each word of the subject aloud to someone who has not opened the diff: did you have to explain any of them?
 - [ ] For each bullet: does it change what somebody **does**, or only what they read or how a thing is configured? If the latter, it belongs in the evidence record.
+- [ ] Does any bullet only describe where a control moved, what a label says, or how a panel is arranged? The interface answers that; keep it only if it matters without seeing the app.
 - [ ] Is there a bullet you cannot connect to the subject however you word it? That is evidence the commit holds two changes — split it.
 - [ ] **Step 3.6:** Can I name the problem, the rejected alternative, the blast radius, the guardrail tests I ran, and the residual risk — from the diff, not from intention?
 - [ ] Did every guardrail check actually **pass**, run from where it would really run? A run where everything failed is a wrong command until proven otherwise.
 - [ ] **Step 3.7:** Did I run the reviewer pass before presenting, unprompted, and carry its objections into the draft?
-- [ ] **Step 3.7:** Reading only the message, what would I wrongly believe is true? What would I ask the author that the message should have answered?
+- [ ] **Step 3.7:** Reading only the message, what would I wrongly believe is true? For each question I would ask, is the answer absent from both the change and the product interface?
 - [ ] **Step 3.7:** Did the pass end in a verdict — merge or send back — rather than a note that it was reviewed?
 - [ ] Were the changes **grouped by change** rather than staged as one blob or split by session? Would each proposed commit survive being read on its own?
 - [ ] If a commit was kept whole rather than split, can one subject honestly summarize it?
@@ -566,7 +568,7 @@ formality — the human should not be the one finding these.
 - [ ] Am I describing a **problem solved**, not steps taken?
 - [ ] Does each bullet describe **delivered impact**, not future work? Next steps belong in progress records, not history.
 - [ ] Does each bullet add **new information** (no duplication)?
-- [ ] Does any bullet belong in the project's evidence record rather than in history?
+- [ ] Does any bullet belong in the project's evidence record rather than in history? Did I check that record for known limits the diff does not reveal?
 - [ ] If the change is opt-in, adds a dependency, or gives something up, does the message say so?
 - [ ] Are benefits **specific and measurable**, not vague?
 
