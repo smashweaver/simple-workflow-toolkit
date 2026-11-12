@@ -56,6 +56,10 @@ approval before drafting anything** — it is a decision about the history, and 
 and expensive once messages exist. For each proposed commit, name its files and the one-line subject it
 would carry.
 
+Before drafting, compare the approved group with the staged diff: confirm the staged paths and changes
+belong to that group, and keep unrelated staged or unstaged work out. The commit message must describe
+what this group changes, not the entire task, working tree, or repository initiative.
+
 **What makes a coherent commit:**
 
 - One subject can honestly summarize it. If you cannot write that sentence, it is two commits.
@@ -106,6 +110,13 @@ bullet and the subject are measured against that sentence, not against the diff.
 Reconcile that purpose with the task's before/after context above. In particular, distinguish an
 existing command or capability from the behavior this change corrects, extends, or removes. The subject
 names the changed behavior, not an existing command as though this commit introduced it.
+
+Make the subject answer both **what changed** and, where needed to make the outcome meaningful, **why**
+it matters. Keep it within the actual scope of the staged group: do not substitute a task ID, ownership
+rule, or broad project goal for the concrete change. Use identifiers only when they help the intended
+reader understand or find the change; explain the outcome in ordinary terms either way. When a change
+preserves earlier work, call it historical or provisional if that is its status, and do not imply it is
+final or cannot be superseded unless the record supports that claim.
 
 Start with the subject: state the concrete outcome on its own. Add a bullet only when it supplies
 important information the subject leaves out, such as a limit, cost, or choice. For example, after
@@ -512,6 +523,10 @@ bullets by default.
 Most messages need no bullets. A subject that states the whole outcome is complete, and size is not the
 test — a change spanning many files can still be fully described by its subject.
 
+Do not add a bullet merely to restate the subject or enumerate implementation details. A subject-only
+message is preferred when it gives a reader the change and its context without creating a misleading
+expectation; add a bullet only for an important qualification the subject cannot carry.
+
 Before presenting, **delete each bullet in turn and read what remains.** Keep it only if removing the
 fact would leave the reader with an important gap; if you cannot say what they would miss, it is costing
 them a line.
@@ -543,6 +558,8 @@ Use this as a final check before presenting the draft. Complete each check at th
 change grouping is decided in Step 1, before drafting.
 
 - [ ] Does the subject state the concrete outcome on its own? If there are bullets, do they support it without merely restating it?
+- [ ] Does the subject match the staged group's scope and explain what changed and why, without relying on an unexplained task ID or broad project rule?
+- [ ] If the change preserves earlier work, does the message accurately convey whether it is historical, provisional, or current without implying permanence?
 - [ ] **Do the bullets support the subject?** If the subject's key noun appears in no bullet, they are about something else.
 - [ ] For each bullet: **is it a decision?** If nothing would differ had we decided otherwise, it records expected behaviour — cut it.
 - [ ] Does any bullet assert a relationship (*shared*, *owned*, *per-application*, *isolated*, *identical*, *independent*) I actually verified? Would a reader act differently on it?
@@ -571,6 +588,7 @@ change grouping is decided in Step 1, before drafting.
 - [ ] If a commit was kept whole rather than split, can one subject honestly summarize it?
 - [ ] Delete each bullet in turn: would a reader notice its absence? If not, it goes.
 - [ ] Does the subject alone state the whole outcome? If so, there should be no bullets.
+- [ ] Is every bullet necessary, rather than a restatement or a list of staged contents?
 - [ ] Am I describing a **problem solved**, not steps taken?
 - [ ] Does each bullet describe **delivered impact**, not future work? Next steps belong in progress records, not history.
 - [ ] Does each bullet add **new information** (no duplication)?
