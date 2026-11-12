@@ -17,6 +17,8 @@ Impact-focused commit messages make code history readable and maintainable. This
 
 Verify the skill and lint script are present, inspect the staged diff for WIP markers or debug statements, and check that no stale `commit.diff` or `commit.draft` remains. Run the reviewer pass later, after the draft exists.
 
+Read the owning task/issue and the latest owner direction before treating the diff as the whole story. Establish the change in context: what behavior or command already existed, what this change alters, and what remains unchanged. Confirm command or API names against current source or documentation. Draft the subject for that before/after difference; do not make a fix to an existing capability sound like the capability itself is new, or let a narrow correction imply a broader workflow changed. If there is no task contract or owner direction, say so and use the repository's current product records.
+
 > [!CAUTION]
 > **Keep structural noise out of the message.** Bullets describe outcomes, not paths, extensions, or internal refactoring. The lint rejects structural noise in bullets and warns about paths in the subject.
 
@@ -100,6 +102,10 @@ git diff --cached > commit.diff
 issue) and write one sentence naming what this change is evidence of, enables, or settles. Every
 bullet and the subject are measured against that sentence, not against the diff. A person reading
 `git log` should not have to open the README to learn why the code matters.
+
+Reconcile that purpose with the task's before/after context above. In particular, distinguish an
+existing command or capability from the behavior this change corrects, extends, or removes. The subject
+names the changed behavior, not an existing command as though this commit introduced it.
 
 Start with the subject: state the concrete outcome on its own. Add a bullet only when it supplies
 important information the subject leaves out, such as a limit, cost, or choice. For example, after
