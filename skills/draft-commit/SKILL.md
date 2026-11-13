@@ -39,7 +39,7 @@ bash skills/draft-commit/scripts/draft-commit.sh --preview
 bash skills/draft-commit/scripts/draft-commit.sh --preview --draft "type(scope): concrete outcome"
 ```
 
-Preview gets the diff on unstaged files and applies the draft-commit logic to it: status plus unstaged diff stats, protocol validation on the unstaged diff (WIP markers, debug statements, repo hygiene), then the full unstaged diff itself for drafting, and, with `--draft`, an in-memory lint of the message. It never stages anything and never writes `commit.diff` or `commit.draft`.
+Preview shows the unstaged working tree: status, diff stats, WIP/debug marker checks, repo hygiene (no stale `commit.diff` or `commit.draft`), and the full unstaged diff itself for drafting. With `--draft`, it also runs an in-memory lint of the message. It never stages anything and never writes `commit.diff` or `commit.draft`. The staged diff is captured separately in Step 2.
 
 ### Step 1 — Group the changes into commits, then stage each one
 
@@ -153,12 +153,13 @@ The skill will:
 
 > ⚠️ **The skill MUST NOT execute any `git commit` command at this stage.** Approval is the human's call.
 
-### Step 3.5 — Critique the draft before presenting it
+### Agent self-check — Critique the draft before presenting it (optional)
 
 The lint gate checks that a message is well-formed. It cannot check that a well-formed message
 describes the right thing, and the most common failure is exactly that: accurate, grammatical
 prose about the change's behavior rather than its contribution. So the agent critiques its own
-draft and revises it **before** the human reads it.
+draft and revises it **before** the human reads it. The skill does not enforce this pass — it is
+agent-facing guidance, not a scripted step.
 
 **Surface what you are assuming.** The checks below all test a draft you believe is sound, which is
 the trap: *"the subject is concrete"*, *"the bullets are fine"*, *"this is what the change does"* —
@@ -359,22 +360,22 @@ what was wrong with the first attempt; that is the part that makes the message t
 time. One revision pass is the expectation — if the critique finds nothing, say so briefly and
 move on rather than manufacturing objections.
 
-Record any *systematic* failure here in [DRAFT_DRIFT_NOTES.md](DRAFT_DRIFT_NOTES.md), the same way
-the existing entries were recorded: a real failure, its root cause, and the change that would
-remove the cause. A one-off wording problem is not a note.
+Record any *systematic* failure here in [DRAFT_DRIFT_NOTES.md](DRAFT_DRIFT_NOTES.md): a real failure,
+its root cause, and the change that would remove the cause. A one-off wording problem is not a note.
 
-### Step 3.6 — Review the change, not just the message
+### Agent self-check — Review the change, not just the message (optional)
 
-Step 3.5 asks whether the message describes the right thing. It cannot ask whether the *change* is
-sound, because the diff is taken as given. That gap is where the expensive mistakes live: a message can
-be perfect about a change whose blast radius nobody examined.
+The step above asks whether the message describes the right thing. It cannot ask whether the *change*
+is sound, because the diff is taken as given. That gap is where the expensive mistakes live: a message
+can be perfect about a change whose blast radius nobody examined. The skill does not enforce this pass —
+it is agent-facing guidance, not a scripted step.
 
 **Anchor every question below in the reader, not in the reviewer.** A note written as "the agent failed
 to ask about the blast radius" describes one session; a note written as "a reader of this commit would
 conclude the arrangement is now enforced, and it is not" describes a failure that recurs. For each
 question, the check is: *what would a passive reader wrongly come away believing if this went
-unexamined?* Name that, and the question earns its place. Many of these turn out to be the same failure
-as D-15 — a limit the author knows and the message does not say.
+unexamined?* Name that, and the question earns its place. Many of these turn out to be the same failure — a limit
+the author knows and the message does not say.
 
 Run this before presenting, and answer from the diff and the repository — not from the intention that
 produced the change. Six questions:
@@ -401,13 +402,14 @@ not a package, a filter matching nothing, an environment the runner does not hav
 where it would actually run before concluding anything — and say which it was, because a false negative
 here is the same shape as a false green.
 
-### Step 3.7 — Review the draft as the person who receives it
+### Agent self-check — Review the draft as the person who receives it (optional)
 
-**This step is not optional and does not wait to be asked.** The human should never be the first reader
-to meet a finished-looking draft. Step 3.5 asks whether the message is well-formed and Step 3.6 asks
-whether the change is sound; neither can ask the question that catches most of what actually reaches
-a human review, because both are asked by the author, who is holding the diff and already knows what
-every word means.
+**This pass is not optional if you want to catch what a cold reader would.** The human should never be
+the first reader to meet a finished-looking draft. The step above asks whether the message is well-formed
+and the one before asks whether the change is sound; neither can ask the question that catches most of
+what actually reaches a human review, because both are asked by the author, who is holding the diff and
+already knows what every word means. The skill does not enforce this pass — it is agent-facing guidance,
+not a scripted step.
 
 Adopt a different stance and hold it for the whole pass. **You are the reviewer the commit is presented
 to — someone with the authority to send it back, reading the message cold, with no access to the
@@ -423,8 +425,8 @@ the moment you would have to stop and ask.
 Five questions, in this order:
 
 1. **Reading only the message, what do I now believe is true that is not?** Name the strongest
-   assumption the subject invites, then check whether any bullet qualifies it. This is where D-15 and
-   D-17 live: a message can be flawless about a change whose limits nobody examined.
+   assumption the subject invites, then check whether any bullet qualifies it. This is where a message
+   can be flawless about a change whose limits nobody examined.
 2. **What does this permit that it should not?** Answer it from the change, not from the subject. If
    the honest answer is "nothing stops X", that is a limit the message does not carry.
 3. **What is in the change that I would be surprised to see missing?** Especially something true,
@@ -439,7 +441,7 @@ Five questions, in this order:
 
 **Then revise, and show what the pass caught.** The point is not to report that you reviewed — it is
 that the reviewer stance finds objections the author's stance cannot. Present the objections and the
-revised draft together, the same way Step 3.5 requires its critique. If the pass genuinely finds
+revised draft together, the same way the critique requires. If the pass genuinely finds
 nothing, say so in one line and present the draft; do not manufacture objections to look thorough.
 
 **A reviewer is not an approver.** This pass produces a verdict you carry into the approval gate; it
@@ -579,11 +581,11 @@ change grouping is decided in Step 1, before drafting.
 - [ ] For each bullet: does it change what somebody **does**, or only what they read or how a thing is configured? If the latter, it belongs in the evidence record.
 - [ ] Does any bullet only describe where a control moved, what a label says, or how a panel is arranged? The interface answers that; keep it only if it matters without seeing the app.
 - [ ] Is there a bullet you cannot connect to the subject however you word it? That is evidence the commit holds two changes — split it.
-- [ ] **Step 3.6:** Can I name the problem, the rejected alternative, the blast radius, the guardrail tests I ran, and the residual risk — from the diff, not from intention?
+- [ ] Can I name the problem, the rejected alternative, the blast radius, the guardrail tests I ran, and the residual risk — from the diff, not from intention?
 - [ ] Did every guardrail check actually **pass**, run from where it would really run? A run where everything failed is a wrong command until proven otherwise.
-- [ ] **Step 3.7:** Did I run the reviewer pass before presenting, unprompted, and carry its objections into the draft?
-- [ ] **Step 3.7:** Reading only the message, what would I wrongly believe is true? For each question I would ask, is the answer absent from both the change and the product interface?
-- [ ] **Step 3.7:** Did the pass end in a verdict — merge or send back — rather than a note that it was reviewed?
+- [ ] Did I run the reviewer self-check before presenting, unprompted, and carry its objections into the draft?
+- [ ] Reading only the message, what would I wrongly believe is true? For each question I would ask, is the answer absent from both the change and the product interface?
+- [ ] Did the pass end in a verdict — merge or send back — rather than a note that it was reviewed?
 - [ ] Were the changes **grouped by change** rather than staged as one blob or split by session? Would each proposed commit survive being read on its own?
 - [ ] If a commit was kept whole rather than split, can one subject honestly summarize it?
 - [ ] Delete each bullet in turn: would a reader notice its absence? If not, it goes.
